@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>チャット</title>
+<style>
+body { font-family: sans-serif; }
+#chat { display:none; }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h3>名前を入力してください</h3>
+  <input id="nameInput" placeholder="ニックネーム">
+  <button onclick="join()">入室</button>
+</div>
+
+<div id="chat">
+  <div id="status"></div>
+  <ul id="messages"></ul>
+  <input id="input">
+  <button onclick="send()">送信</button>
+  <button onclick="leave()">退出</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+let myName = "";
+
+function join() {
+  myName = document.getElementById("nameInput").value;
+  if (!myName) return alert("名前を入れてください");
+  socket.emit("join", myName);
+  document.getElementById("login").style.display = "none";
+  document.getElementById("chat").style.display = "block";
+}
+
+socket.on("system", msg => {
+  const li = document.createElement("li");
+  li.textContent = msg;
+  li.style.color = "gray";
+  document.getElementById("messages").appendChild(li);
+});
+
+socket.on("chat", data => {
+  const li = document.createElement("li");
+  li.textContent = data.name + " : " + data.msg;
+  document.getElementById("messages").appendChild(li);
+});
+
+function send() {
+  const i = document.getElementById("input");
+  if (!i.value) return;
+  socket.emit("chat", { name: myName, msg: i.value });
+  i.value = "";
+}
+function leave() {
+  socket.disconnect();
+  location.reload();
+}
+
+</script>
+</body>
+</html>
