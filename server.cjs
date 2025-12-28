@@ -9,11 +9,11 @@ const io = new Server(server);
 app.use(express.static("public"));
 
 const punishments = [
-  "腕立て伏せ10回",
-  "変顔で写真を撮る",
-  "次の発言を敬語で話す",
-  "10秒間無言",
-  "好きな食べ物を発表する"
+  "下着の上からクリスリスリ",
+  "乳首をカリカリ３分",
+  "クリをスリスリ３分",
+  "寸止め１回",
+  "全力オナニーで絶頂する"
 ];
 
 io.on("connection", socket => {
