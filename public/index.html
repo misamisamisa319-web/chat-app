@@ -4,21 +4,40 @@
 <meta charset="UTF-8">
 <title>チャット</title>
 <style>
-body { font-family: sans-serif; margin: 0; }
-#chat { display: none; height: 100vh; flex-direction: column; }
+body {
+  font-family: sans-serif;
+  margin: 0;
+}
+
+#chat {
+  display: none;
+  height: 100vh;
+  flex-direction: column;
+}
+
 #inputBar {
   position: fixed;
-  top: 0; left: 0; width: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
   background: #eee;
   padding: 10px;
   display: flex;
   gap: 5px;
   border-bottom: 1px solid #ccc;
+  box-sizing: border-box;
 }
+
 #messages {
   margin-top: 60px;
   padding: 10px;
   list-style: none;
+  overflow-y: auto;
+  flex: 1;
+}
+
+#messages li {
+  margin-bottom: 6px;
 }
 </style>
 </head>
@@ -26,13 +45,13 @@ body { font-family: sans-serif; margin: 0; }
 
 <div id="login">
   <h3>名前を入力してください</h3>
-  <input id="nameInput">
+  <input id="nameInput" placeholder="ニックネーム">
   <button id="joinBtn">入室</button>
 </div>
 
 <div id="chat">
   <div id="inputBar">
-    <input id="input">
+    <input id="input" placeholder="メッセージを入力" style="flex:1;">
     <button id="sendBtn">送信</button>
     <button id="leaveBtn">退出</button>
   </div>
@@ -45,8 +64,7 @@ const socket = io();
 let myName = "";
 
 document.getElementById("joinBtn").onclick = () => {
-  console.log("join clicked");
-  myName = document.getElementById("nameInput").value;
+  myName = document.getElementById("nameInput").value.trim();
   if (!myName) return alert("名前を入れてください");
 
   socket.emit("join", myName);
@@ -54,12 +72,17 @@ document.getElementById("joinBtn").onclick = () => {
   document.getElementById("chat").style.display = "flex";
 };
 
-document.getElementById("sendBtn").onclick = () => {
+document.getElementById("sendBtn").onclick = sendMessage;
+document.getElementById("input").addEventListener("keydown", e => {
+  if (e.key === "Enter") sendMessage();
+});
+
+function sendMessage() {
   const i = document.getElementById("input");
   if (!i.value) return;
   socket.emit("chat", { name: myName, msg: i.value });
   i.value = "";
-};
+}
 
 document.getElementById("leaveBtn").onclick = () => {
   socket.disconnect();
@@ -70,7 +93,9 @@ socket.on("system", msg => {
   const li = document.createElement("li");
   li.textContent = msg;
   li.style.color = "gray";
+  li.style.fontStyle = "italic";
   document.getElementById("messages").appendChild(li);
+  scrollToBottom();
 });
 
 function colorFromName(name) {
@@ -78,7 +103,7 @@ function colorFromName(name) {
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return `hsl(${hash % 360}, 70%, 40%)`;
+  return `hsl(${Math.abs(hash) % 360}, 70%, 40%)`;
 }
 
 socket.on("chat", data => {
@@ -96,8 +121,13 @@ socket.on("chat", data => {
   li.appendChild(msgSpan);
 
   document.getElementById("messages").appendChild(li);
+  scrollToBottom();
 });
 
+function scrollToBottom() {
+  const m = document.getElementById("messages");
+  m.scrollTop = m.scrollHeight;
+}
 </script>
 
 </body>
