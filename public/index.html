@@ -1,92 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <title>チャット</title>
 <style>
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #e5ddd5;
-}
+  body {
+    font-family: sans-serif;
+    margin: 0;
+  }
 
-#login {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
+  #login {
+    padding: 20px;
+  }
 
-#login input {
-  font-size: 18px;
-  padding: 8px;
-}
+  #chat {
+    display: none;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 
-#chat {
-  display: none;
-  height: 100vh;
-  padding-top: 70px;
-  box-sizing: border-box;
-}
+  #inputBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #f0f0f0;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    gap: 5px;
+    z-index: 1000;
+  }
 
-#inputBar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: #f0f0f0;
-  padding: 10px;
-  display: flex;
-  gap: 5px;
-  border-bottom: 1px solid #ccc;
-}
+  #messages {
+    margin-top: 60px;
+    list-style: none;
+    padding: 10px;
+    flex: 1;
+    overflow-y: auto;
+  }
 
-#inputBar input {
-  flex: 1;
-  font-size: 18px;
-  padding: 8px;
-}
-
-#inputBar button {
-  font-size: 16px;
-  padding: 8px 12px;
-}
-
-#messages {
-  list-style: none;
-  padding: 10px;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.message {
-  max-width: 70%;
-  padding: 8px 12px;
-  border-radius: 15px;
-  font-size: 16px;
-  word-wrap: break-word;
-}
-
-.mine {
-  align-self: flex-end;
-  background: #dcf8c6;
-}
-
-.other {
-  align-self: flex-start;
-  background: #ffffff;
-}
-
-.system {
-  align-self: center;
-  background: #ddd;
-  color: #555;
-  font-size: 13px;
-}
+  input, button {
+    font-size: 16px;
+  }
 </style>
 </head>
 <body>
@@ -99,7 +56,7 @@ body {
 
 <div id="chat">
   <div id="inputBar">
-    <input id="input" placeholder="メッセージ">
+    <input id="input" placeholder="メッセージを入力">
     <button onclick="send()">送信</button>
     <button onclick="leave()">退出</button>
   </div>
@@ -114,13 +71,40 @@ let myName = "";
 function join() {
   myName = document.getElementById("nameInput").value;
   if (!myName) return alert("名前を入れてください");
+
   socket.emit("join", myName);
   document.getElementById("login").style.display = "none";
-  document.getElementById("chat").style.display = "block";
+  document.getElementById("chat").style.display = "flex";
 }
 
 socket.on("system", msg => {
-  addMessage(msg, "system");
+  const li = document.createElement("li");
+  li.textContent = msg;
+  li.style.color = "gray";
+  document.getElementById("messages").appendChild(li);
+});
+
+socket.on("chat", data => {
+  const li = document.createElement("li");
+  li.textContent = data.name + " : " + data.msg;
+  document.getElementById("messages").appendChild(li);
+});
+
+function send() {
+  const i = document.getElementById("input");
+  if (!i.value) return;
+  socket.emit("chat", { name: myName, msg: i.value });
+  i.value = "";
+}
+
+function leave() {
+  socket.disconnect();
+  location.reload();
+}
+</script>
+</body>
+</html>
+
 });
 
 socket.on
