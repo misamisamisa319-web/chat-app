@@ -10,8 +10,8 @@ app.use(express.static("public"));
 
 io.on("connection", socket => {
   socket.on("join", name => {
-    socket.name = name;
-    io.emit("system", `${name} が入室しました`);
+    socket.username = name;
+    socket.broadcast.emit("system", `${name} さんが入室しました`);
   });
 
   socket.on("chat", data => {
@@ -19,12 +19,12 @@ io.on("connection", socket => {
   });
 
   socket.on("disconnect", () => {
-    if (socket.name) {
-      io.emit("system", `${socket.name} が退出しました`);
+    if (socket.username) {
+      socket.broadcast.emit("system", `${socket.username} さんが退出しました`);
     }
   });
 });
 
 server.listen(3000, () => {
-  console.log("http://localhost:3000 で起動中");
+  console.log("サーバー起動 http://localhost:3000");
 });
