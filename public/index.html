@@ -4,61 +4,37 @@
 <meta charset="UTF-8">
 <title>チャット</title>
 <style>
-  body {
-    font-family: sans-serif;
-    margin: 0;
-  }
-
-  #login {
-    padding: 20px;
-  }
-
-  #chat {
-    display: none;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  #inputBar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: #f0f0f0;
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-    display: flex;
-    gap: 5px;
-    z-index: 1000;
-  }
-
-  #messages {
-    margin-top: 60px;
-    list-style: none;
-    padding: 10px;
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  input, button {
-    font-size: 16px;
-  }
+body { font-family: sans-serif; margin: 0; }
+#chat { display: none; height: 100vh; flex-direction: column; }
+#inputBar {
+  position: fixed;
+  top: 0; left: 0; width: 100%;
+  background: #eee;
+  padding: 10px;
+  display: flex;
+  gap: 5px;
+  border-bottom: 1px solid #ccc;
+}
+#messages {
+  margin-top: 60px;
+  padding: 10px;
+  list-style: none;
+}
 </style>
 </head>
 <body>
 
 <div id="login">
   <h3>名前を入力してください</h3>
-  <input id="nameInput" placeholder="ニックネーム">
-  <button onclick="join()">入室</button>
+  <input id="nameInput">
+  <button id="joinBtn">入室</button>
 </div>
 
 <div id="chat">
   <div id="inputBar">
-    <input id="input" placeholder="メッセージを入力">
-    <button onclick="send()">送信</button>
-    <button onclick="leave()">退出</button>
+    <input id="input">
+    <button id="sendBtn">送信</button>
+    <button id="leaveBtn">退出</button>
   </div>
   <ul id="messages"></ul>
 </div>
@@ -68,14 +44,27 @@
 const socket = io();
 let myName = "";
 
-function join() {
+document.getElementById("joinBtn").onclick = () => {
+  console.log("join clicked");
   myName = document.getElementById("nameInput").value;
   if (!myName) return alert("名前を入れてください");
 
   socket.emit("join", myName);
   document.getElementById("login").style.display = "none";
   document.getElementById("chat").style.display = "flex";
-}
+};
+
+document.getElementById("sendBtn").onclick = () => {
+  const i = document.getElementById("input");
+  if (!i.value) return;
+  socket.emit("chat", { name: myName, msg: i.value });
+  i.value = "";
+};
+
+document.getElementById("leaveBtn").onclick = () => {
+  socket.disconnect();
+  location.reload();
+};
 
 socket.on("system", msg => {
   const li = document.createElement("li");
@@ -89,22 +78,7 @@ socket.on("chat", data => {
   li.textContent = data.name + " : " + data.msg;
   document.getElementById("messages").appendChild(li);
 });
-
-function send() {
-  const i = document.getElementById("input");
-  if (!i.value) return;
-  socket.emit("chat", { name: myName, msg: i.value });
-  i.value = "";
-}
-
-function leave() {
-  socket.disconnect();
-  location.reload();
-}
 </script>
+
 </body>
 </html>
-
-});
-
-socket.on
