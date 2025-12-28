@@ -1,88 +1,65 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>チャット</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      background: #f5f5f5;
-    }
+<meta charset="UTF-8">
+<title>チャット</title>
+<style>
+body {
+  margin: 0;
+  font-family: sans-serif;
+}
 
-    #login {
-      padding: 20px;
-      text-align: center;
-    }
+#login {
+  padding: 20px;
+}
 
-    #login input {
-      font-size: 18px;
-      padding: 10px;
-      width: 80%;
-      max-width: 300px;
-    }
+#chat {
+  display: none;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-    #login button {
-      font-size: 18px;
-      padding: 10px 20px;
-      margin-top: 10px;
-    }
+#inputBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  gap: 5px;
+  z-index: 1000;
+}
 
-    #chat {
-      display: none;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+#messages {
+  list-style: none;
+  margin: 0;
+  padding: 70px 10px 10px 10px; /* inputBarの高さ分あける */
+  overflow-y: auto;
+  flex: 1;
+}
 
-    #inputBar {
-      position: sticky;
-      top: 0;
-      background: white;
-      padding: 10px;
-      border-bottom: 1px solid #ccc;
-      display: flex;
-      gap: 5px;
-    }
+#messages li {
+  padding: 4px 0;
+}
 
-    #inputBar input {
-      flex: 1;
-      font-size: 16px;
-      padding: 8px;
-    }
+#input {
+  flex: 1;
+  font-size: 16px;
+}
 
-    #inputBar button {
-      font-size: 16px;
-      padding: 8px 12px;
-    }
-
-    #messages {
-      list-style: none;
-      padding: 10px;
-      margin: 0;
-      overflow-y: auto;
-      flex: 1;
-    }
-
-    #messages li {
-      padding: 4px 0;
-      font-size: 15px;
-    }
-
-    #status {
-      padding: 5px 10px;
-      font-size: 12px;
-      color: gray;
-    }
-  </style>
+button {
+  font-size: 16px;
+}
+</style>
 </head>
 <body>
 
 <div id="login">
   <h3>名前を入力してください</h3>
   <input id="nameInput" placeholder="ニックネーム">
-  <br>
   <button onclick="join()">入室</button>
 </div>
 
@@ -92,8 +69,6 @@
     <button onclick="send()">送信</button>
     <button onclick="leave()">退出</button>
   </div>
-
-  <div id="status"></div>
   <ul id="messages"></ul>
 </div>
 
@@ -121,6 +96,7 @@ socket.on("chat", data => {
   const li = document.createElement("li");
   li.textContent = data.name + " : " + data.msg;
   document.getElementById("messages").appendChild(li);
+  li.scrollIntoView();
 });
 
 function send() {
@@ -135,6 +111,5 @@ function leave() {
   location.reload();
 }
 </script>
-
 </body>
 </html>
