@@ -4,21 +4,53 @@
 <meta charset="utf-8">
 <title>チャット</title>
 <style>
-body { 
-  font-family: sans-serif; 
-  font-size: 20px; /* ページ全体の文字サイズ */
+body {
+  font-family: sans-serif;
+  margin: 0;
+  background: #f5f5f5;
 }
 
-#chat { 
-  display: none; 
+#login {
+  padding: 30px;
+  text-align: center;
+}
+
+#chat {
+  display: none;
+}
+
+#inputArea {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  padding: 10px;
+  display: flex;
+  gap: 5px;
+  border-bottom: 1px solid #ccc;
+  z-index: 10;
+}
+
+#input {
+  flex: 1;
+  font-size: 18px;
+  padding: 6px;
+}
+
+button {
+  font-size: 16px;
+  padding: 6px 10px;
+}
+
+#messages {
+  list-style: none;
+  padding: 10px;
+  margin: 70px 0 0 0;
 }
 
 #messages li {
-  font-size: 18px; /* チャットの文字サイズ */
-}
-
-#chat input, #chat button {
-  font-size: 18px; /* 入力欄とボタンの文字サイズ */
+  margin-bottom: 8px;
 }
 </style>
 </head>
@@ -27,15 +59,17 @@ body {
 <div id="login">
   <h3>名前を入力してください</h3>
   <input id="nameInput" placeholder="ニックネーム">
+  <br><br>
   <button onclick="join()">入室</button>
 </div>
 
 <div id="chat">
-  <div id="status"></div>
+  <div id="inputArea">
+    <input id="input" placeholder="メッセージ">
+    <button onclick="send()">送信</button>
+    <button onclick="leave()">退出</button>
+  </div>
   <ul id="messages"></ul>
-  <input id="input">
-  <button onclick="send()">送信</button>
-  <button onclick="leave()">退出</button>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -47,34 +81,4 @@ function join() {
   myName = document.getElementById("nameInput").value;
   if (!myName) return alert("名前を入れてください");
   socket.emit("join", myName);
-  document.getElementById("login").style.display = "none";
-  document.getElementById("chat").style.display = "block";
-}
-
-socket.on("system", msg => {
-  const li = document.createElement("li");
-  li.textContent = msg;
-  li.style.color = "gray";
-  document.getElementById("messages").appendChild(li);
-});
-
-socket.on("chat", data => {
-  const li = document.createElement("li");
-  li.textContent = data.name + " : " + data.msg;
-  document.getElementById("messages").appendChild(li);
-});
-
-function send() {
-  const i = document.getElementById("input");
-  if (!i.value) return;
-  socket.emit("chat", { name: myName, msg: i.value });
-  i.value = "";
-}
-
-function leave() {
-  socket.disconnect();
-  location.reload();
-}
-</script>
-</body>
-</html>
+  document.getElementBy
