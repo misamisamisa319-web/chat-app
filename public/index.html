@@ -73,11 +73,31 @@ socket.on("system", msg => {
   document.getElementById("messages").appendChild(li);
 });
 
+function colorFromName(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return `hsl(${hash % 360}, 70%, 40%)`;
+}
+
 socket.on("chat", data => {
   const li = document.createElement("li");
-  li.textContent = data.name + " : " + data.msg;
+
+  const nameSpan = document.createElement("span");
+  nameSpan.textContent = data.name;
+  nameSpan.style.color = colorFromName(data.name);
+  nameSpan.style.fontWeight = "bold";
+
+  const msgSpan = document.createElement("span");
+  msgSpan.textContent = " : " + data.msg;
+
+  li.appendChild(nameSpan);
+  li.appendChild(msgSpan);
+
   document.getElementById("messages").appendChild(li);
 });
+
 </script>
 
 </body>
