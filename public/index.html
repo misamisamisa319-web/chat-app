@@ -37,6 +37,7 @@ document.getElementById("leaveBtn").onclick = leave;
 let myName = "";
 
 function join() {
+  alert("join() が呼ばれました");
   myName = document.getElementById("nameInput").value;
   if (!myName) return alert("名前を入れてください");
   socket.emit("join", myName);
