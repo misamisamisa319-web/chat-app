@@ -1,30 +1,18 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
+const punishments = [
+  "腕立て伏せ10回！",
+  "変顔で写真を撮る！",
+  "好きな食べ物を告白する！",
+  "今の気分を一言で言う！",
+  "次の人にジュースをおごる！",
+  "好きな絵文字を3つ送る！",
+  "過去の黒歴史を1つ言う！"
+];
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
-
-app.use(express.static("public"));
-
-io.on("connection", socket => {
-  socket.on("join", name => {
-    socket.username = name;
-    socket.broadcast.emit("system", `${name} さんが入室しました`);
-  });
-
-  socket.on("chat", data => {
+socket.on("chat", data => {
+  if (data.msg === "罰ゲーム") {
+    const p = punishments[Math.floor(Math.random() * punishments.length)];
+    io.emit("chat", { name: "🎲 罰ゲーム", msg: p });
+  } else {
     io.emit("chat", data);
-  });
-
-  socket.on("disconnect", () => {
-    if (socket.username) {
-      socket.broadcast.emit("system", `${socket.username} さんが退出しました`);
-    }
-  });
-});
-
-server.listen(3000, () => {
-  console.log("サーバー起動 http://localhost:3000");
+  }
 });
