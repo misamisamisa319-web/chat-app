@@ -1,23 +1,34 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <title>チャット</title>
 <style>
 body {
   margin: 0;
-  font-family: sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #e5ddd5;
 }
 
 #login {
-  padding: 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+#login input {
+  font-size: 18px;
+  padding: 8px;
 }
 
 #chat {
   display: none;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
+  padding-top: 70px;
+  box-sizing: border-box;
 }
 
 #inputBar {
@@ -25,33 +36,56 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  background: white;
+  background: #f0f0f0;
   padding: 10px;
-  border-bottom: 1px solid #ccc;
   display: flex;
   gap: 5px;
-  z-index: 1000;
+  border-bottom: 1px solid #ccc;
+}
+
+#inputBar input {
+  flex: 1;
+  font-size: 18px;
+  padding: 8px;
+}
+
+#inputBar button {
+  font-size: 16px;
+  padding: 8px 12px;
 }
 
 #messages {
   list-style: none;
+  padding: 10px;
   margin: 0;
-  padding: 70px 10px 10px 10px; /* inputBarの高さ分あける */
-  overflow-y: auto;
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-#messages li {
-  padding: 4px 0;
-}
-
-#input {
-  flex: 1;
+.message {
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 15px;
   font-size: 16px;
+  word-wrap: break-word;
 }
 
-button {
-  font-size: 16px;
+.mine {
+  align-self: flex-end;
+  background: #dcf8c6;
+}
+
+.other {
+  align-self: flex-start;
+  background: #ffffff;
+}
+
+.system {
+  align-self: center;
+  background: #ddd;
+  color: #555;
+  font-size: 13px;
 }
 </style>
 </head>
@@ -65,7 +99,7 @@ button {
 
 <div id="chat">
   <div id="inputBar">
-    <input id="input" placeholder="メッセージを入力">
+    <input id="input" placeholder="メッセージ">
     <button onclick="send()">送信</button>
     <button onclick="leave()">退出</button>
   </div>
@@ -82,34 +116,11 @@ function join() {
   if (!myName) return alert("名前を入れてください");
   socket.emit("join", myName);
   document.getElementById("login").style.display = "none";
-  document.getElementById("chat").style.display = "flex";
+  document.getElementById("chat").style.display = "block";
 }
 
 socket.on("system", msg => {
-  const li = document.createElement("li");
-  li.textContent = msg;
-  li.style.color = "gray";
-  document.getElementById("messages").appendChild(li);
+  addMessage(msg, "system");
 });
 
-socket.on("chat", data => {
-  const li = document.createElement("li");
-  li.textContent = data.name + " : " + data.msg;
-  document.getElementById("messages").appendChild(li);
-  li.scrollIntoView();
-});
-
-function send() {
-  const i = document.getElementById("input");
-  if (!i.value) return;
-  socket.emit("chat", { name: myName, msg: i.value });
-  i.value = "";
-}
-
-function leave() {
-  socket.disconnect();
-  location.reload();
-}
-</script>
-</body>
-</html>
+socket.on
