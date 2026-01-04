@@ -10,7 +10,7 @@ app.use(express.static("public"));
 
 let users = [];
 
-// 5個の罰ゲーム
+// 罰ゲーム5個を登録
 const punishItems = [
   "1. 腕立て10回",
   "2. 変顔写真を送る",
@@ -22,26 +22,30 @@ const punishItems = [
 io.on("connection", (socket) => {
   console.log("ユーザー接続");
 
+  // 入室
   socket.on("join", ({ name }) => {
     socket.name = name;
     users.push(name);
     io.emit("userList", users);
   });
 
+  // メッセージ受信
   socket.on("message", (msg) => {
     io.emit("message", msg);
 
-    // 「罰ゲーム」と入力されたら5個の中からランダムで表示
+    // 「罰ゲーム」と入力されたらランダムで1つ表示
     if(msg.text.includes("罰ゲーム")) {
       const randomPunish = punishItems[Math.floor(Math.random() * punishItems.length)];
       io.emit("punishment", { text: randomPunish });
     }
   });
 
+  // 切断
   socket.on("disconnect", () => {
-    users = users.filter(u => u!==socket.name);
+    users = users.filter(u => u !== socket.name);
     io.emit("userList", users);
   });
 });
 
+// サーバー起動
 server.listen(3000, () => console.log("Server running on port 3000"));
