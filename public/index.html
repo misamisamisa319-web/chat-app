@@ -4,41 +4,11 @@
 <meta charset="UTF-8">
 <title>チャット</title>
 <style>
-body {
-  font-family: sans-serif;
-  margin: 0;
-}
-
-#chat {
-  display: none;
-  height: 100vh;
-  flex-direction: column;
-}
-
-#inputBar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: #eee;
-  padding: 10px;
-  display: flex;
-  gap: 5px;
-  border-bottom: 1px solid #ccc;
-  box-sizing: border-box;
-}
-
-#messages {
-  margin-top: 60px;
-  padding: 10px;
-  list-style: none;
-  overflow-y: auto;
-  flex: 1;
-}
-
-#messages li {
-  margin-bottom: 6px;
-}
+body { font-family:sans-serif; margin:0; }
+#chat { display:none; height:100vh; flex-direction:column; }
+#inputBar { position:fixed; top:0; left:0; width:100%; background:#eee; padding:10px; display:flex; gap:5px; border-bottom:1px solid #ccc; box-sizing:border-box; }
+#messages { margin-top:60px; padding:10px; list-style:none; overflow-y:auto; flex:1; }
+#messages li { margin-bottom:6px; }
 </style>
 </head>
 <body>
@@ -56,6 +26,8 @@ body {
     <button id="leaveBtn">退出</button>
   </div>
   <ul id="messages"></ul>
+  <h4>参加者一覧</h4>
+  <ul id="userList"></ul>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -66,8 +38,7 @@ let myName = "";
 document.getElementById("joinBtn").onclick = () => {
   myName = document.getElementById("nameInput").value.trim();
   if (!myName) return alert("名前を入れてください");
-
-  socket.emit("join", myName);
+  socket.emit("join", { name: myName });
   document.getElementById("login").style.display = "none";
   document.getElementById("chat").style.display = "flex";
 };
@@ -89,45 +60,34 @@ document.getElementById("leaveBtn").onclick = () => {
   location.reload();
 };
 
-socket.on("system", msg => {
+function addMessage(text, isSystem = false) {
   const li = document.createElement("li");
-  li.textContent = msg;
-  li.style.color = "gray";
-  li.style.fontStyle = "italic";
-  document.getElementById("messages").appendChild(li);
-  scrollToBottom();
-});
-
-function colorFromName(name) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  li.textContent = text;
+  if (isSystem) {
+    li.style.color = "gray";
+    li.style.fontStyle = "italic";
   }
-  return `hsl(${Math.abs(hash) % 360}, 70%, 40%)`;
+  const ul = document.getElementById("messages");
+  ul.insertBefore(li, ul.firstChild);
 }
+
+socket.on("system", msg => {
+  addMessage(msg, true);
+});
 
 socket.on("chat", data => {
-  const li = document.createElement("li");
-
-  const nameSpan = document.createElement("span");
-  nameSpan.textContent = data.name;
-  nameSpan.style.color = colorFromName(data.name);
-  nameSpan.style.fontWeight = "bold";
-
-  const msgSpan = document.createElement("span");
-  msgSpan.textContent = " : " + data.msg;
-
-  li.appendChild(nameSpan);
-  li.appendChild(msgSpan);
-
-  document.getElementById("messages").appendChild(li);
-  scrollToBottom();
+  addMessage(data.name + " : " + data.msg);
 });
 
-function scrollToBottom() {
-  const m = document.getElementById("messages");
-  m.scrollTop = m.scrollHeight;
-}
+socket.on('userList', list => {
+  const ul = document.getElementById('userList');
+  ul.innerHTML = '';
+  list.forEach(u => {
+    const li = document.createElement('li');
+    li.textContent = u;
+    ul.appendChild(li);
+  });
+});
 </script>
 
 </body>
