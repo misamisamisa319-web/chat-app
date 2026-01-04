@@ -10,6 +10,9 @@ app.use(express.static("public"));
 
 let users = [];
 
+// 罰ゲームの判定キーワード
+const punishItems = ["罰ゲーム", "1", "2", "3", "4"];
+
 io.on("connection", (socket) => {
   console.log("ユーザー接続");
 
@@ -22,8 +25,8 @@ io.on("connection", (socket) => {
   socket.on("message", (msg) => {
     io.emit("message", msg);
 
-    // 「罰ゲーム」という文字が含まれたら自動で罰ゲーム表示
-    if(msg.text.includes("罰ゲーム")) {
+    // punishItemsのどれかを含む場合に罰ゲーム表示
+    if(punishItems.some(keyword => msg.text.includes(keyword))) {
       io.emit("punishment", { text: msg.text });
     }
   });
