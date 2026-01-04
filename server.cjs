@@ -22,10 +22,9 @@ io.on("connection", (socket) => {
   socket.on("message", (msg) => {
     io.emit("message", msg);
 
-    // 罰ゲームコマンド: "/punish <内容>"
-    if(msg.text.startsWith("/punish ")) {
-      const text = msg.text.replace("/punish ","");
-      io.emit("punishment", { text });
+    // 「罰ゲーム」という文字が含まれたら自動で罰ゲーム表示
+    if(msg.text.includes("罰ゲーム")) {
+      io.emit("punishment", { text: msg.text });
     }
   });
 
