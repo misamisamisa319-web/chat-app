@@ -10,6 +10,15 @@ app.use(express.static("public"));
 
 let users = [];
 
+// 5個の罰ゲーム
+const punishItems = [
+  "1. 腕立て10回",
+  "2. 変顔写真を送る",
+  "3. 早口言葉を言う",
+  "4. 好きな食べ物を1分間褒める",
+  "5. 一言だけ替え歌を歌う"
+];
+
 io.on("connection", (socket) => {
   console.log("ユーザー接続");
 
@@ -22,9 +31,10 @@ io.on("connection", (socket) => {
   socket.on("message", (msg) => {
     io.emit("message", msg);
 
-    // 罰ゲーム有効判定
+    // 「罰ゲーム」と入力されたら5個の中からランダムで表示
     if(msg.text.includes("罰ゲーム")) {
-      io.emit("punishment", { text: msg.text });
+      const randomPunish = punishItems[Math.floor(Math.random() * punishItems.length)];
+      io.emit("punishment", { text: randomPunish });
     }
   });
 
