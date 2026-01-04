@@ -1,40 +1,67 @@
-import express from "express";
-import http from "http";
-import { Server } from "socket.io";
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static("public"));
+// public フォルダを配信
+app.use(express.static('public'));
 
-let users = [];
+// 参加者管理
+const users = new Map();
 
-// 罰ゲームの判定キーワード
-const punishItems = ["罰ゲーム", "1", "2", "3", "4"];
+// ユーザー一覧を送信
+function sendUserList() {
+  const list = Array.from(users.values()).map(u => `${u.name} (${u.ip})`);
+  io.emit('userList', list);
+}
 
-io.on("connection", (socket) => {
-  console.log("ユーザー接続");
+io.on('connection', (socket) => {
+  console.log('ユーザー接続');
 
-  socket.on("join", ({ name }) => {
-    socket.name = name;
-    users.push(name);
-    io.emit("userList", users);
+  socket.on('join', (data) => {
+    const name = data.name;
+    const ip = socket.handshake.address || '';
+    const maskedIP = ip.includes('.') ? ip.split('.').slice(0, 3).join('.') + '.xxx' : ip;
+    users.set(socket.id, { name, ip: maskedIP });
+    console.log(`${name} が参加しました（IP: ${maskedIP}）`);
+    io.emit('system', `${name} が入室しました`);
+    sendUserList();
   });
 
-  socket.on("message", (msg) => {
-    io.emit("message", msg);
+  socket.on('chat', (data) => {
+    io.emit('chat', {
+      name: data.name,
+      msg: data.msg,
+      _time: Date.now()
+    });
+  });
 
-    // punishItemsのどれかを含む場合に罰ゲーム表示
-    if(punishItems.some(keyword => msg.text.includes(keyword))) {
-      io.emit("punishment", { text: msg.text });
+  socket.on('disconnect', () => {
+    const user = users.get(socket.id);
+    if (user) {
+      io.emit('system', `${user.name} が退出しました`);
+      console.log(`${user.name} が退出しました（IP: ${user.ip}）`);
+      users.delete(socket.id);
+      sendUserList();
     }
-  });
-
-  socket.on("disconnect", () => {
-    users = users.filter(u => u!==socket.name);
-    io.emit("userList", users);
   });
 });
 
-server.listen(3000, () => console.log("Server running on port 3000"));
+// ポート自動調整
+let PORT = 3000;
+function startServer(port) {
+  server.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      startServer(port + 1);
+    } else {
+      console.error(err);
+    }
+  });
+}
+
+startServer(PORT);
