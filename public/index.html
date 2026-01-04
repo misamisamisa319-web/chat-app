@@ -2,13 +2,69 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>チャット</title>
 <style>
-body { font-family:sans-serif; margin:0; }
-#chat { display:none; height:100vh; flex-direction:column; }
-#inputBar { position:fixed; top:0; left:0; width:100%; background:#eee; padding:10px; display:flex; gap:5px; border-bottom:1px solid #ccc; box-sizing:border-box; }
-#messages { margin-top:60px; padding:10px; list-style:none; overflow-y:auto; flex:1; }
-#messages li { margin-bottom:6px; }
+body {
+  font-family: sans-serif;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#login {
+  padding: 20px;
+}
+
+#chat {
+  display: none;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  list-style: none;
+  margin: 0;
+}
+
+#messages li {
+  margin-bottom: 6px;
+}
+
+#userList {
+  padding: 0 10px;
+  list-style: none;
+  margin: 0 0 10px 0;
+}
+
+#inputBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #eee;
+  padding: 6px;
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+#inputBar input {
+  flex: 1;
+  font-size: 16px;
+  padding: 6px 8px;
+}
+
+#inputBar button {
+  padding: 6px 10px;
+  font-size: 14px;
+}
 </style>
 </head>
 <body>
@@ -21,7 +77,7 @@ body { font-family:sans-serif; margin:0; }
 
 <div id="chat">
   <div id="inputBar">
-    <input id="input" placeholder="メッセージを入力" style="flex:1;">
+    <input id="input" placeholder="メッセージを入力">
     <button id="sendBtn">送信</button>
     <button id="leaveBtn">退出</button>
   </div>
@@ -38,57 +94,48 @@ let myName = "";
 document.getElementById("joinBtn").onclick = () => {
   myName = document.getElementById("nameInput").value.trim();
   if (!myName) return alert("名前を入れてください");
+
   socket.emit("join", { name: myName });
   document.getElementById("login").style.display = "none";
   document.getElementById("chat").style.display = "flex";
 };
 
-document.getElementById("sendBtn").onclick = sendMessage;
-document.getElementById("input").addEventListener("keydown", e => {
-  if (e.key === "Enter") sendMessage();
-});
-
-function sendMessage() {
-  const i = document.getElementById("input");
-  if (!i.value) return;
-  socket.emit("chat", { name: myName, msg: i.value });
-  i.value = "";
-}
-
-document.getElementById("leaveBtn").onclick = () => {
-  socket.disconnect();
-  location.reload();
+document.getElementById("sendBtn").onclick = () => {
+  const msgInput = document.getElementById("input");
+  const text = msgInput.value.trim();
+  if (!text) return;
+  socket.emit("message", { name: myName, text });
+  msgInput.value = "";
 };
 
-function addMessage(text, isSystem = false) {
+document.getElementById("leaveBtn").onclick = () => {
+  socket.emit("leave", { name: myName });
+  document.getElementById("chat").style.display = "none";
+  document.getElementById("login").style.display = "block";
+};
+
+socket.on("message", (msg) => {
   const li = document.createElement("li");
-  li.textContent = text;
-  if (isSystem) {
-    li.style.color = "gray";
-    li.style.fontStyle = "italic";
-  }
-  const ul = document.getElementById("messages");
-  ul.insertBefore(li, ul.firstChild);
-}
-
-socket.on("system", msg => {
-  addMessage(msg, true);
+  li.textContent = msg.name + ": " + msg.text;
+  document.getElementById("messages").appendChild(li);
 });
 
-socket.on("chat", data => {
-  addMessage(data.name + " : " + data.msg);
-});
-
-socket.on('userList', list => {
-  const ul = document.getElementById('userList');
-  ul.innerHTML = '';
-  list.forEach(u => {
-    const li = document.createElement('li');
-    li.textContent = u;
-    ul.appendChild(li);
+socket.on("userList", (users) => {
+  const list = document.getElementById("userList");
+  list.innerHTML = "";
+  users.forEach(u => {
+    const li = document.createElement("li");
+    li.textContent = u.name;
+    list.appendChild(li);
   });
 });
-</script>
 
+socket.on("punishment", (data) => {
+  const li = document.createElement("li");
+  li.textContent = "⚠️ " + data.text;
+  li.style.color = "red";
+  document.getElementById("messages").appendChild(li);
+});
+</script>
 </body>
 </html>
