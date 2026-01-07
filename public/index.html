@@ -5,39 +5,102 @@
 <title>Chat</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{margin:0;font-family:sans-serif;height:100vh;display:flex;flex-direction:column}
-#login,#chat{flex:1;display:flex;flex-direction:column}
-#chat{display:none}
-#messages{flex:1;overflow:auto;padding:10px;list-style:none}
-#userList{background:#f0f0f0;padding:5px;list-style:none;max-height:100px;overflow:auto}
-#controls{display:flex;gap:5px;padding:5px}
-input,button{padding:10px;font-size:16px}
-.system{color:gray}
+/* 全体設定 */
+body {
+  margin: 0;
+  font-family: sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 入室画面 */
+#login {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+#login input, #login button {
+  font-size: 18px;
+  padding: 10px;
+  margin: 5px 0;
+  width: 80%;
+  max-width: 300px;
+}
+
+/* チャット画面 */
+#chat {
+  flex: 1;
+  display: none;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* メッセージリスト */
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  list-style: none;
+  margin: 0;
+}
+
+/* ユーザーリスト */
+#userList {
+  max-height: 80px;
+  overflow-y: auto;
+  background: #f0f0f0;
+  padding: 5px;
+  list-style: none;
+  margin: 0;
+}
+
+/* コントロール部（入力欄＋ボタン） */
+#controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 5px;
+}
+#controls input, #controls button {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 18px;
+  padding: 10px;
+}
+
+.system {
+  color: gray;
+}
 </style>
 </head>
 <body>
 
+<!-- 入室画面 -->
 <div id="login">
   <h2>入室</h2>
   <input id="nameInput" placeholder="名前">
   <button id="joinBtn">入室</button>
 </div>
 
+<!-- チャット画面 -->
 <div id="chat">
-  <h4>ユーザー</h4>
-  <ul id="userList"></ul>
-  <ul id="messages"></ul>
   <div id="controls">
     <input id="input" placeholder="メッセージ">
     <button id="sendBtn">送信</button>
     <button id="leaveBtn">退出</button>
   </div>
+
+  <ul id="messages"></ul>
+  <ul id="userList"></ul>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
-const login = loginDiv = document.getElementById("login");
+const login = document.getElementById("login");
 const chat = document.getElementById("chat");
 const joinBtn = document.getElementById("joinBtn");
 const nameInput = document.getElementById("nameInput");
@@ -53,42 +116,44 @@ joinBtn.onclick = () => {
   if (!nameInput.value.trim()) return;
   username = nameInput.value.trim();
   socket.emit("join", { name: username });
-  login.style.display="none";
-  chat.style.display="flex";
+  login.style.display = "none";
+  chat.style.display = "flex";
 };
 
 sendBtn.onclick = () => {
   if (!input.value.trim()) return;
   socket.emit("message", { name: username, text: input.value.trim() });
-  input.value="";
+  input.value = "";
 };
 
 leaveBtn.onclick = () => {
   socket.emit("leave");
-  chat.style.display="none";
-  login.style.display="flex";
-  messages.innerHTML="";
-  userList.innerHTML="";
+  chat.style.display = "none";
+  login.style.display = "flex";
+  messages.innerHTML = "";
+  userList.innerHTML = "";
 };
 
 socket.on("message", d => {
-  const li=document.createElement("li");
+  const li = document.createElement("li");
   li.textContent = `${d.name}: ${d.text}`;
   messages.appendChild(li);
+  messages.scrollTop = messages.scrollHeight;
 });
 
 socket.on("system", msg => {
-  const li=document.createElement("li");
+  const li = document.createElement("li");
   li.textContent = msg;
-  li.className="system";
+  li.className = "system";
   messages.appendChild(li);
+  messages.scrollTop = messages.scrollHeight;
 });
 
 socket.on("userList", list => {
-  userList.innerHTML="";
-  list.forEach(u=>{
-    const li=document.createElement("li");
-    li.textContent=u.name;
+  userList.innerHTML = "";
+  list.forEach(u => {
+    const li = document.createElement("li");
+    li.textContent = u.name;
     userList.appendChild(li);
   });
 });
