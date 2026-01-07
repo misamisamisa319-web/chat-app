@@ -21,18 +21,26 @@ io.on("connection", socket => {
     io.emit("system", `${name} が入室しました`);
   });
 
-  socket.on("message", data => {
+ socket.on("message", data => {
+  // 文字列で送られてきた場合も安全に変換
+  if (typeof data === "string") {
+    data = { name: socket.username || "anon", text: data };
+  }
+
   console.log("受信:", data);
 
   const text = data.text ?? data.message ?? data;
 
+  // 罰ゲーム処理
   if (text === "罰ゲーム") {
     const p = punishItems[Math.floor(Math.random() * punishItems.length)];
     io.emit("system", `罰ゲーム: ${p}`);
-  } else {
-    io.emit("message", { name: socket.username, text });
   }
+
+  // 通常メッセージ送信
+  io.emit("message", { name: socket.username || "anon", text });
 });
+
 
   socket.on("leave", () => {
     users = users.filter(u => u.id !== socket.id);
