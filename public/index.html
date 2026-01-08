@@ -18,35 +18,47 @@ body {
   flex-direction: column;
 }
 #chat { display: none; }
+
+/* 入力欄固定（上部） */
 #controls {
   display: flex;
   gap: 5px;
   padding: 5px;
-  background: #f0f0f0;
+  flex-shrink: 0;
   position: sticky;
   top: 0;
+  background: #fff;
   z-index: 10;
 }
-#messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-  list-style: none;
-  display: flex;
-  flex-direction: column; /* 上→下に並ぶ。JSで上に追加 */
-}
+
+input, button { padding: 10px; font-size: 16px; }
 
 #userList {
-  background: #e0e0e0;
+  background: #f0f0f0;
   padding: 5px;
   list-style: none;
   max-height: 100px;
+  overflow: auto;
+  flex-shrink: 0;
+}
+
+#messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column-reverse; /* 最新を上に */
+  overflow-y: auto;
+  padding: 10px;
+  list-style: none;
+}
+
+#punishList {
+  background: #ffe0e0;
+  padding: 5px;
+  list-style: none;
+  max-height: 300px;
   overflow-y: auto;
 }
-input, button {
-  padding: 10px;
-  font-size: 16px;
-}
+
 .system { color: gray; }
 </style>
 </head>
@@ -64,14 +76,28 @@ input, button {
     <button id="sendBtn">送信</button>
     <button id="leaveBtn">退出</button>
   </div>
+
   <h4>ユーザー</h4>
   <ul id="userList"></ul>
+
+  <h4>チャット</h4>
   <ul id="messages"></ul>
+
+  <h4>罰ゲーム</h4>
+  <ul id="punishList">
+    <li id="punish1"></li><li id="punish2"></li><li id="punish3"></li><li id="punish4"></li><li id="punish5"></li>
+    <li id="punish6"></li><li id="punish7"></li><li id="punish8"></li><li id="punish9"></li><li id="punish10"></li>
+    <li id="punish11"></li><li id="punish12"></li><li id="punish13"></li><li id="punish14"></li><li id="punish15"></li>
+    <li id="punish16"></li><li id="punish17"></li><li id="punish18"></li><li id="punish19"></li><li id="punish20"></li>
+    <li id="punish21"></li><li id="punish22"></li><li id="punish23"></li><li id="punish24"></li><li id="punish25"></li>
+    <li id="punish26"></li><li id="punish27"></li><li id="punish28"></li><li id="punish29"></li><li id="punish30"></li>
+  </ul>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
+
 const login = document.getElementById("login");
 const chat = document.getElementById("chat");
 const joinBtn = document.getElementById("joinBtn");
@@ -81,6 +107,7 @@ const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
 const leaveBtn = document.getElementById("leaveBtn");
 const userList = document.getElementById("userList");
+const punishList = document.getElementById("punishList");
 
 let username = "";
 
@@ -88,46 +115,53 @@ joinBtn.onclick = () => {
   if (!nameInput.value.trim()) return;
   username = nameInput.value.trim();
   socket.emit("join", { name: username });
-  login.style.display="none";
-  chat.style.display="flex";
+  login.style.display = "none";
+  chat.style.display = "flex";
 };
 
 sendBtn.onclick = () => {
   if (!input.value.trim()) return;
   socket.emit("message", { name: username, text: input.value.trim() });
-  input.value="";
+  input.value = "";
 };
 
 leaveBtn.onclick = () => {
   socket.emit("leave");
-  chat.style.display="none";
-  login.style.display="flex";
-  messages.innerHTML="";
-  userList.innerHTML="";
+  chat.style.display = "none";
+  login.style.display = "flex";
+  messages.innerHTML = "";
+  userList.innerHTML = "";
 };
 
+// チャットメッセージ受信
 socket.on("message", d => {
   const li = document.createElement("li");
   li.textContent = `${d.name}: ${d.text}`;
-  messages.appendChild(li);
-  messages.scrollTop = messages.scrollHeight;
+  messages.prepend(li); // 上に表示
 });
 
+// システムメッセージ
 socket.on("system", msg => {
   const li = document.createElement("li");
   li.textContent = msg;
-  li.className="system";
-  messages.appendChild(li);
-  messages.scrollTop = messages.scrollHeight;
+  li.className = "system";
+  messages.prepend(li);
 });
 
+// ユーザーリスト更新
 socket.on("userList", list => {
-  userList.innerHTML="";
+  userList.innerHTML = "";
   list.forEach(u => {
     const li = document.createElement("li");
     li.textContent = u.name;
     userList.appendChild(li);
   });
+});
+
+// 罰ゲーム更新（入室時に30個）
+socket.on("updatePunish", ({ index, text }) => {
+  const li = document.getElementById(`punish${index+1}`);
+  if (li) li.textContent = text;
 });
 </script>
 </body>
