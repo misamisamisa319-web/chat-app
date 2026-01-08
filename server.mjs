@@ -9,7 +9,15 @@ const io = new Server(server);
 app.use(express.static("public"));
 
 let users = [];
-const punishItems = ["腕立て10回", "スクワット20回", "一発ギャグ", "変顔10秒", "歌う"];
+// 罰ゲーム30個
+const punishItems = [
+  "罰1", "罰2", "罰3", "罰4", "罰5",
+  "罰6", "罰7", "罰8", "罰9", "罰10",
+  "罰11", "罰12", "罰13", "罰14", "罰15",
+  "罰16", "罰17", "罰18", "罰19", "罰20",
+  "罰21", "罰22", "罰23", "罰24", "罰25",
+  "罰26", "罰27", "罰28", "罰29", "罰30"
+];
 
 // 接続
 io.on("connection", socket => {
@@ -18,12 +26,9 @@ io.on("connection", socket => {
   // 入室
   socket.on("join", ({ name }) => {
     socket.username = name;
-
-    // 名前重複防止
     if (!users.find(u => u.name === name)) {
       users.push({ id: socket.id, name });
     } else {
-      // 重複なら番号をつける
       let i = 2;
       let newName = name + i;
       while (users.find(u => u.name === newName)) i++, newName = name + i;
@@ -33,22 +38,25 @@ io.on("connection", socket => {
 
     io.emit("userList", users);
     io.emit("system", `${socket.username} が入室しました`);
+
+    // 入室時に罰ゲーム30個を送信
+    punishItems.forEach((item, index) => {
+      socket.emit("updatePunish", { index, text: item });
+    });
   });
 
   // メッセージ
   socket.on("message", data => {
-    // 文字列なら変換
     if (typeof data === "string") data = { name: socket.username || "anon", text: data };
-
     const text = data.text ?? data.message ?? data;
 
-    // 罰ゲーム判定
+    // 罰ゲーム判定（ランダム1個表示）
     if (text === "罰ゲーム") {
-      const p = punishItems[Math.floor(Math.random() * punishItems.length)];
+      const randomIndex = Math.floor(Math.random() * punishItems.length);
+      const p = punishItems[randomIndex];
       io.emit("system", `罰ゲーム: ${p}`);
     }
 
-    // 安全に送信
     io.emit("message", { name: data.name || socket.username || "anon", text });
     console.log("受信:", { name: data.name || socket.username || "anon", text });
   });
