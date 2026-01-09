@@ -19,7 +19,6 @@ body {
 }
 #chat { display: none; }
 
-/* 入力欄固定（上部） */
 #controls {
   display: flex;
   gap: 5px;
@@ -85,6 +84,7 @@ input, button { padding: 10px; font-size: 16px; }
 
   <h4>罰ゲーム</h4>
   <ul id="punishList">
+    <!-- 罰ゲーム枠30個 -->
     <li id="punish1"></li><li id="punish2"></li><li id="punish3"></li><li id="punish4"></li><li id="punish5"></li>
     <li id="punish6"></li><li id="punish7"></li><li id="punish8"></li><li id="punish9"></li><li id="punish10"></li>
     <li id="punish11"></li><li id="punish12"></li><li id="punish13"></li><li id="punish14"></li><li id="punish15"></li>
@@ -121,7 +121,14 @@ joinBtn.onclick = () => {
 
 sendBtn.onclick = () => {
   if (!input.value.trim()) return;
-  socket.emit("message", { name: username, text: input.value.trim() });
+  const text = input.value.trim();
+  socket.emit("message", { name: username, text });
+
+  // 「罰ゲーム」と送信したらランダムに1個表示
+  if (text === "罰ゲーム") {
+    socket.emit("punish");
+  }
+
   input.value = "";
 };
 
@@ -137,7 +144,7 @@ leaveBtn.onclick = () => {
 socket.on("message", d => {
   const li = document.createElement("li");
   li.textContent = `${d.name}: ${d.text}`;
-  messages.prepend(li); // 上に表示
+  messages.prepend(li);
 });
 
 // システムメッセージ
@@ -158,10 +165,11 @@ socket.on("userList", list => {
   });
 });
 
-// 罰ゲーム更新（入室時に30個）
-socket.on("updatePunish", ({ index, text }) => {
-  const li = document.getElementById(`punish${index+1}`);
-  if (li) li.textContent = text;
+// 罰ゲーム更新
+socket.on("punish", text => {
+  // ランダムな空の罰枠に表示
+  const emptyLi = Array.from(punishList.children).find(li => li.textContent === "");
+  if (emptyLi) emptyLi.textContent = text;
 });
 </script>
 </body>
