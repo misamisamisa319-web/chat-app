@@ -85,19 +85,18 @@ io.on("connection", socket => {
     console.log("受信:", { name: data.name || socket.username || "anon", text });
   });
 
-  // 退出
-  socket.on("leave", () => {
-    users = users.filter(u => u.id !== socket.id);
-    io.emit("userList", users);
-    if (socket.username) io.emit("system", `${socket.username} が退出しました`);
-  });
+  // 退出（表示なし）
+socket.on("leave", () => {
+  socket.disconnect(true);
+});
 
-  // 切断
-  socket.on("disconnect", () => {
-    users = users.filter(u => u.id !== socket.id);
-    io.emit("userList", users);
-    if (socket.username) io.emit("system", `${socket.username} が切断されました`);
-  });
+// 切断（ここでだけ表示）
+socket.on("disconnect", () => {
+  users = users.filter(u => u.id !== socket.id);
+  io.emit("userList", users);
+  if (socket.username) io.emit("system", `${socket.username} が退出しました`);
+});
+
 });
 
 // サーバー起動
