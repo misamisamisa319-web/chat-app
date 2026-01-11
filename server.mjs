@@ -9,6 +9,8 @@ const io = new Server(server);
 app.use(express.static("public"));
 
 let users = [];
+let messagesLog = []; // 過去メッセージ保存用
+
 // 罰ゲーム30個
 const punishItems = [
   "罰1.全裸になり脚を開き、人差し指と中指でクリトリスを軽く挟み込んで擦る。3分以内に100往復こする。できなかった場合、2分以内に100往復に続けて挑戦する。", 
@@ -61,6 +63,8 @@ io.on("connection", socket => {
     }
 
     io.emit("userList", users);
+    messagesLog.forEach(msg => socket.emit("message", msg));
+
     io.emit("system", `${socket.username} が入室しました`);
 
     // 入室時に罰ゲーム30個を送信
@@ -83,6 +87,9 @@ io.on("connection", socket => {
 
     io.emit("message", { name: data.name || socket.username || "anon", text });
     console.log("受信:", { name: data.name || socket.username || "anon", text });
+    messagesLog.push({ name: data.name || socket.username || "anon", text });
+
+
   });
 
   // 退出（表示なし）
