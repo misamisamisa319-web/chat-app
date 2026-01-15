@@ -44,18 +44,19 @@ input, button { padding: 10px; font-size: 16px; }
 #messages {
   flex: 1;
   display: flex;
-  flex-direction: column; /* 最新を上に */
+  flex-direction: column;
   overflow-y: auto;
   padding: 10px;
   list-style: none;
 }
 
-#punishList {
+#punishList, #punishMaleList {
   background: #ffe0e0;
   padding: 5px;
   list-style: none;
-  max-height: 300px;
+  max-height: 200px;
   overflow-y: auto;
+  margin-bottom: 10px;
 }
 
 .system { color: gray; }
@@ -76,20 +77,29 @@ input, button { padding: 10px; font-size: 16px; }
     <button id="leaveBtn">退出</button>
   </div>
 
-  
   <ul id="userList"></ul>
 
   <h4>チャット</h4>
   <ul id="messages"></ul>
 
+  <h4>女子罰</h4>
   <ul id="punishList">
-    <!-- 女子罰枠30個 -->
-    <li id="punish1"></li><li id="punish2"></li><li id="punish3"></li><li id="punish4"></li><li id="punish5"></li>
-    <li id="punish6"></li><li id="punish7"></li><li id="punish8"></li><li id="punish9"></li><li id="punish10"></li>
-    <li id="punish11"></li><li id="punish12"></li><li id="punish13"></li><li id="punish14"></li><li id="punish15"></li>
-    <li id="punish16"></li><li id="punish17"></li><li id="punish18"></li><li id="punish19"></li><li id="punish20"></li>
-    <li id="punish21"></li><li id="punish22"></li><li id="punish23"></li><li id="punish24"></li><li id="punish25"></li>
-    <li id="punish26"></li><li id="punish27"></li><li id="punish28"></li><li id="punish29"></li><li id="punish30"></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+  </ul>
+
+  <h4>男子罰</h4>
+  <ul id="punishMaleList">
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
   </ul>
 </div>
 
@@ -107,6 +117,7 @@ const sendBtn = document.getElementById("sendBtn");
 const leaveBtn = document.getElementById("leaveBtn");
 const userList = document.getElementById("userList");
 const punishList = document.getElementById("punishList");
+const punishMaleList = document.getElementById("punishMaleList");
 
 let username = "";
 
@@ -123,10 +134,8 @@ sendBtn.onclick = () => {
   const text = input.value.trim();
   socket.emit("message", { name: username, text });
 
-  // 「女子罰」と送信したらランダムに1個表示
-  if (text === "女子罰") {
-    socket.emit("punish");
-  }
+  if (text === "女子罰") socket.emit("punish");
+  if (text === "男子罰") socket.emit("punish_male");
 
   input.value = "";
 };
@@ -139,14 +148,12 @@ leaveBtn.onclick = () => {
   userList.innerHTML = "";
 };
 
-// チャットメッセージ受信
 socket.on("message", d => {
   const li = document.createElement("li");
   li.textContent = `${d.name}: ${d.text}`;
   messages.prepend(li);
 });
 
-// システムメッセージ
 socket.on("system", msg => {
   const li = document.createElement("li");
   li.textContent = msg;
@@ -154,7 +161,6 @@ socket.on("system", msg => {
   messages.prepend(li);
 });
 
-// ユーザーリスト更新
 socket.on("userList", list => {
   userList.innerHTML = "";
   list.forEach(u => {
@@ -164,10 +170,13 @@ socket.on("userList", list => {
   });
 });
 
-// 罰ゲーム更新
 socket.on("punish", text => {
-  // ランダムな空の罰枠に表示
   const emptyLi = Array.from(punishList.children).find(li => li.textContent === "");
+  if (emptyLi) emptyLi.textContent = text;
+});
+
+socket.on("punish_male", text => {
+  const emptyLi = Array.from(punishMaleList.children).find(li => li.textContent === "");
   if (emptyLi) emptyLi.textContent = text;
 });
 </script>
