@@ -11,7 +11,7 @@ app.use(express.static("public"));
 let users = [];
 let messagesLog = []; // 過去メッセージ保存用
 
-// 罰ゲーム30個
+// 女子罰30個
 const punishItems = [
   "罰1.全裸になり脚を開き、人差し指と中指でクリトリスを軽く挟み込んで擦る。3分以内に100往復こする。できなかった場合、2分以内に100往復に続けて挑戦する。", 
   "罰2.カーテン全開の窓際に立ちクリトリスかおまんこへのオナニーを2分実施。", 
@@ -44,6 +44,40 @@ const punishItems = [
   "罰29.実況しながらイクまでオナニー　(保留可)", 
   "罰30.オナニーの頻度と一番好きなオナニーのおかず・方法を告白する。その後、告白した方法でオナニー開始　勝者の許可が出るまで続ける。"
 ];
+// 男子罰30個
+const boyPunishItems = [
+  "男子罰1",
+  "男子罰2",
+  "男子罰3",
+  "男子罰4",
+  "男子罰5",
+  "男子罰6",
+  "男子罰7",
+  "男子罰8",
+  "男子罰9",
+  "男子罰10",
+  "男子罰11",
+  "男子罰12",
+  "男子罰13",
+  "男子罰14",
+  "男子罰15",
+  "男子罰16",
+  "男子罰17",
+  "男子罰18",
+  "男子罰19",
+  "男子罰20",
+  "男子罰21",
+  "男子罰22",
+  "男子罰23",
+  "男子罰24",
+  "男子罰25",
+  "男子罰26",
+  "男子罰27",
+  "男子罰28",
+  "男子罰29",
+  "男子罰30",
+];
+
 
 // 接続
 io.on("connection", socket => {
@@ -74,23 +108,31 @@ io.on("connection", socket => {
   });
 
   // メッセージ
-  socket.on("message", data => {
-    if (typeof data === "string") data = { name: socket.username || "anon", text: data };
-    const text = data.text ?? data.message ?? data;
+socket.on("message", data => {
+  if (typeof data === "string") data = { name: socket.username || "anon", text: data };
+  const text = data.text ?? data.message ?? data;
 
-    // 罰ゲーム判定（ランダム1個表示）
-    if (text === "罰ゲーム") {
-      const randomIndex = Math.floor(Math.random() * punishItems.length);
-      const p = punishItems[randomIndex];
-      io.emit("system", `罰ゲーム: ${p}`);
-    }
+  // 女子罰
+  if (text === "女子罰") {
+    const randomIndex = Math.floor(Math.random() * punishItems.length);
+    const p = punishItems[randomIndex];
+    io.emit("system", `女子罰: ${p}`);
+    return;
+  }
 
-    io.emit("message", { name: data.name || socket.username || "anon", text });
-    console.log("受信:", { name: data.name || socket.username || "anon", text });
-    messagesLog.push({ name: data.name || socket.username || "anon", text });
+  // 男子罰
+  if (text === "男子罰") {
+    const randomIndex = Math.floor(Math.random() * boyPunishItems.length);
+    const p = boyPunishItems[randomIndex];
+    io.emit("system", `男子罰: ${p}`);
+    return;
+  }
 
+  io.emit("message", { name: data.name || socket.username || "anon", text });
+  console.log("受信:", { name: data.name || socket.username || "anon", text });
+  messagesLog.push({ name: data.name || socket.username || "anon", text });
+});
 
-  });
 
   // 退出（表示なし）
 socket.on("leave", () => {
