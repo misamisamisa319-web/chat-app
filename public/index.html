@@ -83,7 +83,7 @@ input, button { padding: 10px; font-size: 16px; }
   <ul id="messages"></ul>
 
   <ul id="punishList">
-    <!-- 罰ゲーム枠30個 -->
+    <!-- 女子罰枠30個 -->
     <li id="punish1"></li><li id="punish2"></li><li id="punish3"></li><li id="punish4"></li><li id="punish5"></li>
     <li id="punish6"></li><li id="punish7"></li><li id="punish8"></li><li id="punish9"></li><li id="punish10"></li>
     <li id="punish11"></li><li id="punish12"></li><li id="punish13"></li><li id="punish14"></li><li id="punish15"></li>
@@ -123,8 +123,8 @@ sendBtn.onclick = () => {
   const text = input.value.trim();
   socket.emit("message", { name: username, text });
 
-  // 「罰ゲーム」と送信したらランダムに1個表示
-  if (text === "罰ゲーム") {
+  // 「女子罰」と送信したらランダムに1個表示
+  if (text === "女子罰") {
     socket.emit("punish");
   }
 
