@@ -59,6 +59,11 @@ input, button { padding: 10px; font-size: 16px; }
   margin-bottom: 10px;
 }
 
+#punishList:empty,
+#punishMaleList:empty {
+  display: none;
+}
+
 .system { color: gray; }
 </style>
 </head>
@@ -83,24 +88,10 @@ input, button { padding: 10px; font-size: 16px; }
   <ul id="messages"></ul>
 
   <h4>女子罰</h4>
-  <ul id="punishList">
-    <li></li><li></li><li></li><li></li><li></li>
-    <li></li><li></li><li></li><li></li><li></li>
-    <li></li><li></li><li></li><li></li><li></li>
-    <li></li><li></li><li></li><li></li><li></li>
-    <li></li><li></li><li></li><li></li><li></li>
-    <li></li><li></li><li></li><li></li><li></li>
-  </ul>
+  <ul id="punishList"></ul>
 
   <h4>男子罰</h4>
-  <ul id="punishMaleList">
-    <li></li><li></li><li></li><li></li><li></li>
-    <li></li><li></li><li></li><li></li><li></li>
-    <li></li><li></li><li></li><li></li><li></li>
-    <li></li><li></li><li></li><li></li><li></li>
-    <li></li><li></li><li></li><li></li><li></li>
-    <li></li><li></li><li></li><li></li><li></li>
-  </ul>
+  <ul id="punishMaleList"></ul>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -146,6 +137,8 @@ leaveBtn.onclick = () => {
   login.style.display = "flex";
   messages.innerHTML = "";
   userList.innerHTML = "";
+  punishList.innerHTML = "";
+  punishMaleList.innerHTML = "";
 };
 
 socket.on("message", d => {
@@ -155,6 +148,7 @@ socket.on("message", d => {
 });
 
 socket.on("system", msg => {
+  if (!msg || !msg.trim()) return;
   const li = document.createElement("li");
   li.textContent = msg;
   li.className = "system";
@@ -171,13 +165,15 @@ socket.on("userList", list => {
 });
 
 socket.on("punish", text => {
-  const emptyLi = Array.from(punishList.children).find(li => li.textContent === "");
-  if (emptyLi) emptyLi.textContent = text;
+  const li = document.createElement("li");
+  li.textContent = text;
+  punishList.appendChild(li);
 });
 
 socket.on("punish_male", text => {
-  const emptyLi = Array.from(punishMaleList.children).find(li => li.textContent === "");
-  if (emptyLi) emptyLi.textContent = text;
+  const li = document.createElement("li");
+  li.textContent = text;
+  punishMaleList.appendChild(li);
 });
 </script>
 </body>
