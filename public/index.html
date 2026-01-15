@@ -18,6 +18,17 @@ body {
   flex-direction: column;
 }
 #chat { display: none; }
+.system { color: gray; }
+
+.system.girl {
+  color: red;
+  font-weight: bold;
+}
+
+.system.boy {
+  color: blue;
+  font-weight: bold;
+}
 
 #controls {
   display: flex;
@@ -151,6 +162,9 @@ socket.on("system", msg => {
   const li = document.createElement("li");
   li.textContent = msg;
   li.className = "system";
+  if (msg.startsWith("女子罰")) li.classList.add("girl");
+  if (msg.startsWith("男子罰")) li.classList.add("boy");
+
   messages.prepend(li);
 });
 
