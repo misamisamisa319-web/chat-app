@@ -78,6 +78,30 @@ const boyPunishItems = [
   "男子罰29.【地獄】女性化調教。勝者に女性としての名前、名前の色をつけてもらう。一人称は「あたし」で男言葉使用禁止、女になりきってチャットすること。女性用ショーツとパンスト、家ではブラやパッド、スカートも手に入る場合は身につける。下着禁止や脱衣命令が出ても脱ぐのは禁止。おちんぽはクリ、アナルはおまんこと呼称する。オナニーする場合は普通にしごく男としてのオナニーを禁止し、女性のクリオナのように撫でるようにショーツの上から喘ぎながら行うこと。期間は次に勝負に勝つまでとする。",
   "男子罰30.【地獄】勝利者の奴隷に3日なる。",
 ];
+// シャッフル関数
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+// 女子罰・男子罰ストック
+let girlPunishStock = [];
+let boyPunishStock = [];
+
+// 女子罰取得
+function getGirlPunish() {
+  if (girlPunishStock.length === 0) {
+    girlPunishStock = shuffle([...punishItems]);
+  }
+  return girlPunishStock.shift();
+}
+
+// 男子罰取得
+function getBoyPunish() {
+  if (boyPunishStock.length === 0) {
+    boyPunishStock = shuffle([...boyPunishItems]);
+  }
+  return boyPunishStock.shift();
+}
 
 
 // 接続
@@ -114,25 +138,20 @@ const text = data.text ?? data.message ?? "";
 
 
   // 女子罰
- if (text === "女子罰") {
-  const randomIndex = Math.floor(Math.random() * punishItems.length);
-  const p = punishItems[randomIndex];
-
+ // 女子罰（30個出るまで被らない）
+if (text === "女子罰") {
+  const p = getGirlPunish();
   io.emit("system", p);
   return;
 }
-
-
 
   // 男子罰
+// 男子罰（30個出るまで被らない）
 if (text === "男子罰") {
-  const randomIndex = Math.floor(Math.random() * boyPunishItems.length);
-  const p = boyPunishItems[randomIndex];
-
+  const p = getBoyPunish();
   io.emit("system", p);
   return;
 }
-
 
 
   io.emit("message", { name: data.name || socket.username || "anon", text });
