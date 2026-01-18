@@ -10,6 +10,8 @@ app.use(express.static("public"));
 
 let users = [];
 let messagesLog = []; // 過去メッセージ保存用
+let punishLog = []; // 罰履歴
+
 
 // 女子罰30個
 const punishItems = [
@@ -105,6 +107,11 @@ io.on("connection", socket => {
     punishItems.forEach((item, index) => {
       socket.emit("updatePunish", { index, text: item });
     });
+    // 過去の罰履歴を送信
+    punishLog.forEach(log => {
+  socket.emit("system", log);
+});
+
   });
 
   // メッセージ
@@ -114,19 +121,30 @@ socket.on("message", data => {
 
   // 女子罰
   if (text === "女子罰") {
-    const randomIndex = Math.floor(Math.random() * punishItems.length);
-    const p = punishItems[randomIndex];
-    io.emit("system", `女子罰: ${p}`);
-    return;
-  }
+  const randomIndex = Math.floor(Math.random() * punishItems.length);
+  const p = punishItems[randomIndex];
+
+  const log = `女子罰: ${p}`;
+  punishLog.push(log);
+io.emit("punishLog", punishLog);
+
+
+  return;
+}
+
 
   // 男子罰
   if (text === "男子罰") {
-    const randomIndex = Math.floor(Math.random() * boyPunishItems.length);
-    const p = boyPunishItems[randomIndex];
-    io.emit("system", `男子罰: ${p}`);
-    return;
-  }
+  const randomIndex = Math.floor(Math.random() * boyPunishItems.length);
+  const p = boyPunishItems[randomIndex];
+
+  const log = `男子罰: ${p}`;
+ punishLog.push(log);
+io.emit("punishLog", punishLog);
+
+ return;
+}
+
 
   io.emit("message", { name: data.name || socket.username || "anon", text });
   console.log("受信:", { name: data.name || socket.username || "anon", text });

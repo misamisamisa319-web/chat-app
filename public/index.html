@@ -149,8 +149,6 @@ sendBtn.onclick = () => {
   const text = input.value.trim();
   socket.emit("message", { name: username, text });
 
-  if (text === "女子罰") socket.emit("punish");
-  if (text === "男子罰") socket.emit("punish_male");
 
   input.value = "";
 };
@@ -192,17 +190,22 @@ socket.on("userList", list => {
   });
 });
 
-socket.on("punish", text => {
-  const li = document.createElement("li");
-  li.textContent = text;
-  punishList.appendChild(li);
+socket.on("punishLog", logs => {
+  punishList.innerHTML = "";
+  punishMaleList.innerHTML = "";
+
+  logs.forEach(l => {
+    const li = document.createElement("li");
+    li.textContent = l;
+
+    if (l.startsWith("女子罰")) {
+      punishList.prepend(li);
+    } else if (l.startsWith("男子罰")) {
+      punishMaleList.prepend(li);
+    }
+  });
 });
 
-socket.on("punish_male", text => {
-  const li = document.createElement("li");
-  li.textContent = text;
-  punishMaleList.appendChild(li);
-});
 </script>
 
 </body>
