@@ -144,21 +144,21 @@ socket.on("message", data => {
 const text = data.text ?? data.message ?? "";
 
 
-  // 女子罰
- // 女子罰（30個出るまで被らない）
+ // 女子罰
 if (text === "女子罰") {
   const p = getGirlPunish();
-  io.emit("system", `${socket.username} → ${p}`);
+  io.emit("system", { text: `${socket.username} → ${p}`, type: "girl" });
   return;
 }
 
-  // 男子罰
-// 男子罰（30個出るまで被らない）
+// 男子罰
 if (text === "男子罰") {
   const p = getBoyPunish();
-   io.emit("system", `${socket.username} → ${p}`);
+  io.emit("system", { text: `${socket.username} → ${p}`, type: "boy" });
   return;
 }
+
+ 
 
 
   io.emit("message", { name: data.name || socket.username || "anon", text });

@@ -167,12 +167,17 @@ socket.on("message", d => {
 });
 
 socket.on("system", msg => {
-  if (!msg || !msg.trim()) return;
   const li = document.createElement("li");
-  li.textContent = msg;
   li.className = "system";
-  if (msg.startsWith("女子罰")) li.classList.add("girl");
-  if (msg.startsWith("男子罰")) li.classList.add("boy");
+
+  if (typeof msg === "string") {
+    li.textContent = msg; // 入室・退出などの文字列
+  } else {
+    li.textContent = msg.text; // サーバーから送られた罰ゲーム
+    if (msg.type === "girl") li.classList.add("girl");
+    if (msg.type === "boy") li.classList.add("boy");
+  }
+
   messages.prepend(li);
 });
 
