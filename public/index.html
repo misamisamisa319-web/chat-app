@@ -27,7 +27,6 @@ input, button { padding: 10px; font-size: 16px; }
 #messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; }
 #punishList, #punishMaleList { background: #ffe0e0; padding: 5px; list-style: none; max-height: 200px; overflow-y: auto; margin-bottom: 10px; }
 #punishList:empty, #punishMaleList:empty { display: none; }
-.system { color: gray; }
 </style>
 </head>
 <body>
@@ -46,6 +45,7 @@ input, button { padding: 10px; font-size: 16px; }
   <h4>チャット</h4>
   <ul id="messages"></ul>
 </div>
+
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
@@ -60,7 +60,7 @@ const leaveBtn = document.getElementById("leaveBtn");
 const userList = document.getElementById("userList");
 let username = "";
 
-/* ★★ ここが追加部分（何も考えなくてOK）★★ */
+/* 入室時に名前を復元 */
 const savedName = localStorage.getItem("chatName");
 if (savedName) {
   username = savedName;
@@ -68,8 +68,8 @@ if (savedName) {
   login.style.display = "none";
   chat.style.display = "flex";
 }
-/* ★★ ここまで ★★ */
 
+/* 入室 */
 joinBtn.onclick = () => {
   if (!nameInput.value.trim()) return;
   username = nameInput.value.trim();
@@ -79,6 +79,7 @@ joinBtn.onclick = () => {
   chat.style.display = "flex";
 };
 
+/* メッセージ送信 */
 sendBtn.onclick = () => {
   if (!input.value.trim()) return;
   const text = input.value.trim();
@@ -86,6 +87,7 @@ sendBtn.onclick = () => {
   input.value = "";
 };
 
+/* 退出 */
 leaveBtn.onclick = () => {
   socket.emit("leave");
   localStorage.removeItem("chatName");
@@ -95,17 +97,29 @@ leaveBtn.onclick = () => {
   userList.innerHTML = "";
 };
 
-// 過去ログ受信
+/* 過去ログ受信 */
 socket.on("pastMessages", logs => {
   logs.forEach(d => {
     const li = document.createElement("li");
     li.textContent = `${d.name}: ${d.text}`;
     if (d.type === "girl") li.style.color = "red";
     if (d.type === "boy") li.style.color = "blue";
-    messages.appendChild(li); // ←古い順で下に追加
+    messages.appendChild(li); // 古い順で下に追加
   });
+  messages.scrollTop = messages.scrollHeight;
 });
 
+/* 新規メッセージ受信 */
+socket.on("message", data => {
+  const li = document.createElement("li");
+  li.textContent = `${data.name}: ${data.text}`;
+  if (data.type === "girl") li.style.color = "red";
+  if (data.type === "boy") li.style.color = "blue";
+  messages.appendChild(li);
+  messages.scrollTop = messages.scrollHeight;
+});
+
+/* systemメッセージ受信 */
 socket.on("system", msg => {
   const li = document.createElement("li");
   li.className = "system";
@@ -116,9 +130,11 @@ socket.on("system", msg => {
     if (msg.type === "girl") li.classList.add("girl");
     if (msg.type === "boy") li.classList.add("boy");
   }
-  messages.prepend(li);
+  messages.appendChild(li);
+  messages.scrollTop = messages.scrollHeight;
 });
 
+/* ユーザーリスト更新 */
 socket.on("userList", list => {
   userList.innerHTML = "";
   list.forEach(u => {
@@ -128,5 +144,6 @@ socket.on("userList", list => {
   });
 });
 </script>
+
 </body>
 </html>
