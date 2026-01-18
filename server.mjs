@@ -104,23 +104,32 @@ function resetPunishments() {
 io.on("connection", socket => {
   console.log("接続:", socket.id);
 
-  socket.on("join", ({ name }) => {
-    socket.username = name;
-    if (!users.find(u => u.name === name)) {
-      users.push({ id: socket.id, name });
-    } else {
-      let i = 2;
-      let newName = name + i;
-      while (users.find(u => u.name === newName)) i++, newName = name + i;
-      socket.username = newName;
-      users.push({ id: socket.id, name: newName });
-    }
+  socket.on("join", ({ name, color = "black" }) => { // colorを追加
+  socket.username = name;
+  let userColor = color; // 初期色を保持
 
-    io.emit("userList", users);
-    socket.emit("pastMessages", messagesLog); // 過去ログ送信
-    // 入室のsystemメッセージは非表示にする場合コメントアウト
-    // io.emit("system", `${socket.username} が入室しました`);
-  });
+  if (!users.find(u => u.name === name)) {
+    users.push({ id: socket.id, name, color: userColor }); // colorを追加
+  } else {
+    let i = 2;
+    let newName = name + i;
+    while (users.find(u => u.name === newName)) i++, newName = name + i;
+    socket.username = newName;
+    users.push({ id: socket.id, name: newName, color: userColor }); // colorを追加
+  }
+
+  io.emit("userList", users);
+  socket.emit("pastMessages", messagesLog); 
+});
+// ユーザー単位で色を更新
+socket.on("updateColor", ({ color }) => {
+  const u = users.find(u => u.id === socket.id);
+  if (u) {
+    u.color = color;
+    io.emit("userList", users); // 参加者リストを即更新
+  }
+});
+
 
   socket.on("message", data => {
     const text = data.text ?? "";

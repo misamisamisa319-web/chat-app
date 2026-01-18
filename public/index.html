@@ -100,11 +100,21 @@ if (savedName) {
 joinBtn.onclick = () => {
   if (!nameInput.value.trim()) return;
   username = nameInput.value.trim();
+  myColor = colorSelect.value;  // 入室時の色
   localStorage.setItem("chatName", username);
-  socket.emit("join", { name: username });
+  socket.emit("join", { name: username, color: myColor });
   login.style.display = "none";
   chat.style.display = "flex";
 };
+
+/* 設定更新 */
+updateBtn.onclick = () => {
+  myColor = colorSelect.value;
+  privateTo = privateTarget.value.trim();
+  // サーバーに色変更通知
+  socket.emit("updateColor", { color: myColor });
+};
+
 
 /* 送信 */
 sendBtn.onclick = () => {
@@ -165,15 +175,16 @@ socket.on("system", msg => {
   messages.prepend(li);
 });
 
-/* 参加者リスト */
 socket.on("userList", list => {
   userList.innerHTML = "";
   list.forEach(u => {
     const li = document.createElement("li");
     li.textContent = u.name;
+    li.style.color = u.color || "black"; // 色を反映
     userList.appendChild(li);
   });
 });
+
 </script>
 </body>
 </html>
