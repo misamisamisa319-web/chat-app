@@ -99,9 +99,6 @@ input, button { padding: 10px; font-size: 16px; }
   <ul id="messages"></ul>
 
 
-  <ul id="punishList"></ul>
-
-  <ul id="punishMaleList"></ul>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -118,8 +115,7 @@ const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
 const leaveBtn = document.getElementById("leaveBtn");
 const userList = document.getElementById("userList");
-const punishList = document.getElementById("punishList");
-const punishMaleList = document.getElementById("punishMaleList");
+
 
 let username = "";
 
@@ -161,8 +157,7 @@ leaveBtn.onclick = () => {
   login.style.display = "flex";
   messages.innerHTML = "";
   userList.innerHTML = "";
-  punishList.innerHTML = "";
-  punishMaleList.innerHTML = "";
+
 };
 
 socket.on("message", d => {
@@ -190,21 +185,7 @@ socket.on("userList", list => {
   });
 });
 
-socket.on("punishLog", logs => {
-  punishList.innerHTML = "";
-  punishMaleList.innerHTML = "";
 
-  logs.forEach(l => {
-    const li = document.createElement("li");
-    li.textContent = l;
-
-    if (l.startsWith("女子罰")) {
-      punishList.prepend(li);
-    } else if (l.startsWith("男子罰")) {
-      punishMaleList.prepend(li);
-    }
-  });
-});
 
 </script>
 
