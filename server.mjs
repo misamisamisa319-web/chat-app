@@ -148,7 +148,7 @@ const text = data.text ?? data.message ?? "";
  // 女子罰（30個出るまで被らない）
 if (text === "女子罰") {
   const p = getGirlPunish();
-  io.emit("system", p);
+  io.emit("system", `${socket.username} → ${p}`);
   return;
 }
 
@@ -156,7 +156,7 @@ if (text === "女子罰") {
 // 男子罰（30個出るまで被らない）
 if (text === "男子罰") {
   const p = getBoyPunish();
-  io.emit("system", p);
+   io.emit("system", `${socket.username} → ${p}`);
   return;
 }
 
