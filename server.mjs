@@ -11,7 +11,6 @@ app.use(express.static("public"));
 let users = [];
 let messagesLog = []; // 過去メッセージ保存用
 
-
 // 女子罰30個
 const punishItems = [
   "女子罰1.勝者の指定する方法で1d5分間の全力オナニー（ルブルにて1d5のサイコロを振り「○分間全力オナニーをします」と発言し、今の心境も書き残してくること）",
@@ -45,6 +44,7 @@ const punishItems = [
   "女子罰29.【地獄】カーテンを全開の窓際に立ち、勝利者の指定した方法で一回寸止めオナニーする。",
   "女子罰30.【地獄】勝利者の奴隷に3日なる。",
 ];
+
 // 男子罰30個
 const boyPunishItems = [
   "男子罰1.寸止め１回する。",
@@ -78,17 +78,18 @@ const boyPunishItems = [
   "男子罰29.【地獄】女性化調教。勝者に女性としての名前、名前の色をつけてもらう。一人称は「あたし」で男言葉使用禁止、女になりきってチャットすること。女性用ショーツとパンスト、家ではブラやパッド、スカートも手に入る場合は身につける。下着禁止や脱衣命令が出ても脱ぐのは禁止。おちんぽはクリ、アナルはおまんこと呼称する。オナニーする場合は普通にしごく男としてのオナニーを禁止し、女性のクリオナのように撫でるようにショーツの上から喘ぎながら行うこと。期間は次に勝負に勝つまでとする。",
   "男子罰30.【地獄】勝利者の奴隷に3日なる。",
 ];
+
 // シャッフル関数
 function shuffle(array) {
   return array.sort(() => Math.random() - 0.5);
 }
+
 // 罰ストック初期化（全員退出時などに使う）
 function resetPunishments() {
   girlPunishStock = shuffle([...punishItems]);
   boyPunishStock  = shuffle([...boyPunishItems]);
   console.log("罰ストックをリセットしました");
 }
-
 
 // 女子罰・男子罰ストック
 let girlPunishStock = [];
@@ -110,7 +111,6 @@ function getBoyPunish() {
   return boyPunishStock.shift();
 }
 
-
 // 接続
 io.on("connection", socket => {
   console.log("接続:", socket.id);
@@ -129,66 +129,57 @@ io.on("connection", socket => {
     }
 
     io.emit("userList", users);
-    socket.emit("pastMessages", messagesLog);
-
+    socket.emit("pastMessages", messagesLog); // ←ここで新規入室者に過去ログ送信
     io.emit("system", `${socket.username} が入室しました`);
-
-
-
-
   });
 
   // メッセージ
-socket.on("message", data => {
-  if (typeof data === "string") data = { name: socket.username || "anon", text: data };
-const text = data.text ?? data.message ?? "";
+  socket.on("message", data => {
+    if (typeof data === "string") data = { name: socket.username || "anon", text: data };
+    const text = data.text ?? data.message ?? "";
 
+    // 女子罰
+    if (text === "女子罰") {
+      const p = getGirlPunish();
+      const msg = { name: socket.username, text: `女子罰 → ${p}`, type: "girl" };
+      messagesLog.push(msg);        // 過去ログに保存
+      io.emit("message", msg);      // 通常チャットと同じ形式で送信
+      return;
+    }
 
- // 女子罰
-if (text === "女子罰") {
-  const p = getGirlPunish();
-  const msg = { name: socket.username, text: `女子罰 → ${p}`, type: "girl" };
-  messagesLog.push(msg);        // 過去ログに保存
-  io.emit("message", msg);      // 通常チャットと同じ形式で送信
-  return;
-}
+    // 男子罰
+    if (text === "男子罰") {
+      const p = getBoyPunish();
+      const msg = { name: socket.username, text: `男子罰 → ${p}`, type: "boy" };
+      messagesLog.push(msg);        // 過去ログに保存
+      io.emit("message", msg);      // 通常チャットと同じ形式で送信
+      return;
+    }
 
-// 男子罰
-if (text === "男子罰") {
-  const p = getBoyPunish();
-  const msg = { name: socket.username, text: `男子罰 → ${p}`, type: "boy" };
-  messagesLog.push(msg);        // 過去ログに保存
-  io.emit("message", msg);      // 通常チャットと同じ形式で送信
-  return;
-}
-
-
-  io.emit("message", { name: data.name || socket.username || "anon", text });
-  console.log("受信:", { name: data.name || socket.username || "anon", text });
-  messagesLog.push({ name: data.name || socket.username || "anon", text });
-});
-
+    io.emit("message", { name: data.name || socket.username || "anon", text });
+    console.log("受信:", { name: data.name || socket.username || "anon", text });
+    messagesLog.push({ name: data.name || socket.username || "anon", text });
+  });
 
   // 退出（表示なし）
-socket.on("leave", () => {
-  socket.disconnect(true);
-});
+  socket.on("leave", () => {
+    socket.disconnect(true);
+  });
 
-// 切断（ここでだけ表示）
-socket.on("disconnect", () => {
-  users = users.filter(u => u.id !== socket.id);
-  io.emit("userList", users);
+  // 切断（ここでだけ表示）
+  socket.on("disconnect", () => {
+    users = users.filter(u => u.id !== socket.id);
+    io.emit("userList", users);
 
-  if (socket.username) {
-    io.emit("system", `${socket.username} が退出しました`);
-  }
+    if (socket.username) {
+      io.emit("system", `${socket.username} が退出しました`);
+    }
 
-  // ★ 全員退出したら罰をリセット
-  if (users.length === 0) {
-    resetPunishments();
-  }
-});
-
+    // ★ 全員退出したら罰をリセット
+    if (users.length === 0) {
+      resetPunishments();
+    }
+  });
 
 });
 

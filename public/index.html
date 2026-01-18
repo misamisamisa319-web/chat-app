@@ -19,93 +19,36 @@ body {
 }
 #chat { display: none; }
 .system { color: gray; }
-
-.system.girl {
-  color: red;
-  font-weight: bold;
-}
-
-.system.boy {
-  color: blue;
-  font-weight: bold;
-}
-
-#controls {
-  display: flex;
-  gap: 5px;
-  padding: 5px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  background: #fff;
-  z-index: 10;
-}
-
+.system.girl { color: red; font-weight: bold; }
+.system.boy { color: blue; font-weight: bold; }
+#controls { display: flex; gap: 5px; padding: 5px; flex-shrink: 0; position: sticky; top: 0; background: #fff; z-index: 10; }
 input, button { padding: 10px; font-size: 16px; }
-
-#userList {
-  background: #f0f0f0;
-  padding: 5px;
-  list-style: none;
-  max-height: 100px;
-  overflow: auto;
-  flex-shrink: 0;
-}
-
-#messages {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  padding: 10px;
-  list-style: none;
-}
-
-#punishList, #punishMaleList {
-  background: #ffe0e0;
-  padding: 5px;
-  list-style: none;
-  max-height: 200px;
-  overflow-y: auto;
-  margin-bottom: 10px;
-}
-
-#punishList:empty,
-#punishMaleList:empty {
-  display: none;
-}
-
+#userList { background: #f0f0f0; padding: 5px; list-style: none; max-height: 100px; overflow: auto; flex-shrink: 0; }
+#messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; }
+#punishList, #punishMaleList { background: #ffe0e0; padding: 5px; list-style: none; max-height: 200px; overflow-y: auto; margin-bottom: 10px; }
+#punishList:empty, #punishMaleList:empty { display: none; }
 .system { color: gray; }
 </style>
 </head>
 <body>
-
 <div id="login">
   <h2>入室</h2>
   <input id="nameInput" placeholder="名前">
   <button id="joinBtn">入室</button>
 </div>
-
 <div id="chat">
   <div id="controls">
     <input id="input" placeholder="メッセージ">
     <button id="sendBtn">送信</button>
     <button id="leaveBtn">退出</button>
   </div>
-
   <ul id="userList"></ul>
-
   <h4>チャット</h4>
   <ul id="messages"></ul>
-
-
 </div>
-
 <script src="/socket.io/socket.io.js"></script>
-
 <script>
 const socket = io();
-
 const login = document.getElementById("login");
 const chat = document.getElementById("chat");
 const joinBtn = document.getElementById("joinBtn");
@@ -115,8 +58,6 @@ const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
 const leaveBtn = document.getElementById("leaveBtn");
 const userList = document.getElementById("userList");
-
-
 let username = "";
 
 /* ★★ ここが追加部分（何も考えなくてOK）★★ */
@@ -132,9 +73,7 @@ if (savedName) {
 joinBtn.onclick = () => {
   if (!nameInput.value.trim()) return;
   username = nameInput.value.trim();
-
   localStorage.setItem("chatName", username);
-
   socket.emit("join", { name: username });
   login.style.display = "none";
   chat.style.display = "flex";
@@ -144,20 +83,16 @@ sendBtn.onclick = () => {
   if (!input.value.trim()) return;
   const text = input.value.trim();
   socket.emit("message", { name: username, text });
-
-
   input.value = "";
 };
 
 leaveBtn.onclick = () => {
   socket.emit("leave");
   localStorage.removeItem("chatName");
-
   chat.style.display = "none";
   login.style.display = "flex";
   messages.innerHTML = "";
   userList.innerHTML = "";
-
 };
 
 // 過去ログ受信
@@ -165,30 +100,22 @@ socket.on("pastMessages", logs => {
   logs.forEach(d => {
     const li = document.createElement("li");
     li.textContent = `${d.name}: ${d.text}`;
-    
-    // 女子罰・男子罰の色付け
     if (d.type === "girl") li.style.color = "red";
     if (d.type === "boy") li.style.color = "blue";
-
-    messages.appendChild(li);
-
+    messages.appendChild(li); // ←古い順で下に追加
   });
 });
-
-
 
 socket.on("system", msg => {
   const li = document.createElement("li");
   li.className = "system";
-
   if (typeof msg === "string") {
-    li.textContent = msg; // 入室・退出などの文字列
+    li.textContent = msg;
   } else {
-    li.textContent = msg.text; // サーバーから送られた罰ゲーム
+    li.textContent = msg.text;
     if (msg.type === "girl") li.classList.add("girl");
     if (msg.type === "boy") li.classList.add("boy");
   }
-
   messages.prepend(li);
 });
 
@@ -200,10 +127,6 @@ socket.on("userList", list => {
     userList.appendChild(li);
   });
 });
-
-
-
 </script>
-
 </body>
 </html>
