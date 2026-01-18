@@ -9,22 +9,16 @@ const io = new Server(server);
 app.use(express.static("public"));
 
 let users = [];
-let messagesLog = []; // 過去メッセージ保存用
+let messagesLog = [];
 
-// 女子罰・男子罰は省略（先ほどの配列そのまま）
+// 女子罰と男子罰
+const punishItems = ["女子罰1", "女子罰2", "女子罰3"]; // 省略版
+const boyPunishItems = ["男子罰1", "男子罰2", "男子罰3"]; // 省略版
 
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
+function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
 
-let girlPunishStock = [];
-let boyPunishStock = [];
-
-function resetPunishments() {
-  girlPunishStock = shuffle([...punishItems]);
-  boyPunishStock  = shuffle([...boyPunishItems]);
-  console.log("罰ストックをリセットしました");
-}
+let girlPunishStock = shuffle([...punishItems]);
+let boyPunishStock = shuffle([...boyPunishItems]);
 
 function getGirlPunish() {
   if (girlPunishStock.length === 0) girlPunishStock = shuffle([...punishItems]);
@@ -36,14 +30,17 @@ function getBoyPunish() {
   return boyPunishStock.shift();
 }
 
-// 接続
+function resetPunishments() {
+  girlPunishStock = shuffle([...punishItems]);
+  boyPunishStock = shuffle([...boyPunishItems]);
+  console.log("罰ストックをリセットしました");
+}
+
 io.on("connection", socket => {
   console.log("接続:", socket.id);
 
-  // 入室
   socket.on("join", ({ name }) => {
     socket.username = name;
-
     if (!users.find(u => u.name === name)) {
       users.push({ id: socket.id, name });
     } else {
@@ -54,56 +51,45 @@ io.on("connection", socket => {
       users.push({ id: socket.id, name: newName });
     }
 
-    // ユーザーリスト更新のみ、システムメッセージは送らない
     io.emit("userList", users);
-
-    // 過去ログを新規入室者に送信
-    socket.emit("pastMessages", messagesLog);
+    socket.emit("pastMessages", messagesLog); // 過去ログ送信
+    // 入室のsystemメッセージは非表示にする場合コメントアウト
+    // io.emit("system", `${socket.username} が入室しました`);
   });
 
-  // メッセージ
   socket.on("message", data => {
-    if (typeof data === "string") data = { name: socket.username || "anon", text: data };
-
-    const text = data.text ?? data.message ?? "";
-    const color = data.color || "black";
-    const to = data.to || ""; // 内緒相手
-
+    const text = data.text ?? "";
     // 女子罰
     if (text === "女子罰") {
       const p = getGirlPunish();
-      const msg = { name: socket.username, text: `女子罰 → ${p}`, type: "girl", color };
+      const msg = { name: socket.username, text: `女子罰 → ${p}`, type: "girl", color: "red" };
       messagesLog.push(msg);
       io.emit("message", msg);
       return;
     }
-
     // 男子罰
     if (text === "男子罰") {
       const p = getBoyPunish();
-      const msg = { name: socket.username, text: `男子罰 → ${p}`, type: "boy", color };
+      const msg = { name: socket.username, text: `男子罰 → ${p}`, type: "boy", color: "blue" };
       messagesLog.push(msg);
       io.emit("message", msg);
       return;
     }
 
-    // 通常メッセージ
-    const msg = { name: socket.username, text, color, to };
+    const msg = { name: data.name || socket.username, text, color: data.color || "black" };
     messagesLog.push(msg);
     io.emit("message", msg);
   });
 
-  // 退出（システムメッセージなし）
   socket.on("leave", () => {
     socket.disconnect(true);
   });
 
-  // 切断
   socket.on("disconnect", () => {
     users = users.filter(u => u.id !== socket.id);
     io.emit("userList", users);
-
-    // 全員退出で罰リセット
+    // 退出のsystemメッセージは非表示にする場合コメントアウト
+    // if (socket.username) io.emit("system", `${socket.username} が退出しました`);
     if (users.length === 0) resetPunishments();
   });
 });
