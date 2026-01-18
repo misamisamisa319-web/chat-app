@@ -60,7 +60,7 @@ const leaveBtn = document.getElementById("leaveBtn");
 const userList = document.getElementById("userList");
 let username = "";
 
-/* 入室時に名前を復元 */
+/* ★★ 入室時に名前を復元 ★★ */
 const savedName = localStorage.getItem("chatName");
 if (savedName) {
   username = savedName;
@@ -69,7 +69,7 @@ if (savedName) {
   chat.style.display = "flex";
 }
 
-/* 入室 */
+/* ★★ 入室 ★★ */
 joinBtn.onclick = () => {
   if (!nameInput.value.trim()) return;
   username = nameInput.value.trim();
@@ -79,7 +79,7 @@ joinBtn.onclick = () => {
   chat.style.display = "flex";
 };
 
-/* メッセージ送信 */
+/* ★★ メッセージ送信 ★★ */
 sendBtn.onclick = () => {
   if (!input.value.trim()) return;
   const text = input.value.trim();
@@ -87,7 +87,7 @@ sendBtn.onclick = () => {
   input.value = "";
 };
 
-/* 退出 */
+/* ★★ 退出 ★★ */
 leaveBtn.onclick = () => {
   socket.emit("leave");
   localStorage.removeItem("chatName");
@@ -97,7 +97,7 @@ leaveBtn.onclick = () => {
   userList.innerHTML = "";
 };
 
-/* 過去ログ受信 */
+/* ★★ 過去ログ受信 ★★ */
 socket.on("pastMessages", logs => {
   logs.forEach(d => {
     const li = document.createElement("li");
@@ -106,20 +106,19 @@ socket.on("pastMessages", logs => {
     if (d.type === "boy") li.style.color = "blue";
     messages.appendChild(li); // 古い順で下に追加
   });
-  messages.scrollTop = messages.scrollHeight;
+  messages.scrollTop = messages.scrollHeight; // 下までスクロール
 });
 
-/* 新規メッセージ受信 */
+/* ★★ 新規メッセージ受信 ★★ */
 socket.on("message", data => {
   const li = document.createElement("li");
   li.textContent = `${data.name}: ${data.text}`;
   if (data.type === "girl") li.style.color = "red";
   if (data.type === "boy") li.style.color = "blue";
-  messages.appendChild(li);
-  messages.scrollTop = messages.scrollHeight;
+  messages.prepend(li); // 最新を上に表示
 });
 
-/* systemメッセージ受信 */
+/* ★★ systemメッセージ受信 ★★ */
 socket.on("system", msg => {
   const li = document.createElement("li");
   li.className = "system";
@@ -130,11 +129,10 @@ socket.on("system", msg => {
     if (msg.type === "girl") li.classList.add("girl");
     if (msg.type === "boy") li.classList.add("boy");
   }
-  messages.appendChild(li);
-  messages.scrollTop = messages.scrollHeight;
+  messages.prepend(li); // 最新を上に表示
 });
 
-/* ユーザーリスト更新 */
+/* ★★ ユーザーリスト更新 ★★ */
 socket.on("userList", list => {
   userList.innerHTML = "";
   list.forEach(u => {
