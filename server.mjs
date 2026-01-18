@@ -82,6 +82,13 @@ const boyPunishItems = [
 function shuffle(array) {
   return array.sort(() => Math.random() - 0.5);
 }
+// 罰ストック初期化（全員退出時などに使う）
+function resetPunishments() {
+  girlPunishStock = shuffle([...punishItems]);
+  boyPunishStock  = shuffle([...boyPunishItems]);
+  console.log("罰ストックをリセットしました");
+}
+
 
 // 女子罰・男子罰ストック
 let girlPunishStock = [];
@@ -169,8 +176,17 @@ socket.on("leave", () => {
 socket.on("disconnect", () => {
   users = users.filter(u => u.id !== socket.id);
   io.emit("userList", users);
-  if (socket.username) io.emit("system", `${socket.username} が退出しました`);
+
+  if (socket.username) {
+    io.emit("system", `${socket.username} が退出しました`);
+  }
+
+  // ★ 全員退出したら罰をリセット
+  if (users.length === 0) {
+    resetPunishments();
+  }
 });
+
 
 });
 
