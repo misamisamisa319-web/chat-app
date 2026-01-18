@@ -29,10 +29,6 @@ input, button { padding: 10px; font-size: 16px; }
 /* メッセージ欄 */
 #messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; }
 #messages li { margin-bottom: 5px; }
-
-/* 罰リスト */
-#punishList, #punishMaleList { background: #ffe0e0; padding: 5px; list-style: none; max-height: 200px; overflow-y: auto; margin-bottom: 10px; }
-#punishList:empty, #punishMaleList:empty { display: none; }
 </style>
 </head>
 <body>
@@ -134,23 +130,26 @@ updateBtn.onclick = () => {
   privateTo = privateTarget.value.trim();
 };
 
-/* 過去ログ */
+/* 過去ログ（最新順に表示） */
 socket.on("pastMessages", logs => {
-  logs.forEach(d => {
+  // 古い順のまま渡ってくる場合は逆順にして prepend
+  for (let i = logs.length - 1; i >= 0; i--) {
+    const d = logs[i];
     const li = document.createElement("li");
     li.textContent = `${d.name}: ${d.text}`;
     li.style.color = d.color || (d.type === "girl" ? "red" : d.type === "boy" ? "blue" : "black");
-    messages.appendChild(li); // 古い順で下に
-  });
+    messages.prepend(li);
+  }
 });
 
 /* 新規メッセージ */
 socket.on("message", data => {
+  // 内緒メッセージの表示条件
   if (data.to && data.to !== username && data.name !== username) return;
   const li = document.createElement("li");
   li.textContent = `${data.name}: ${data.text}`;
   li.style.color = data.color || (data.type === "girl" ? "red" : data.type === "boy" ? "blue" : "black");
-  messages.prepend(li); // 最新が上
+  messages.prepend(li); // 最新上
 });
 
 /* systemメッセージ */
