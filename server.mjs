@@ -129,7 +129,7 @@ io.on("connection", socket => {
     }
 
     io.emit("userList", users);
-    messagesLog.forEach(msg => socket.emit("message", msg));
+    socket.emit("pastMessages", messagesLog);
 
     io.emit("system", `${socket.username} が入室しました`);
 

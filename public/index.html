@@ -160,16 +160,21 @@ leaveBtn.onclick = () => {
 
 };
 
-socket.on("message", d => {
-  const li = document.createElement("li");
-  li.textContent = `${d.name}: ${d.text}`;
-  
-  // 女子罰・男子罰の色付け
-  if (d.type === "girl") li.style.color = "red";
-  if (d.type === "boy") li.style.color = "blue";
+// 過去ログ受信
+socket.on("pastMessages", logs => {
+  logs.forEach(d => {
+    const li = document.createElement("li");
+    li.textContent = `${d.name}: ${d.text}`;
+    
+    // 女子罰・男子罰の色付け
+    if (d.type === "girl") li.style.color = "red";
+    if (d.type === "boy") li.style.color = "blue";
 
-  messages.prepend(li);
+    messages.appendChild(li);
+
+  });
 });
+
 
 
 socket.on("system", msg => {
