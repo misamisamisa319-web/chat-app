@@ -105,6 +105,7 @@ input, button { padding: 10px; font-size: 16px; }
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+
 <script>
 const socket = io();
 
@@ -122,9 +123,22 @@ const punishMaleList = document.getElementById("punishMaleList");
 
 let username = "";
 
+/* ★★ ここが追加部分（何も考えなくてOK）★★ */
+const savedName = localStorage.getItem("chatName");
+if (savedName) {
+  username = savedName;
+  socket.emit("join", { name: username });
+  login.style.display = "none";
+  chat.style.display = "flex";
+}
+/* ★★ ここまで ★★ */
+
 joinBtn.onclick = () => {
   if (!nameInput.value.trim()) return;
   username = nameInput.value.trim();
+
+  localStorage.setItem("chatName", username);
+
   socket.emit("join", { name: username });
   login.style.display = "none";
   chat.style.display = "flex";
@@ -143,6 +157,8 @@ sendBtn.onclick = () => {
 
 leaveBtn.onclick = () => {
   socket.emit("leave");
+  localStorage.removeItem("chatName");
+
   chat.style.display = "none";
   login.style.display = "flex";
   messages.innerHTML = "";
@@ -164,7 +180,6 @@ socket.on("system", msg => {
   li.className = "system";
   if (msg.startsWith("女子罰")) li.classList.add("girl");
   if (msg.startsWith("男子罰")) li.classList.add("boy");
-
   messages.prepend(li);
 });
 
@@ -189,5 +204,6 @@ socket.on("punish_male", text => {
   punishMaleList.appendChild(li);
 });
 </script>
+
 </body>
 </html>
