@@ -147,18 +147,20 @@ const text = data.text ?? data.message ?? "";
  // 女子罰
 if (text === "女子罰") {
   const p = getGirlPunish();
-  io.emit("system", { text: `${socket.username} → ${p}`, type: "girl" });
+  const msg = { name: socket.username, text: `女子罰 → ${p}`, type: "girl" };
+  messagesLog.push(msg);        // 過去ログに保存
+  io.emit("message", msg);      // 通常チャットと同じ形式で送信
   return;
 }
 
 // 男子罰
 if (text === "男子罰") {
   const p = getBoyPunish();
-  io.emit("system", { text: `${socket.username} → ${p}`, type: "boy" });
+  const msg = { name: socket.username, text: `男子罰 → ${p}`, type: "boy" };
+  messagesLog.push(msg);        // 過去ログに保存
+  io.emit("message", msg);      // 通常チャットと同じ形式で送信
   return;
 }
-
- 
 
 
   io.emit("message", { name: data.name || socket.username || "anon", text });
