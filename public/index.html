@@ -60,23 +60,27 @@ const leaveBtn = document.getElementById("leaveBtn");
 const userList = document.getElementById("userList");
 let username = "";
 
-/* ★★ 入室時に名前を復元 ★★ */
-const savedName = localStorage.getItem("chatName");
-if (savedName) {
-  username = savedName;
-  socket.emit("join", { name: username });
+/* ★★ 入室処理まとめ関数 ★★ */
+function enterChat(name) {
+  username = name;
+  localStorage.setItem("chatName", username);
+
   login.style.display = "none";
-  chat.style.display = "flex";
+  chat.style.display = "flex"; // 先にチャット画面を表示
+
+  socket.emit("join", { name: username }); // そのあと join
 }
 
-/* ★★ 入室 ★★ */
+/* ★★ 保存名から復元 ★★ */
+const savedName = localStorage.getItem("chatName");
+if (savedName) {
+  enterChat(savedName);
+}
+
+/* ★★ 入室ボタン ★★ */
 joinBtn.onclick = () => {
   if (!nameInput.value.trim()) return;
-  username = nameInput.value.trim();
-  localStorage.setItem("chatName", username);
-  socket.emit("join", { name: username });
-  login.style.display = "none";
-  chat.style.display = "flex";
+  enterChat(nameInput.value.trim());
 };
 
 /* ★★ メッセージ送信 ★★ */
@@ -106,7 +110,7 @@ socket.on("pastMessages", logs => {
     if (d.type === "boy") li.style.color = "blue";
     messages.appendChild(li); // 古い順で下に追加
   });
-  messages.scrollTop = messages.scrollHeight; // 下までスクロール
+  messages.scrollTop = messages.scrollHeight;
 });
 
 /* ★★ 新規メッセージ受信 ★★ */
@@ -142,6 +146,5 @@ socket.on("userList", list => {
   });
 });
 </script>
-
 </body>
 </html>
