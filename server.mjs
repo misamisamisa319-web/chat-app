@@ -100,6 +100,12 @@ function resetPunishments() {
 io.on("connection", socket => {
   console.log("接続:", socket.id);
 
+  // ===== 入室前：参加者一覧要求 =====
+socket.on("getUsers", () => {
+  socket.emit("userList", users);
+});
+
+
   // ===== 入室 =====
   socket.on("join", ({ name, color = "black" }) => {
     let finalName = name;

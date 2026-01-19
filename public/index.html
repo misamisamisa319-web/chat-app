@@ -31,6 +31,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 <div id="login">
   <h2>入室</h2>
+   <div id="loginUsers"></div>
   <input id="nameInput" placeholder="名前">
   <button id="joinBtn">入室</button>
 </div>
@@ -62,6 +63,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
+socket.emit("getUsers");
 
 const login = document.getElementById("login");
 const chat = document.getElementById("chat");
@@ -112,23 +114,45 @@ socket.on("message", d => {
 });
 
 socket.on("userList", list => {
+
+  /* ===== 入室画面用 ===== */
+  const loginUsers = document.getElementById("loginUsers");
+
+  if (!joined) {
+    loginUsers.innerHTML = "";
+
+    if (list.length === 0) {
+      loginUsers.textContent = "現在参加者はいません";
+    } else {
+      list.forEach(u => {
+        const span = document.createElement("span");
+        span.textContent = u.name;
+        span.style.color = u.color || "#000";
+        span.style.marginRight = "8px";
+        loginUsers.appendChild(span);
+      });
+    }
+  }
+
+  /* ===== チャット画面用（既存） ===== */
   userList.innerHTML = "";
   privateTarget.innerHTML = `<option value="">なし</option>`;
+
   list.forEach(u => {
     const li = document.createElement("li");
     li.textContent = u.name;
     li.style.color = u.color || "#000";
     userList.appendChild(li);
+
     if (u.id !== socket.id) {
       const opt = document.createElement("option");
       opt.value = u.id;
       opt.textContent = u.name;
-    privateTarget.appendChild(opt);
-
-
+      privateTarget.appendChild(opt);
     }
   });
 });
+
 
 /* ===== 入室処理 ===== */
 
