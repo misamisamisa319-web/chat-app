@@ -199,11 +199,10 @@ joinBtn.onclick = () => {
   doJoin(name, room, color);
 };
 
-/* ===== 自動再入室（★ここが追加点） ===== */
+/* 自動再入室 */
 const savedName = localStorage.getItem("chatName");
 const savedRoom = localStorage.getItem("chatRoom");
 const savedColor = localStorage.getItem("chatColor");
-
 if (savedName && savedRoom && savedColor) {
   doJoin(savedName, savedRoom, savedColor);
 }
@@ -222,17 +221,23 @@ if (updateBtn) {
 }
 
 privateTarget.onchange = () => {
-  privateTo = privateTarget.value;
+  privateTo = privateTarget.value || "";
 };
 
 sendBtn.onclick = () => {
   if (!input.value.trim()) return;
+
   socket.emit("message", {
     text: input.value.trim(),
     color: myColor,
     to: privateTo || undefined
   });
+
   input.value = "";
+
+  /* ★ 内緒は1回で解除（ここが今回の変更点） */
+  privateTo = "";
+  privateTarget.value = "";
 };
 
 input.addEventListener("keydown", e => {
