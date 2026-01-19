@@ -20,11 +20,11 @@ input, button { padding: 10px; font-size: 16px; }
 
 /* 参加者リスト横並び */
 #userList { display: flex; flex-wrap: wrap; gap: 10px; background: #f0f0f0; padding: 5px; list-style: none; max-height: 100px; overflow-x: auto; }
-#userList li { padding: 3px 8px; background: #ddd; border-radius: 5px; }
+#userList li { padding: 3px 8px; border-radius: 5px; }
 
 /* 設定タブ */
 #settings { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; padding: 5px; background: #f9f9f9; border-bottom: 1px solid #ccc; }
-#settings select, #settings input, #settings button { padding: 5px; font-size: 14px; }
+#settings input, #settings button { padding: 5px; font-size: 14px; }
 
 /* メッセージ欄 */
 #messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; }
@@ -51,14 +51,7 @@ input, button { padding: 10px; font-size: 16px; }
   </div>
 
   <div id="settings">
-    <label>文字色:
-      <select id="colorSelect">
-        <option value="black">黒</option>
-        <option value="red">赤</option>
-        <option value="blue">青</option>
-        <option value="green">緑</option>
-      </select>
-    </label>
+    <label>文字色: <input type="color" id="colorSelect" value="#000000"></label>
     <label>内緒相手: <input id="privateTarget" placeholder="名前"></label>
     <button id="updateBtn">更新</button>
     <button id="leaveBtn">退出</button>
@@ -84,14 +77,14 @@ const privateTarget = document.getElementById("privateTarget");
 const updateBtn = document.getElementById("updateBtn");
 
 let username = "";
-let myColor = "black";
+let myColor = "#000000";
 let privateTo = "";
 
 /* 名前復元 */
 const savedName = localStorage.getItem("chatName");
 if (savedName) {
   username = savedName;
-  socket.emit("join", { name: username });
+  socket.emit("join", { name: username, color: myColor });
   login.style.display = "none";
   chat.style.display = "flex";
 }
@@ -100,21 +93,11 @@ if (savedName) {
 joinBtn.onclick = () => {
   if (!nameInput.value.trim()) return;
   username = nameInput.value.trim();
-  myColor = colorSelect.value;  // 入室時の色
   localStorage.setItem("chatName", username);
   socket.emit("join", { name: username, color: myColor });
   login.style.display = "none";
   chat.style.display = "flex";
 };
-
-/* 設定更新 */
-updateBtn.onclick = () => {
-  myColor = colorSelect.value;
-  privateTo = privateTarget.value.trim();
-  // サーバーに色変更通知
-  socket.emit("updateColor", { color: myColor });
-};
-
 
 /* 送信 */
 sendBtn.onclick = () => {
@@ -138,28 +121,27 @@ leaveBtn.onclick = () => {
 updateBtn.onclick = () => {
   myColor = colorSelect.value;
   privateTo = privateTarget.value.trim();
+  socket.emit("updateColor", { color: myColor }); // サーバー側にも送信
 };
 
 /* 過去ログ（最新順に表示） */
 socket.on("pastMessages", logs => {
-  // 古い順のまま渡ってくる場合は逆順にして prepend
   for (let i = logs.length - 1; i >= 0; i--) {
     const d = logs[i];
     const li = document.createElement("li");
     li.textContent = `${d.name}: ${d.text}`;
-    li.style.color = d.color || (d.type === "girl" ? "red" : d.type === "boy" ? "blue" : "black");
+    li.style.color = d.color || (d.type === "girl" ? "red" : d.type === "boy" ? "blue" : "#000");
     messages.prepend(li);
   }
 });
 
 /* 新規メッセージ */
 socket.on("message", data => {
-  // 内緒メッセージの表示条件
   if (data.to && data.to !== username && data.name !== username) return;
   const li = document.createElement("li");
   li.textContent = `${data.name}: ${data.text}`;
-  li.style.color = data.color || (data.type === "girl" ? "red" : data.type === "boy" ? "blue" : "black");
-  messages.prepend(li); // 最新上
+  li.style.color = data.color || (data.type === "girl" ? "red" : data.type === "boy" ? "blue" : "#000");
+  messages.prepend(li);
 });
 
 /* systemメッセージ */
@@ -175,16 +157,16 @@ socket.on("system", msg => {
   messages.prepend(li);
 });
 
+/* 参加者リスト */
 socket.on("userList", list => {
   userList.innerHTML = "";
   list.forEach(u => {
     const li = document.createElement("li");
     li.textContent = u.name;
-    li.style.color = u.color || "black"; // 色を反映
+    li.style.color = u.color || "#000";
     userList.appendChild(li);
   });
 });
-
 </script>
 </body>
 </html>
