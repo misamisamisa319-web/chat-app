@@ -52,6 +52,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   <div id="controls">
     <input id="input" placeholder="メッセージ">
     <button id="sendBtn">送信</button>
+    <button id="updateBtn">更新</button>
   </div>
 
   <div>
@@ -84,6 +85,7 @@ const roomSelect = document.getElementById("roomSelect");
 const messages = document.getElementById("messages");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
+const updateBtn = document.getElementById("updateBtn");
 const leaveBtn = document.getElementById("leaveBtn");
 const userList = document.getElementById("userList");
 const colorSelect = document.getElementById("colorSelect");
@@ -187,6 +189,13 @@ colorSelect.oninput = () => {
   myColor = colorSelect.value;
   socket.emit("updateColor", { color: myColor });
 };
+// ★ 更新ボタン
+if (updateBtn) {
+  updateBtn.onclick = () => {
+    socket.emit("updateColor", { color: myColor });
+  };
+}
+
 
 privateTarget.onchange = () => {
   privateTo = privateTarget.value;
