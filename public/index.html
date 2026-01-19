@@ -99,10 +99,11 @@ joinBtn.onclick = () => {
   chat.style.display = "flex";
 };
 
-/* 送信 */
+/* 送信（自動で最新の色を反映） */
 sendBtn.onclick = () => {
   if (!input.value.trim()) return;
   const text = input.value.trim();
+  myColor = colorSelect.value; // 最新色を反映
   socket.emit("message", { name: username, text, color: myColor, to: privateTo });
   input.value = "";
 };
@@ -117,7 +118,7 @@ leaveBtn.onclick = () => {
   userList.innerHTML = "";
 };
 
-/* 設定更新 */
+/* 設定更新（参加者リスト更新用） */
 updateBtn.onclick = () => {
   myColor = colorSelect.value;
   privateTo = privateTarget.value.trim();
@@ -130,7 +131,7 @@ socket.on("pastMessages", logs => {
     const d = logs[i];
     const li = document.createElement("li");
     li.textContent = `${d.name}: ${d.text}`;
-    li.style.color = d.color || "#000"; // 常に color を優先
+    li.style.color = d.color || (d.type === "girl" ? "red" : d.type === "boy" ? "blue" : "#000");
     messages.prepend(li);
   }
 });
@@ -140,7 +141,7 @@ socket.on("message", data => {
   if (data.to && data.to !== username && data.name !== username) return;
   const li = document.createElement("li");
   li.textContent = `${data.name}: ${data.text}`;
-  li.style.color = data.color || "#000"; // 常に color を優先
+  li.style.color = data.color || (data.type === "girl" ? "red" : data.type === "boy" ? "blue" : "#000");
   messages.prepend(li);
 });
 
