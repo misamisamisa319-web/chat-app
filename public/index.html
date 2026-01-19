@@ -52,7 +52,9 @@ input, button, select { padding: 10px; font-size: 16px; }
   </div>
 
   <div id="settings">
-    <label>文字色: <input type="color" id="colorSelect" value="#000000"></label>
+    <label>文字色:
+      <input type="color" id="colorSelect" value="#000000">
+    </label>
     <label>内緒相手:
       <select id="privateTarget">
         <option value="">なし</option>
@@ -83,38 +85,46 @@ const privateTarget = document.getElementById("privateTarget");
 let username = "";
 let myColor = "#000000";
 let privateTo = "";
+let joined = false;   // ★重要：join二重防止
 
-/* 名前復元 */
+/* ===== 名前復元（更新対策） ===== */
 const savedName = localStorage.getItem("chatName");
 if (savedName) {
   username = savedName;
   socket.emit("join", { name: username, color: myColor });
+  joined = true;
+
   login.style.display = "none";
   chat.style.display = "flex";
 }
 
-/* 入室 */
+/* ===== 入室 ===== */
 joinBtn.onclick = () => {
+  if (joined) return;
   if (!nameInput.value.trim()) return;
+
   username = nameInput.value.trim();
   localStorage.setItem("chatName", username);
+
   socket.emit("join", { name: username, color: myColor });
+  joined = true;
+
   login.style.display = "none";
   chat.style.display = "flex";
 };
 
-/* 色変更 即反映 */
+/* ===== 色変更 即反映 ===== */
 colorSelect.oninput = () => {
   myColor = colorSelect.value;
   socket.emit("updateColor", { color: myColor });
 };
 
-/* 内緒相手 */
+/* ===== 内緒相手 ===== */
 privateTarget.onchange = () => {
   privateTo = privateTarget.value; // socket.id
 };
 
-/* 送信 */
+/* ===== 送信 ===== */
 sendBtn.onclick = () => {
   if (!input.value.trim()) return;
 
@@ -127,60 +137,68 @@ sendBtn.onclick = () => {
   input.value = "";
 };
 
-/* 退出 */
+/* ===== 退出 ===== */
 leaveBtn.onclick = () => {
   socket.emit("leave");
   localStorage.removeItem("chatName");
+  joined = false;
+
   chat.style.display = "none";
   login.style.display = "flex";
   messages.innerHTML = "";
   userList.innerHTML = "";
 };
 
-/* 過去ログ */
+/* ===== 過去ログ ===== */
 socket.on("pastMessages", logs => {
   logs.forEach(d => {
     const li = document.createElement("li");
+
     if (d.private) {
       li.textContent = `【内緒】${d.name}: ${d.text}`;
       li.classList.add("private");
     } else {
       li.textContent = `${d.name}: ${d.text}`;
     }
+
     li.style.color = d.color || "#000";
-    messages.prepend(li);
+    messages.appendChild(li);
   });
 });
 
-/* 新着メッセージ */
+/* ===== 新着メッセージ ===== */
 socket.on("message", d => {
   if (d.private && d.to !== socket.id && d.name !== username) return;
 
   const li = document.createElement("li");
+
   if (d.private) {
     li.textContent = `【内緒】${d.name}: ${d.text}`;
     li.classList.add("private");
   } else {
     li.textContent = `${d.name}: ${d.text}`;
   }
+
   li.style.color = d.color || "#000";
-  messages.prepend(li);
+  messages.appendChild(li);
 });
 
-/* 参加者リスト */
+/* ===== 参加者リスト ===== */
 socket.on("userList", list => {
   userList.innerHTML = "";
   privateTarget.innerHTML = `<option value="">なし</option>`;
 
   list.forEach(u => {
+    // 参加者表示（自分も含む）
     const li = document.createElement("li");
     li.textContent = u.name;
     li.style.color = u.color || "#000";
     userList.appendChild(li);
 
-   if (u.id !== socket.id) {
+    // 内緒相手（自分以外）
+    if (u.id !== socket.id) {
       const opt = document.createElement("option");
-      opt.value = u.id; // ★socket.id
+      opt.value = u.id;
       opt.textContent = u.name;
       privateTarget.appendChild(opt);
     }
