@@ -170,6 +170,14 @@ sendBtn.onclick = () => {
   });
   input.value = "";
 };
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendBtn.click();
+  }
+});
+
+
 
 leaveBtn.onclick = () => {
   socket.emit("leave");
