@@ -254,18 +254,22 @@ io.on("connection", socket => {
     socket.disconnect(true);
   });
 
-  socket.on("disconnect", () => {
-    users = users.filter(u => u.id !== socket.id);
+ socket.on("disconnect", () => {
+  users = users.filter(u => u.id !== socket.id);
 
-    io.to(socket.room).emit(
-      "userList",
-      users.filter(u => u.room === socket.room)
-    );
+  io.to(socket.room).emit(
+    "userList",
+    users.filter(u => u.room === socket.room)
+  );
 
-    if (!users.some(u => u.room === socket.room)) {
-      resetPunishments();
-    }
-  });
+  if (!users.some(u => u.room === socket.room)) {
+    resetPunishments();
+
+    // ★ この部屋のログを削除
+    messagesLog = messagesLog.filter(m => m.room !== socket.room);
+  }
+});
+
 });
 
 /* ===== 起動 ===== */
