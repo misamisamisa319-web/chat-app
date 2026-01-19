@@ -25,22 +25,17 @@ input, button, select { padding: 10px; font-size: 16px; }
 #messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; }
 #messages li { margin-bottom: 5px; }
 .private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
-#roomSelect {
-  margin: 8px 0;
-  padding: 6px;
-}
 
+#roomSelect { margin: 8px 0; padding: 6px; }
 </style>
 </head>
 <body>
 
-<!-- index.html -->
 <div id="login">
   <h2>入室</h2>
 
   <div id="loginUsers"></div>
 
-  <!-- ★ ここから追加 -->
   <label>
     部屋:
     <select id="roomSelect">
@@ -48,12 +43,10 @@ input, button, select { padding: 10px; font-size: 16px; }
       <option value="room2">部屋2</option>
     </select>
   </label>
-  <!-- ★ ここまで -->
 
   <input id="nameInput" placeholder="名前">
   <button id="joinBtn">入室</button>
 </div>
-
 
 <div id="chat">
   <div id="controls">
@@ -82,12 +75,12 @@ input, button, select { padding: 10px; font-size: 16px; }
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
-socket.emit("getUsers");
 
 const login = document.getElementById("login");
 const chat = document.getElementById("chat");
 const joinBtn = document.getElementById("joinBtn");
 const nameInput = document.getElementById("nameInput");
+const roomSelect = document.getElementById("roomSelect");
 const messages = document.getElementById("messages");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
@@ -101,9 +94,10 @@ let myColor = "#000000";
 let privateTo = "";
 let joined = false;
 
-/* ===== socket.on を先に全部登録 ===== */
+/* ===== 受信 ===== */
 
 socket.on("pastMessages", logs => {
+  messages.innerHTML = ""; // ★ ここ重要：部屋切替時にクリア
   logs.forEach(d => {
     const li = document.createElement("li");
     if (d.private) {
@@ -114,12 +108,12 @@ socket.on("pastMessages", logs => {
     }
     li.style.color = d.color || "#000";
     messages.prepend(li);
-
   });
 });
 
 socket.on("message", d => {
   if (d.private && d.to !== socket.id && d.name !== username) return;
+
   const li = document.createElement("li");
   if (d.private) {
     li.textContent = `【内緒】${d.name}: ${d.text}`;
@@ -129,17 +123,13 @@ socket.on("message", d => {
   }
   li.style.color = d.color || "#000";
   messages.prepend(li);
-
 });
 
 socket.on("userList", list => {
-
-  /* ===== 入室画面用 ===== */
   const loginUsers = document.getElementById("loginUsers");
 
   if (!joined) {
     loginUsers.innerHTML = "";
-
     if (list.length === 0) {
       loginUsers.textContent = "現在参加者はいません";
     } else {
@@ -153,7 +143,6 @@ socket.on("userList", list => {
     }
   }
 
-  /* ===== チャット画面用（既存） ===== */
   userList.innerHTML = "";
   privateTarget.innerHTML = `<option value="">なし</option>`;
 
@@ -172,28 +161,27 @@ socket.on("userList", list => {
   });
 });
 
-
-/* ===== 入室処理 ===== */
-
-const savedName = localStorage.getItem("chatName");
-if (savedName) {
-  username = savedName;
-  socket.emit("join", { name: username, color: myColor });
-  joined = true;
-  login.style.display = "none";
-  chat.style.display = "flex";
-}
+/* ===== 入室 ===== */
 
 joinBtn.onclick = () => {
   if (joined) return;
   if (!nameInput.value.trim()) return;
+
   username = nameInput.value.trim();
   localStorage.setItem("chatName", username);
-  socket.emit("join", { name: username, color: myColor });
+
+  socket.emit("join", {
+    name: username,
+    color: myColor,
+    room: roomSelect.value // ★ 部屋を必ず送る
+  });
+
   joined = true;
   login.style.display = "none";
   chat.style.display = "flex";
 };
+
+/* ===== 操作 ===== */
 
 colorSelect.oninput = () => {
   myColor = colorSelect.value;
@@ -213,14 +201,13 @@ sendBtn.onclick = () => {
   });
   input.value = "";
 };
+
 input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     sendBtn.click();
   }
 });
-
-
 
 leaveBtn.onclick = () => {
   socket.emit("leave");
