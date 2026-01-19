@@ -121,7 +121,7 @@ leaveBtn.onclick = () => {
 updateBtn.onclick = () => {
   myColor = colorSelect.value;
   privateTo = privateTarget.value.trim();
-  socket.emit("updateColor", { color: myColor }); // サーバー側にも送信
+  socket.emit("updateColor", { color: myColor });
 };
 
 /* 過去ログ（最新順に表示） */
@@ -130,7 +130,7 @@ socket.on("pastMessages", logs => {
     const d = logs[i];
     const li = document.createElement("li");
     li.textContent = `${d.name}: ${d.text}`;
-    li.style.color = d.color || (d.type === "girl" ? "red" : d.type === "boy" ? "blue" : "#000");
+    li.style.color = d.color || "#000"; // 常に color を優先
     messages.prepend(li);
   }
 });
@@ -140,7 +140,7 @@ socket.on("message", data => {
   if (data.to && data.to !== username && data.name !== username) return;
   const li = document.createElement("li");
   li.textContent = `${data.name}: ${data.text}`;
-  li.style.color = data.color || (data.type === "girl" ? "red" : data.type === "boy" ? "blue" : "#000");
+  li.style.color = data.color || "#000"; // 常に color を優先
   messages.prepend(li);
 });
 

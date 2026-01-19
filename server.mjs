@@ -11,7 +11,6 @@ app.use(express.static("public"));
 let users = [];
 let messagesLog = [];
 
-// 女子罰と男子罰
 // 女子罰30個
 const punishItems = [
   "女子罰1.勝者の指定する方法で1d5分間の全力オナニー（ルブルにて1d5のサイコロを振り「○分間全力オナニーをします」と発言し、今の心境も書き残してくること）",
@@ -43,7 +42,7 @@ const punishItems = [
   "女子罰27.実況しながら寸止めオナニー（保留可）",
   "女子罰28.実況しながらイクまでオナニー(保留可)",
   "女子罰29.【地獄】カーテンを全開の窓際に立ち、勝利者の指定した方法で一回寸止めオナニーする。",
-  "女子罰30.【地獄】勝利者の奴隷に3日なる。",
+  "女子罰30.【地獄】勝利者の奴隷に3日なる。"
 ];
 
 // 男子罰30個
@@ -77,7 +76,7 @@ const boyPunishItems = [
   "男子罰27.実況しながら寸止めオナニー（保留可）",
   "男子罰28.実況しながらイクまでオナニー(保留可)",
   "男子罰29.【地獄】女性化調教。勝者に女性としての名前、名前の色をつけてもらう。一人称は「あたし」で男言葉使用禁止、女になりきってチャットすること。女性用ショーツとパンスト、家ではブラやパッド、スカートも手に入る場合は身につける。下着禁止や脱衣命令が出ても脱ぐのは禁止。おちんぽはクリ、アナルはおまんこと呼称する。オナニーする場合は普通にしごく男としてのオナニーを禁止し、女性のクリオナのように撫でるようにショーツの上から喘ぎながら行うこと。期間は次に勝負に勝つまでとする。",
-  "男子罰30.【地獄】勝利者の奴隷に3日なる。",
+  "男子罰30.【地獄】勝利者の奴隷に3日なる。"
 ];
 
 function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
@@ -104,36 +103,37 @@ function resetPunishments() {
 io.on("connection", socket => {
   console.log("接続:", socket.id);
 
-  socket.on("join", ({ name, color = "black" }) => { // colorを追加
-  socket.username = name;
-  let userColor = color; // 初期色を保持
+  socket.on("join", ({ name, color = "black" }) => {
+    socket.username = name;
+    let userColor = color;
 
-  if (!users.find(u => u.name === name)) {
-    users.push({ id: socket.id, name, color: userColor }); // colorを追加
-  } else {
-    let i = 2;
-    let newName = name + i;
-    while (users.find(u => u.name === newName)) i++, newName = name + i;
-    socket.username = newName;
-    users.push({ id: socket.id, name: newName, color: userColor }); // colorを追加
-  }
+    if (!users.find(u => u.name === name)) {
+      users.push({ id: socket.id, name, color: userColor });
+    } else {
+      let i = 2;
+      let newName = name + i;
+      while (users.find(u => u.name === newName)) i++, newName = name + i;
+      socket.username = newName;
+      users.push({ id: socket.id, name: newName, color: userColor });
+    }
 
-  io.emit("userList", users);
-  socket.emit("pastMessages", messagesLog); 
-});
-// ユーザー単位で色を更新
-socket.on("updateColor", ({ color }) => {
-  const u = users.find(u => u.id === socket.id);
-  if (u) {
-    u.color = color;
-    io.emit("userList", users); // 参加者リストを即更新
-  }
-});
+    io.emit("userList", users);
+    socket.emit("pastMessages", messagesLog);
+  });
 
+  socket.on("updateColor", ({ color }) => {
+    const u = users.find(u => u.id === socket.id);
+    if (u) {
+      u.color = color;
+      io.emit("userList", users);
+    }
+  });
 
   socket.on("message", data => {
     const text = data.text ?? "";
-    // 女子罰
+    const user = users.find(u => u.id === socket.id);
+    const color = user?.color || "black";
+
     if (text === "女子罰") {
       const p = getGirlPunish();
       const msg = { name: socket.username, text: `女子罰 → ${p}`, type: "girl", color: "red" };
@@ -141,7 +141,7 @@ socket.on("updateColor", ({ color }) => {
       io.emit("message", msg);
       return;
     }
-    // 男子罰
+
     if (text === "男子罰") {
       const p = getBoyPunish();
       const msg = { name: socket.username, text: `男子罰 → ${p}`, type: "boy", color: "blue" };
@@ -150,7 +150,7 @@ socket.on("updateColor", ({ color }) => {
       return;
     }
 
-    const msg = { name: data.name || socket.username, text, color: data.color || "black" };
+    const msg = { name: socket.username, text, color };
     messagesLog.push(msg);
     io.emit("message", msg);
   });
@@ -162,8 +162,6 @@ socket.on("updateColor", ({ color }) => {
   socket.on("disconnect", () => {
     users = users.filter(u => u.id !== socket.id);
     io.emit("userList", users);
-    // 退出のsystemメッセージは非表示にする場合コメントアウト
-    // if (socket.username) io.emit("system", `${socket.username} が退出しました`);
     if (users.length === 0) resetPunishments();
   });
 });
