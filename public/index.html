@@ -178,7 +178,7 @@ socket.on("userList", list => {
     li.style.color = u.color || "#000";
     userList.appendChild(li);
 
-    if (u.name !== username) {
+   if (u.id !== socket.id) {
       const opt = document.createElement("option");
       opt.value = u.id; // ★socket.id
       opt.textContent = u.name;
