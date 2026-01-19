@@ -5,23 +5,28 @@
 <title>Chat v2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{margin:0;font-family:sans-serif;height:100vh;display:flex;flex-direction:column}
-#login,#chat{flex:1;display:flex;flex-direction:column}
-#chat{display:none}
-.system{color:gray}
-.system.girl{color:red;font-weight:bold}
-.system.boy{color:blue;font-weight:bold}
-#controls{display:flex;gap:5px;padding:5px;position:sticky;top:0;background:#fff;z-index:10}
-input,button,select{padding:10px;font-size:16px}
-#userList{display:flex;flex-wrap:wrap;gap:10px;background:#f0f0f0;padding:5px;list-style:none;max-height:100px;overflow-x:auto}
-#userList li{padding:3px 8px;border-radius:5px}
-#settings{display:flex;gap:5px;align-items:center;flex-wrap:wrap;padding:5px;background:#f9f9f9;border-bottom:1px solid #ccc}
-#settings input,#settings button,#settings select{padding:5px;font-size:14px}
-#messages{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:10px;list-style:none}
-#messages li{margin-bottom:5px}
-.private{background:#fff3cd;padding:3px 6px;border-radius:4px}
-#roomSelect{margin:8px 0;padding:6px}
-.time{opacity:.6;margin-right:4px}
+body { margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; }
+#login, #chat { flex: 1; display: flex; flex-direction: column; }
+#chat { display: none; }
+
+.system { color: gray; }
+.system.girl { color: red; font-weight: bold; }
+.system.boy { color: blue; font-weight: bold; }
+
+#controls { display: flex; gap: 5px; padding: 5px; position: sticky; top: 0; background: #fff; z-index: 10; }
+input, button, select { padding: 10px; font-size: 16px; }
+
+#userList { display: flex; flex-wrap: wrap; gap: 10px; background: #f0f0f0; padding: 5px; list-style: none; max-height: 100px; overflow-x: auto; }
+#userList li { padding: 3px 8px; border-radius: 5px; }
+
+#settings { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; padding: 5px; background: #f9f9f9; border-bottom: 1px solid #ccc; }
+#settings input, #settings button, #settings select { padding: 5px; font-size: 14px; }
+
+#messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; }
+#messages li { margin-bottom: 5px; }
+.private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
+
+.time { opacity: .6; margin-right: 4px; }
 </style>
 </head>
 <body>
@@ -29,12 +34,15 @@ input,button,select{padding:10px;font-size:16px}
 <div id="login">
   <h2>入室</h2>
   <div id="loginUsers"></div>
-  <label>部屋:
+
+  <label>
+    部屋:
     <select id="roomSelect">
       <option value="room1">部屋1</option>
       <option value="room2">部屋2</option>
     </select>
   </label>
+
   <input id="nameInput" placeholder="名前">
   <button id="joinBtn">入室</button>
 </div>
@@ -54,7 +62,9 @@ input,button,select{padding:10px;font-size:16px}
   <div id="settings">
     <label>文字色: <input type="color" id="colorSelect" value="#000000"></label>
     <label>内緒相手:
-      <select id="privateTarget"><option value="">なし</option></select>
+      <select id="privateTarget">
+        <option value="">なし</option>
+      </select>
     </label>
     <button id="leaveBtn">退出</button>
   </div>
@@ -80,80 +90,170 @@ const userList = document.getElementById("userList");
 const colorSelect = document.getElementById("colorSelect");
 const privateTarget = document.getElementById("privateTarget");
 
-let username="", myColor="#000000", privateTo="", joined=false;
+let username = "";
+let myColor = "#000000";
+let privateTo = "";
+let joined = false;
 
-/* ===== 表示ヘルパ ===== */
-function renderMsg(d){
-  const li=document.createElement("li");
-  const t=document.createElement("span");
-  if(d.time){ t.textContent=`[${d.time}] `; t.className="time"; li.appendChild(t); }
-  const txt=document.createElement("span");
-  if(d.private){
-    txt.textContent=`【内緒】${d.name}: ${d.text}`; li.classList.add("private");
-  }else{
-    txt.textContent=`${d.name}: ${d.text}`;
+/* ===== 表示 ===== */
+function renderMsg(d) {
+  const li = document.createElement("li");
+
+  if (d.time) {
+    const t = document.createElement("span");
+    t.textContent = `[${d.time}] `;
+    t.className = "time";
+    li.appendChild(t);
   }
-  li.appendChild(txt);
-  li.style.color=d.color||"#000";
+
+  const text = document.createElement("span");
+  if (d.private) {
+    text.textContent = `【内緒】${d.name}: ${d.text}`;
+    li.classList.add("private");
+  } else {
+    text.textContent = `${d.name}: ${d.text}`;
+  }
+
+  li.appendChild(text);
+  li.style.color = d.color || "#000";
   messages.prepend(li);
 }
 
 /* ===== 受信 ===== */
-socket.on("pastMessages", logs=>{
-  messages.innerHTML="";
+socket.on("pastMessages", logs => {
+  messages.innerHTML = "";
   logs.forEach(renderMsg);
 });
-socket.on("message", d=>{
-  if(d.private && d.to!==socket.id && d.name!==username) return;
+
+socket.on("message", d => {
+  if (d.private && d.to !== socket.id && d.name !== username) return;
   renderMsg(d);
 });
-socket.on("userList", list=>{
-  const loginUsers=document.getElementById("loginUsers");
-  if(!joined){
-    loginUsers.innerHTML="";
-    if(!list.length) loginUsers.textContent="現在参加者はいません";
-    else list.forEach(u=>{
-      const s=document.createElement("span");
-      s.textContent=u.name; s.style.color=u.color||"#000"; s.style.marginRight="8px";
-      loginUsers.appendChild(s);
-    });
+
+socket.on("userList", list => {
+  const loginUsers = document.getElementById("loginUsers");
+
+  if (!joined) {
+    loginUsers.innerHTML = "";
+    if (list.length === 0) {
+      loginUsers.textContent = "現在参加者はいません";
+    } else {
+      list.forEach(u => {
+        const span = document.createElement("span");
+        span.textContent = u.name;
+        span.style.color = u.color || "#000";
+        span.style.marginRight = "8px";
+        loginUsers.appendChild(span);
+      });
+    }
   }
-  userList.innerHTML="";
-  privateTarget.innerHTML=`<option value="">なし</option>`;
-  list.forEach(u=>{
-    const li=document.createElement("li");
-    li.textContent=u.name; li.style.color=u.color||"#000"; userList.appendChild(li);
-    if(u.id!==socket.id){
-      const opt=document.createElement("option");
-      opt.value=u.id; opt.textContent=u.name; privateTarget.appendChild(opt);
+
+  userList.innerHTML = "";
+  privateTarget.innerHTML = `<option value="">なし</option>`;
+
+  list.forEach(u => {
+    const li = document.createElement("li");
+    li.textContent = u.name;
+    li.style.color = u.color || "#000";
+    userList.appendChild(li);
+
+    if (u.id !== socket.id) {
+      const opt = document.createElement("option");
+      opt.value = u.id;
+      opt.textContent = u.name;
+      privateTarget.appendChild(opt);
     }
   });
 });
 
-/* ===== 入室 ===== */
-joinBtn.onclick=()=>{
-  if(joined||!nameInput.value.trim()) return;
-  username=nameInput.value.trim();
-  socket.emit("join",{ name:username, color:myColor, room:roomSelect.value });
-  joined=true; login.style.display="none"; chat.style.display="flex";
+/* ===== 入室処理 ===== */
+function doJoin(name, room, color) {
+  username = name;
+  myColor = color;
+  colorSelect.value = color;
+  roomSelect.value = room;
+
+  socket.emit("join", {
+    name: username,
+    color: myColor,
+    room
+  });
+
+  joined = true;
+  login.style.display = "none";
+  chat.style.display = "flex";
+}
+
+/* 手動入室 */
+joinBtn.onclick = () => {
+  if (joined || !nameInput.value.trim()) return;
+
+  const name = nameInput.value.trim();
+  const room = roomSelect.value;
+  const color = myColor;
+
+  localStorage.setItem("chatName", name);
+  localStorage.setItem("chatRoom", room);
+  localStorage.setItem("chatColor", color);
+
+  doJoin(name, room, color);
 };
 
+/* ===== 自動再入室（★ここが追加点） ===== */
+const savedName = localStorage.getItem("chatName");
+const savedRoom = localStorage.getItem("chatRoom");
+const savedColor = localStorage.getItem("chatColor");
+
+if (savedName && savedRoom && savedColor) {
+  doJoin(savedName, savedRoom, savedColor);
+}
+
 /* ===== 操作 ===== */
-colorSelect.oninput=()=>{ myColor=colorSelect.value; socket.emit("updateColor",{color:myColor}); };
-if(updateBtn){ updateBtn.onclick=()=> socket.emit("updateColor",{color:myColor}); }
-privateTarget.onchange=()=> privateTo=privateTarget.value;
-sendBtn.onclick=()=>{
-  if(!input.value.trim()) return;
-  socket.emit("message",{ text:input.value.trim(), color:myColor, to:privateTo||undefined });
-  input.value="";
+colorSelect.oninput = () => {
+  myColor = colorSelect.value;
+  localStorage.setItem("chatColor", myColor);
+  socket.emit("updateColor", { color: myColor });
 };
-input.addEventListener("keydown",e=>{
-  if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendBtn.click(); }
+
+if (updateBtn) {
+  updateBtn.onclick = () => {
+    socket.emit("updateColor", { color: myColor });
+  };
+}
+
+privateTarget.onchange = () => {
+  privateTo = privateTarget.value;
+};
+
+sendBtn.onclick = () => {
+  if (!input.value.trim()) return;
+  socket.emit("message", {
+    text: input.value.trim(),
+    color: myColor,
+    to: privateTo || undefined
+  });
+  input.value = "";
+};
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendBtn.click();
+  }
 });
-leaveBtn.onclick=()=>{
+
+/* ===== 退出 ===== */
+leaveBtn.onclick = () => {
   socket.emit("leave");
-  joined=false; chat.style.display="none"; login.style.display="flex";
-  messages.innerHTML=""; userList.innerHTML="";
+  localStorage.removeItem("chatName");
+  localStorage.removeItem("chatRoom");
+  localStorage.removeItem("chatColor");
+
+  joined = false;
+  chat.style.display = "none";
+  login.style.display = "flex";
+  messages.innerHTML = "";
+  userList.innerHTML = "";
 };
 </script>
 </body>
