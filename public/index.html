@@ -133,7 +133,14 @@ socket.on("pastMessages", logs => {
   for (let i = logs.length - 1; i >= 0; i--) {
     const d = logs[i];
     const li = document.createElement("li");
-    li.textContent = `${d.name}: ${d.text}`;
+
+    // 内緒メッセージか判定
+    if (d.to) {
+      li.textContent = `${d.name} ＞ ${d.to}: ${d.text}`;
+    } else {
+      li.textContent = `${d.name}: ${d.text}`;
+    }
+
     li.style.color = d.color || (d.type === "girl" ? "red" : d.type === "boy" ? "blue" : "#000");
     messages.prepend(li);
   }
@@ -143,7 +150,13 @@ socket.on("pastMessages", logs => {
 socket.on("message", data => {
   if (data.to && data.to !== username && data.name !== username) return;
   const li = document.createElement("li");
-  li.textContent = `${data.name}: ${data.text}`;
+
+  if (data.to) {
+    li.textContent = `${data.name} ＞ ${data.to}: ${data.text}`;
+  } else {
+    li.textContent = `${data.name}: ${data.text}`;
+  }
+
   li.style.color = data.color || (data.type === "girl" ? "red" : data.type === "boy" ? "blue" : "#000");
   messages.prepend(li);
 });
