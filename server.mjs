@@ -107,7 +107,8 @@ socket.on("getUsers", () => {
 
 
   // ===== 入室 =====
-  socket.on("join", ({ name, color = "black" }) => {
+ socket.on("join", ({ name, color = "black", room = "room1" }) => {
+
     let finalName = name;
 
     if (users.find(u => u.name === finalName)) {
@@ -117,28 +118,39 @@ socket.on("getUsers", () => {
     }
 
     socket.username = finalName;
+    socket.join(room);
+    socket.room = room;
 
     users.push({
-      id: socket.id,
-      name: finalName,
-      color
-    });
+  id: socket.id,
+  name: finalName,
+  color,
+  room
+});
+
 
     // ★修正：本人にも必ず送る（初回入室対策）
-    socket.emit("userList", users);
-    socket.broadcast.emit("userList", users);
+  io.to(room).emit(
+  "userList",
+  users.filter(u => u.room === room)
+);
+
 
     socket.emit("pastMessages", messagesLog);
   });
 
   // ===== 色変更 =====
   socket.on("updateColor", ({ color }) => {
-    const u = users.find(u => u.id === socket.id);
-    if (u) {
-      u.color = color;
-      io.emit("userList", users);
-    }
-  });
+  const u = users.find(u => u.id === socket.id);
+  if (u) {
+    u.color = color;
+
+    io.to(socket.room).emit(
+      "userList",
+      users.filter(x => x.room === socket.room)
+    );
+  }
+});
 
   // ===== メッセージ =====
   socket.on("message", data => {
@@ -153,7 +165,9 @@ socket.on("getUsers", () => {
       const p = getGirlPunish();
       const msg = { name: socket.username, text: `女子罰 → ${p}`, type: "girl", color: "red" };
       messagesLog.push(msg);
-      io.emit("message", msg);
+      io.to(socket.room).emit("message", msg);
+
+
       return;
     }
 
@@ -162,7 +176,8 @@ socket.on("getUsers", () => {
       const p = getBoyPunish();
       const msg = { name: socket.username, text: `男子罰 → ${p}`, type: "boy", color: "blue" };
       messagesLog.push(msg);
-      io.emit("message", msg);
+    io.to(socket.room).emit("message", msg);
+
       return;
     }
 
@@ -188,7 +203,8 @@ socket.on("getUsers", () => {
     // 通常
     const msg = { name: socket.username, text, color };
     messagesLog.push(msg);
-    io.emit("message", msg);
+    io.to(socket.room).emit("message", msg);
+
   });
 
   socket.on("leave", () => {
@@ -197,7 +213,11 @@ socket.on("getUsers", () => {
 
   socket.on("disconnect", () => {
     users = users.filter(u => u.id !== socket.id);
-    io.emit("userList", users);
+  io.to(socket.room).emit(
+  "userList",
+  users.filter(u => u.room === socket.room)
+);
+
     if (users.length === 0) resetPunishments();
   });
 });
