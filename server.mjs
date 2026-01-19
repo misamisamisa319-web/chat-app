@@ -129,31 +129,49 @@ io.on("connection", socket => {
     }
   });
 
-  socket.on("message", data => {
-    const text = data.text ?? "";
-    const user = users.find(u => u.id === socket.id);
-    const color = user?.color || "black";
+socket.on("message", data => {
+  const text = data.text ?? "";
+  if (!text.trim()) return;
 
-    if (text === "女子罰") {
-      const p = getGirlPunish();
-      const msg = { name: socket.username, text: `女子罰 → ${p}`, type: "girl", color: "red" };
-      messagesLog.push(msg);
-      io.emit("message", msg);
-      return;
-    }
+  const user = users.find(u => u.id === socket.id);
+  const color = user?.color || "black";
+  const to = data.to?.trim();
 
-    if (text === "男子罰") {
-      const p = getBoyPunish();
-      const msg = { name: socket.username, text: `男子罰 → ${p}`, type: "boy", color: "blue" };
-      messagesLog.push(msg);
-      io.emit("message", msg);
-      return;
-    }
-
-    const msg = { name: socket.username, text, color };
+  // 女子罰
+  if (text === "女子罰") {
+    const p = getGirlPunish();
+    const msg = { name: socket.username, text: `女子罰 → ${p}`, type: "girl", color: "red" };
     messagesLog.push(msg);
     io.emit("message", msg);
-  });
+    return;
+  }
+
+  // 男子罰
+  if (text === "男子罰") {
+    const p = getBoyPunish();
+    const msg = { name: socket.username, text: `男子罰 → ${p}`, type: "boy", color: "blue" };
+    messagesLog.push(msg);
+    io.emit("message", msg);
+    return;
+  }
+
+  // 内緒メッセージ
+  if (to) {
+    const target = users.find(u => u.name === to);
+    if (!target) return;
+
+    const msg = { name: socket.username, text, color, to };
+    socket.emit("message", msg);
+    io.to(target.id).emit("message", msg);
+    return;
+  }
+
+  // 通常メッセージ
+  const msg = { name: socket.username, text, color };
+  messagesLog.push(msg);
+  io.emit("message", msg);
+});
+
 
   socket.on("leave", () => {
     socket.disconnect(true);
