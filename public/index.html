@@ -99,11 +99,21 @@ joinBtn.onclick = () => {
   chat.style.display = "flex";
 };
 
-/* 送信（自動で最新の色を反映） */
+/* 文字色変更を即反映 */
+colorSelect.oninput = () => {
+  myColor = colorSelect.value;
+  socket.emit("updateColor", { color: myColor });
+};
+
+/* 内緒相手は更新ボタンで */
+updateBtn.onclick = () => {
+  privateTo = privateTarget.value.trim();
+};
+
+/* 送信 */
 sendBtn.onclick = () => {
   if (!input.value.trim()) return;
   const text = input.value.trim();
-  myColor = colorSelect.value; // 最新色を反映
   socket.emit("message", { name: username, text, color: myColor, to: privateTo });
   input.value = "";
 };
@@ -118,14 +128,7 @@ leaveBtn.onclick = () => {
   userList.innerHTML = "";
 };
 
-/* 設定更新（参加者リスト更新用） */
-updateBtn.onclick = () => {
-  myColor = colorSelect.value;
-  privateTo = privateTarget.value.trim();
-  socket.emit("updateColor", { color: myColor });
-};
-
-/* 過去ログ（最新順に表示） */
+/* 過去ログ（最新順） */
 socket.on("pastMessages", logs => {
   for (let i = logs.length - 1; i >= 0; i--) {
     const d = logs[i];
