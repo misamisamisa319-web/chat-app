@@ -100,11 +100,6 @@ function resetPunishments() {
 io.on("connection", socket => {
   console.log("接続:", socket.id);
 
-  // ===== 入室前：参加者一覧要求 =====
-socket.on("getUsers", () => {
-  socket.emit("userList", users);
-});
-
 
   // ===== 入室 =====
  socket.on("join", ({ name, color = "black", room = "room1" }) => {
@@ -135,8 +130,11 @@ socket.on("getUsers", () => {
   users.filter(u => u.room === room)
 );
 
+socket.emit(
+  "pastMessages",
+  messagesLog.filter(m => m.room === room)
+);
 
-    socket.emit("pastMessages", messagesLog);
   });
 
   // ===== 色変更 =====
@@ -160,50 +158,66 @@ socket.on("getUsers", () => {
     const user = users.find(u => u.id === socket.id);
     const color = user?.color || "black";
 
-    // 女子罰
-    if (text === "女子罰") {
-      const p = getGirlPunish();
-      const msg = { name: socket.username, text: `女子罰 → ${p}`, type: "girl", color: "red" };
-      messagesLog.push(msg);
-      io.to(socket.room).emit("message", msg);
+   // 女子罰
+if (text === "女子罰") {
+  const p = getGirlPunish();
+  const msg = {
+    name: socket.username,
+    text: `女子罰 → ${p}`,
+    type: "girl",
+    color: "red",
+    room: socket.room
+  };
+
+  messagesLog.push(msg);
+  io.to(socket.room).emit("message", msg);
+  return;
+}
+
+   // 男子罰
+if (text === "男子罰") {
+  const p = getBoyPunish();
+  const msg = {
+    name: socket.username,
+    text: `男子罰 → ${p}`,
+    type: "boy",
+    color: "blue",
+    room: socket.room
+  };
+
+  messagesLog.push(msg);
+  io.to(socket.room).emit("message", msg);
+  return;
+}
 
 
-      return;
-    }
+  // ===== 内緒（★安定化）=====
+if (data.to) {
+  const target = users.find(u => u.id === data.to);
+  if (!target) return;
 
-    // 男子罰
-    if (text === "男子罰") {
-      const p = getBoyPunish();
-      const msg = { name: socket.username, text: `男子罰 → ${p}`, type: "boy", color: "blue" };
-      messagesLog.push(msg);
-    io.to(socket.room).emit("message", msg);
+  // ★ 同じ部屋じゃないと送れない
+  if (target.room !== socket.room) return;
 
-      return;
-    }
+  const msg = {
+    name: socket.username,
+    text,
+    color,
+    to: target.id,
+    private: true,
+    room: socket.room
+  };
 
-    // ===== 内緒（★安定化）=====
-    // ★修正：to は「名前」ではなく「socket.id」を想定
-    if (data.to) {
-      const target = users.find(u => u.id === data.to);
-      if (!target) return;
+  socket.emit("message", msg);
+  io.to(target.id).emit("message", msg);
+  return;
+}
 
-      const msg = {
-        name: socket.username,
-        text,
-        color,
-        to: target.id,
-        private: true
-      };
 
-      socket.emit("message", msg);        // 自分
-      io.to(target.id).emit("message", msg); // 相手
-      return;
-    }
-
-    // 通常
-    const msg = { name: socket.username, text, color };
-    messagesLog.push(msg);
-    io.to(socket.room).emit("message", msg);
+  // 通常
+const msg = { name: socket.username, text, color, room: socket.room };
+messagesLog.push(msg);
+io.to(socket.room).emit("message", msg);
 
   });
 
