@@ -42,7 +42,7 @@ const punishItems = [
   "女子罰27.実況しながら寸止めオナニー（保留可）",
   "女子罰28.実況しながらイクまでオナニー(保留可)",
   "女子罰29.【地獄】カーテンを全開の窓際に立ち、勝利者の指定した方法で一回寸止めオナニーする。",
-  "女子罰30.【地獄】勝利者の奴隷に3日なる。"
+  "女子罰30.【地獄】勝利者の奴隷に3日なる。",
 ];
 
 // 男子罰30個
@@ -76,7 +76,7 @@ const boyPunishItems = [
   "男子罰27.実況しながら寸止めオナニー（保留可）",
   "男子罰28.実況しながらイクまでオナニー(保留可)",
   "男子罰29.【地獄】女性化調教。勝者に女性としての名前、名前の色をつけてもらう。一人称は「あたし」で男言葉使用禁止、女になりきってチャットすること。女性用ショーツとパンスト、家ではブラやパッド、スカートも手に入る場合は身につける。下着禁止や脱衣命令が出ても脱ぐのは禁止。おちんぽはクリ、アナルはおまんこと呼称する。オナニーする場合は普通にしごく男としてのオナニーを禁止し、女性のクリオナのように撫でるようにショーツの上から喘ぎながら行うこと。期間は次に勝負に勝つまでとする。",
-  "男子罰30.【地獄】勝利者の奴隷に3日なる。"
+  "男子罰30.【地獄】勝利者の奴隷に3日なる。",
 ];
 
 function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
@@ -88,39 +88,44 @@ function getGirlPunish() {
   if (girlPunishStock.length === 0) girlPunishStock = shuffle([...punishItems]);
   return girlPunishStock.shift();
 }
-
 function getBoyPunish() {
   if (boyPunishStock.length === 0) boyPunishStock = shuffle([...boyPunishItems]);
   return boyPunishStock.shift();
 }
-
 function resetPunishments() {
   girlPunishStock = shuffle([...punishItems]);
   boyPunishStock = shuffle([...boyPunishItems]);
-  console.log("罰ストックをリセットしました");
 }
 
 io.on("connection", socket => {
   console.log("接続:", socket.id);
 
+  // ===== 入室 =====
   socket.on("join", ({ name, color = "black" }) => {
-    socket.username = name;
-    let userColor = color;
+    let finalName = name;
 
-    if (!users.find(u => u.name === name)) {
-      users.push({ id: socket.id, name, color: userColor });
-    } else {
+    if (users.find(u => u.name === finalName)) {
       let i = 2;
-      let newName = name + i;
-      while (users.find(u => u.name === newName)) i++, newName = name + i;
-      socket.username = newName;
-      users.push({ id: socket.id, name: newName, color: userColor });
+      while (users.find(u => u.name === name + i)) i++;
+      finalName = name + i;
     }
 
-    io.emit("userList", users);
+    socket.username = finalName;
+
+    users.push({
+      id: socket.id,
+      name: finalName,
+      color
+    });
+
+    // ★修正：本人にも必ず送る（初回入室対策）
+    socket.emit("userList", users);
+    socket.broadcast.emit("userList", users);
+
     socket.emit("pastMessages", messagesLog);
   });
 
+  // ===== 色変更 =====
   socket.on("updateColor", ({ color }) => {
     const u = users.find(u => u.id === socket.id);
     if (u) {
@@ -129,49 +134,56 @@ io.on("connection", socket => {
     }
   });
 
-socket.on("message", data => {
-  const text = data.text ?? "";
-  if (!text.trim()) return;
+  // ===== メッセージ =====
+  socket.on("message", data => {
+    const text = data.text ?? "";
+    if (!text.trim()) return;
 
-  const user = users.find(u => u.id === socket.id);
-  const color = user?.color || "black";
-  const to = data.to?.trim();
+    const user = users.find(u => u.id === socket.id);
+    const color = user?.color || "black";
 
-  // 女子罰
-  if (text === "女子罰") {
-    const p = getGirlPunish();
-    const msg = { name: socket.username, text: `女子罰 → ${p}`, type: "girl", color: "red" };
+    // 女子罰
+    if (text === "女子罰") {
+      const p = getGirlPunish();
+      const msg = { name: socket.username, text: `女子罰 → ${p}`, type: "girl", color: "red" };
+      messagesLog.push(msg);
+      io.emit("message", msg);
+      return;
+    }
+
+    // 男子罰
+    if (text === "男子罰") {
+      const p = getBoyPunish();
+      const msg = { name: socket.username, text: `男子罰 → ${p}`, type: "boy", color: "blue" };
+      messagesLog.push(msg);
+      io.emit("message", msg);
+      return;
+    }
+
+    // ===== 内緒（★安定化）=====
+    // ★修正：to は「名前」ではなく「socket.id」を想定
+    if (data.to) {
+      const target = users.find(u => u.id === data.to);
+      if (!target) return;
+
+      const msg = {
+        name: socket.username,
+        text,
+        color,
+        to: target.id,
+        private: true
+      };
+
+      socket.emit("message", msg);        // 自分
+      io.to(target.id).emit("message", msg); // 相手
+      return;
+    }
+
+    // 通常
+    const msg = { name: socket.username, text, color };
     messagesLog.push(msg);
     io.emit("message", msg);
-    return;
-  }
-
-  // 男子罰
-  if (text === "男子罰") {
-    const p = getBoyPunish();
-    const msg = { name: socket.username, text: `男子罰 → ${p}`, type: "boy", color: "blue" };
-    messagesLog.push(msg);
-    io.emit("message", msg);
-    return;
-  }
-
-  // 内緒メッセージ
-  if (to) {
-    const target = users.find(u => u.name === to);
-    if (!target) return;
-
-    const msg = { name: socket.username, text, color, to };
-    socket.emit("message", msg);
-    io.to(target.id).emit("message", msg);
-    return;
-  }
-
-  // 通常メッセージ
-  const msg = { name: socket.username, text, color };
-  messagesLog.push(msg);
-  io.emit("message", msg);
-});
-
+  });
 
   socket.on("leave", () => {
     socket.disconnect(true);

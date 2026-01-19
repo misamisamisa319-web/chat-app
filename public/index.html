@@ -9,26 +9,27 @@ body { margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-di
 #login, #chat { flex: 1; display: flex; flex-direction: column; }
 #chat { display: none; }
 
-/* systemメッセージ */
+/* system */
 .system { color: gray; }
 .system.girl { color: red; font-weight: bold; }
 .system.boy { color: blue; font-weight: bold; }
 
-/* コントロール上部 */
-#controls { display: flex; gap: 5px; padding: 5px; flex-shrink: 0; position: sticky; top: 0; background: #fff; z-index: 10; }
-input, button { padding: 10px; font-size: 16px; }
+/* 上部 */
+#controls { display: flex; gap: 5px; padding: 5px; position: sticky; top: 0; background: #fff; z-index: 10; }
+input, button, select { padding: 10px; font-size: 16px; }
 
-/* 参加者リスト横並び */
+/* 参加者 */
 #userList { display: flex; flex-wrap: wrap; gap: 10px; background: #f0f0f0; padding: 5px; list-style: none; max-height: 100px; overflow-x: auto; }
 #userList li { padding: 3px 8px; border-radius: 5px; }
 
-/* 設定タブ */
+/* 設定 */
 #settings { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; padding: 5px; background: #f9f9f9; border-bottom: 1px solid #ccc; }
-#settings input, #settings button { padding: 5px; font-size: 14px; }
+#settings input, #settings button, #settings select { padding: 5px; font-size: 14px; }
 
-/* メッセージ欄 */
+/* メッセージ */
 #messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; }
 #messages li { margin-bottom: 5px; }
+.private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -52,8 +53,11 @@ input, button { padding: 10px; font-size: 16px; }
 
   <div id="settings">
     <label>文字色: <input type="color" id="colorSelect" value="#000000"></label>
-    <label>内緒相手: <input id="privateTarget" placeholder="名前"></label>
-    <button id="updateBtn">更新</button>
+    <label>内緒相手:
+      <select id="privateTarget">
+        <option value="">なし</option>
+      </select>
+    </label>
     <button id="leaveBtn">退出</button>
   </div>
 
@@ -63,6 +67,7 @@ input, button { padding: 10px; font-size: 16px; }
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
+
 const login = document.getElementById("login");
 const chat = document.getElementById("chat");
 const joinBtn = document.getElementById("joinBtn");
@@ -74,7 +79,6 @@ const leaveBtn = document.getElementById("leaveBtn");
 const userList = document.getElementById("userList");
 const colorSelect = document.getElementById("colorSelect");
 const privateTarget = document.getElementById("privateTarget");
-const updateBtn = document.getElementById("updateBtn");
 
 let username = "";
 let myColor = "#000000";
@@ -99,22 +103,27 @@ joinBtn.onclick = () => {
   chat.style.display = "flex";
 };
 
-/* 文字色変更を即反映 */
+/* 色変更 即反映 */
 colorSelect.oninput = () => {
   myColor = colorSelect.value;
   socket.emit("updateColor", { color: myColor });
 };
 
-/* 内緒相手は更新ボタンで */
-updateBtn.onclick = () => {
-  privateTo = privateTarget.value.trim();
+/* 内緒相手 */
+privateTarget.onchange = () => {
+  privateTo = privateTarget.value; // socket.id
 };
 
 /* 送信 */
 sendBtn.onclick = () => {
   if (!input.value.trim()) return;
-  const text = input.value.trim();
-  socket.emit("message", { name: username, text, color: myColor, to: privateTo });
+
+  socket.emit("message", {
+    text: input.value.trim(),
+    color: myColor,
+    to: privateTo || undefined
+  });
+
   input.value = "";
 };
 
@@ -128,61 +137,53 @@ leaveBtn.onclick = () => {
   userList.innerHTML = "";
 };
 
-/* 過去ログ（最新順） */
+/* 過去ログ */
 socket.on("pastMessages", logs => {
-  for (let i = logs.length - 1; i >= 0; i--) {
-    const d = logs[i];
+  logs.forEach(d => {
     const li = document.createElement("li");
-
-    if (d.to) {
-      // 内緒メッセージ
-      li.textContent = `${d.name} ＞ ${d.to}: ${d.text}`;
+    if (d.private) {
+      li.textContent = `【内緒】${d.name}: ${d.text}`;
+      li.classList.add("private");
     } else {
       li.textContent = `${d.name}: ${d.text}`;
     }
-
-    li.style.color = d.color || (d.type === "girl" ? "red" : d.type === "boy" ? "blue" : "#000");
+    li.style.color = d.color || "#000";
     messages.prepend(li);
-  }
+  });
 });
 
-/* 新規メッセージ */
-socket.on("message", data => {
-  if (data.to && data.to !== username && data.name !== username) return;
-  const li = document.createElement("li");
+/* 新着メッセージ */
+socket.on("message", d => {
+  if (d.private && d.to !== socket.id && d.name !== username) return;
 
-  if (data.to) {
-    // 内緒メッセージ
-    li.textContent = `${data.name} ＞ ${data.to}: ${data.text}`;
+  const li = document.createElement("li");
+  if (d.private) {
+    li.textContent = `【内緒】${d.name}: ${d.text}`;
+    li.classList.add("private");
   } else {
-    li.textContent = `${data.name}: ${data.text}`;
+    li.textContent = `${d.name}: ${d.text}`;
   }
-
-  li.style.color = data.color || (data.type === "girl" ? "red" : data.type === "boy" ? "blue" : "#000");
-  messages.prepend(li);
-});
-
-/* systemメッセージ */
-socket.on("system", msg => {
-  const li = document.createElement("li");
-  li.className = "system";
-  if (typeof msg === "string") li.textContent = msg;
-  else {
-    li.textContent = msg.text;
-    if (msg.type === "girl") li.classList.add("girl");
-    if (msg.type === "boy") li.classList.add("boy");
-  }
+  li.style.color = d.color || "#000";
   messages.prepend(li);
 });
 
 /* 参加者リスト */
 socket.on("userList", list => {
   userList.innerHTML = "";
+  privateTarget.innerHTML = `<option value="">なし</option>`;
+
   list.forEach(u => {
     const li = document.createElement("li");
     li.textContent = u.name;
     li.style.color = u.color || "#000";
     userList.appendChild(li);
+
+    if (u.name !== username) {
+      const opt = document.createElement("option");
+      opt.value = u.id; // ★socket.id
+      opt.textContent = u.name;
+      privateTarget.appendChild(opt);
+    }
   });
 });
 </script>
