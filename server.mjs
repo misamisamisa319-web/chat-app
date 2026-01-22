@@ -13,11 +13,14 @@ let messagesLog = [];
 
 /* ===== 時刻 ===== */
 function getTimeString() {
-  const d = new Date();
+  const d = new Date(
+    new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+  );
   const h = String(d.getHours()).padStart(2, "0");
   const m = String(d.getMinutes()).padStart(2, "0");
   return `${h}:${m}`;
 }
+
 
 /* ===== 罰 ===== */
 // 女子罰30個
