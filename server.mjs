@@ -146,6 +146,48 @@ io.on("connection", socket => {
   });
 
   socket.on("message", data=>{
+   // ===== ダイス判定 =====
+const diceText = (data.text ?? "").trim();
+const diceMatch = diceText.match(/^(\d+)d(\d+)([+-]\d+)?$/i);
+
+if (diceMatch) {
+  const count = Number(diceMatch[1]);
+  const sides = Number(diceMatch[2]);
+  const mod = diceMatch[3] ? Number(diceMatch[3]) : 0;
+
+  // 上限ガード
+  if (count < 1 || sides < 1 || count > 10 || sides > 1000) return;
+
+  const user = users.find(u => u.id === socket.id);
+  const color = user?.color || "black";
+
+  const rolls = [];
+  for (let i = 0; i < count; i++) {
+    rolls.push(Math.floor(Math.random() * sides) + 1);
+  }
+
+  const sum = rolls.reduce((a, b) => a + b, 0);
+  const total = sum + mod;
+
+  const modText = mod === 0 ? "" : (mod > 0 ? `+${mod}` : `${mod}`);
+  const detail =
+    mod === 0
+      ? `（${rolls.join(" + ")}）＝ ${sum}`
+      : `（${rolls.join(" + ")}）${modText} ＝ ${total}`;
+
+  const msg = {
+    name: socket.username,
+    text: `${count}d${sides}${modText} → ${detail}`,
+    color,
+    room: socket.room,
+    time: getTimeString()
+  };
+
+  messagesLog.push(msg);
+  io.to(socket.room).emit("message", msg);
+  return;
+}
+
     updateActive(socket);
     const text = data.text ?? "";
     if(!text.trim()) return;
