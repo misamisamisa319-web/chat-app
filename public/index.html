@@ -107,12 +107,27 @@ function renderMsg(d) {
   }
 
   const text = document.createElement("span");
-  if (d.private) {
-    text.textContent = `【内緒】${d.name}: ${d.text}`;
-    li.classList.add("private");
+
+if (d.private) {
+  let toName = "???";
+
+  // 自分が受信側のとき
+  if (d.to === socket.id) {
+    toName = username;
   } else {
-    text.textContent = `${d.name}: ${d.text}`;
+    // 送信側 or 履歴表示
+    const opt = document.querySelector(
+      `#privateTarget option[value="${d.to}"]`
+    );
+    if (opt) toName = opt.textContent;
   }
+
+  text.textContent = `【内緒】${d.name} ▶ ${toName}: ${d.text}`;
+  li.classList.add("private");
+} else {
+  text.textContent = `${d.name}: ${d.text}`;
+}
+
 
   li.appendChild(text);
   li.style.color = d.color || "#000";
