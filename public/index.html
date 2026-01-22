@@ -68,6 +68,16 @@ input, button, select { padding: 10px; font-size: 16px; }
         <option value="">なし</option>
       </select>
     </label>
+    <label>
+  通知音:
+  <select id="soundSelect">
+    <option value="off">OFF</option>
+    <option value="small">小</option>
+    <option value="medium">中</option>
+    <option value="large">大</option>
+  </select>
+</label>
+
     <button id="leaveBtn">退出</button>
   </div>
 
@@ -91,6 +101,20 @@ const leaveBtn = document.getElementById("leaveBtn");
 const userList = document.getElementById("userList");
 const colorSelect = document.getElementById("colorSelect");
 const privateTarget = document.getElementById("privateTarget");
+const soundSelect = document.getElementById("soundSelect");
+
+const notifySound = new Audio("/notify.mp3");
+
+const SOUND_LEVELS = {
+  off: 0,
+  small: 0.2,
+  medium: 0.5,
+  large: 1.0
+};
+
+let soundLevel = localStorage.getItem("soundLevel") || "off";
+soundSelect.value = soundLevel;
+
 
 let username = "";
 let myColor = "#000000";
@@ -144,6 +168,14 @@ socket.on("pastMessages", logs => {
 
 socket.on("message", d => {
   if (d.private && d.to !== socket.id && d.name !== username) return;
+
+  // ★ 通知音（他人の発言だけ）
+  if (soundLevel !== "off" && d.name && d.name !== username) {
+    notifySound.volume = SOUND_LEVELS[soundLevel];
+    notifySound.currentTime = 0;
+    notifySound.play().catch(()=>{});
+  }
+
   renderMsg(d);
 });
 
@@ -230,6 +262,12 @@ colorSelect.oninput = () => {
   localStorage.setItem("chatColor", myColor);
   socket.emit("updateColor", { color: myColor });
 };
+
+soundSelect.onchange = () => {
+  soundLevel = soundSelect.value;
+  localStorage.setItem("soundLevel", soundLevel);
+};
+
 
 if (updateBtn) {
   updateBtn.onclick = () => {

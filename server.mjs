@@ -100,7 +100,7 @@ function getBoyPunish(){ if(!boyPunishStock.length) boyPunishStock=shuffle([...b
 function resetPunishments(){ girlPunishStock=shuffle([...punishItems]); boyPunishStock=shuffle([...boyPunishItems]); }
 
 /* ===== 30分無反応切断 ===== */
-const LIMIT = 30 * 60 * 1000;
+const LIMIT = 15 * 60 * 1000;
 function updateActive(socket){
   const u = users.find(x=>x.id===socket.id);
   if(u) u.lastActive = Date.now();
@@ -111,7 +111,7 @@ setInterval(()=>{
     if(now - (u.lastActive ?? now) > LIMIT){
       const s = io.sockets.sockets.get(u.id);
       if(s){
-        s.emit("message",{ name:"system", text:"30分間反応がなかったため切断されました", room:u.room, time:getTimeString() });
+        s.emit("message",{ name:"system", text:"15分間反応がなかったため切断されました", room:u.room, time:getTimeString() });
         s.disconnect(true);
       }
     }
