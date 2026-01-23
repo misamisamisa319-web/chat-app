@@ -138,20 +138,34 @@ socket.on("lobbyUpdate", rooms => {
   ];
 
   allRooms.forEach(room => {
-    const countEl = document.getElementById(`count-${room}`);
-    const namesEl = document.getElementById(`names-${room}`);
+  const countEl = document.getElementById(`count-${room}`);
+  const namesEl = document.getElementById(`names-${room}`);
+  const btn = document.querySelector(`button[onclick="enterRoom('${room}')"]`);
 
-    if (!countEl || !namesEl) return;
+  if (!countEl || !namesEl || !btn) return;
 
-    if (rooms[room]) {
-      countEl.textContent = rooms[room].count;
-      namesEl.textContent = rooms[room].names.join(", ");
+  const info = rooms[room];
+
+  if (info) {
+    countEl.textContent = info.count;
+    namesEl.textContent = info.names.join(", ");
+
+    // 個室は2人で満室
+    if (room.startsWith("private") && info.count >= 2) {
+      btn.disabled = true;
+      btn.textContent = "満室";
     } else {
-      countEl.textContent = 0;
-      namesEl.textContent = "なし";
+      btn.disabled = false;
+      btn.textContent = "入室";
     }
-  });
+  } else {
+    countEl.textContent = 0;
+    namesEl.textContent = "なし";
+    btn.disabled = false;
+    btn.textContent = "入室";
+  }
 });
+
 
 /* ===== 入室処理 ===== */
 function enterRoom(room) {

@@ -158,6 +158,23 @@ setInterval(()=>{
 /* ===== 接続 ===== */
 io.on("connection", socket => {
   console.log("接続:", socket.id);
+  socket.on("checkRoomKey", ({ room, key }) => {
+    // 個室で鍵が設定されている場合
+    if (roomKeys[room]) {
+      if (!key || key !== roomKeys[room]) {
+        socket.emit("checkResult", {
+          ok: false,
+          message: "鍵が違います"
+        });
+        return;
+      }
+    }
+
+    // 問題なし
+    socket.emit("checkResult", { ok: true });
+  });
+
+
 
   /* ===== 入室 ===== */
   socket.on("join", ({ name, color="black", room="room1", key }) => {
