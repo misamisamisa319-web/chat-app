@@ -8,41 +8,32 @@
 body {
   font-family: sans-serif;
   padding: 20px;
-  background: #f7f7f7;
-}
-
-h2 {
-  margin-top: 0;
 }
 
 .room {
-  background: #fff;
   border: 1px solid #ccc;
-  padding: 12px;
+  padding: 10px;
   margin-bottom: 12px;
 }
 
 .room-title {
   font-weight: bold;
-  font-size: 16px;
+  margin-bottom: 4px;
 }
 
 .room-info {
-  margin: 6px 0;
   font-size: 14px;
+  margin-bottom: 6px;
 }
 
-.room button {
-  margin-top: 6px;
+button {
   padding: 6px 12px;
-  font-size: 14px;
+  margin-right: 5px;
 }
 
-.room input {
-  margin-top: 6px;
-  padding: 6px;
-  font-size: 14px;
-  width: 160px;
+input[type="password"] {
+  padding: 5px;
+  width: 120px;
 }
 </style>
 </head>
@@ -50,81 +41,123 @@ h2 {
 
 <h2>ロビー</h2>
 
-<div class="room" data-room="room1">
+<!-- ルーム1 -->
+<div class="room">
   <div class="room-title">ルーム1</div>
-  <div class="room-info">人数（3人） A,B,C</div>
-  <button class="enter">入室</button>
+  <div class="room-info">
+    人数（<span id="count-room1">0</span>人）
+    <span id="names-room1">なし</span>
+  </div>
+  <button onclick="enterRoom('room1')">入室</button>
 </div>
 
-<div class="room" data-room="room2">
+<!-- ルーム2 -->
+<div class="room">
   <div class="room-title">ルーム2</div>
-  <div class="room-info">人数（4人） D,E,F,J</div>
-  <button class="enter">入室</button>
+  <div class="room-info">
+    人数（<span id="count-room2">0</span>人）
+    <span id="names-room2">なし</span>
+  </div>
+  <button onclick="enterRoom('room2')">入室</button>
 </div>
 
-<div class="room" data-room="special">
+<!-- スペシャル -->
+<div class="room">
   <div class="room-title">スペシャル</div>
-  <div class="room-info">人数（5人）</div>
-  <button class="enter">入室</button>
+  <div class="room-info">
+    人数（<span id="count-special">0</span>人）
+    <span id="names-special">なし</span>
+  </div>
+  <button onclick="enterRoom('special')">入室</button>
 </div>
 
-<div class="room" data-room="privateA">
+<!-- 個室A -->
+<div class="room">
   <div class="room-title">個室A</div>
-  <div class="room-info">人数（2人）</div>
-  <input class="key" placeholder="パスワード">
-  <br>
-  <button class="enter">入室</button>
+  <div class="room-info">
+    人数（<span id="count-privateA">0</span>人）
+    <span id="names-privateA">なし</span>
+  </div>
+  <input type="password" id="key-privateA" placeholder="鍵">
+  <button onclick="enterRoom('privateA')">入室</button>
 </div>
 
-<div class="room" data-room="privateB">
+<!-- 個室B -->
+<div class="room">
   <div class="room-title">個室B</div>
-  <div class="room-info">人数（2人）</div>
-  <input class="key" placeholder="パスワード">
-  <br>
-  <button class="enter">入室</button>
+  <div class="room-info">
+    人数（<span id="count-privateB">0</span>人）
+    <span id="names-privateB">なし</span>
+  </div>
+  <input type="password" id="key-privateB" placeholder="鍵">
+  <button onclick="enterRoom('privateB')">入室</button>
 </div>
 
-<div class="room" data-room="privateC">
+<!-- 個室C -->
+<div class="room">
   <div class="room-title">個室C</div>
-  <div class="room-info">人数（2人）</div>
-  <input class="key" placeholder="パスワード">
-  <br>
-  <button class="enter">入室</button>
+  <div class="room-info">
+    人数（<span id="count-privateC">0</span>人）
+    <span id="names-privateC">なし</span>
+  </div>
+  <input type="password" id="key-privateC" placeholder="鍵">
+  <button onclick="enterRoom('privateC')">入室</button>
 </div>
 
-<div class="room" data-room="privateD">
+<!-- 個室D -->
+<div class="room">
   <div class="room-title">個室D</div>
-  <div class="room-info">人数（2人）</div>
-  <input class="key" placeholder="パスワード">
-  <br>
-  <button class="enter">入室</button>
+  <div class="room-info">
+    人数（<span id="count-privateD">0</span>人）
+    <span id="names-privateD">なし</span>
+  </div>
+  <input type="password" id="key-privateD" placeholder="鍵">
+  <button onclick="enterRoom('privateD')">入室</button>
 </div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
-document.querySelectorAll(".enter").forEach(btn => {
-  btn.onclick = () => {
-    const roomDiv = btn.closest(".room");
-    const room = roomDiv.dataset.room;
+const socket = io();
 
-    let key = "";
-    const keyInput = roomDiv.querySelector(".key");
-    if (keyInput) {
-      key = keyInput.value.trim();
-      if (!key) {
-        alert("パスワードを入力してください");
-        return;
-      }
-      localStorage.setItem("chatKey", key);
+/* ===== ロビー更新 ===== */
+socket.on("lobbyUpdate", rooms => {
+  const allRooms = [
+    "room1","room2","special",
+    "privateA","privateB","privateC","privateD"
+  ];
+
+  allRooms.forEach(room => {
+    const countEl = document.getElementById(`count-${room}`);
+    const namesEl = document.getElementById(`names-${room}`);
+
+    if (!countEl || !namesEl) return;
+
+    if (rooms[room]) {
+      countEl.textContent = rooms[room].count;
+      namesEl.textContent = rooms[room].names.join(", ");
     } else {
-      localStorage.removeItem("chatKey");
+      countEl.textContent = 0;
+      namesEl.textContent = "なし";
     }
-
-    localStorage.setItem("chatRoom", room);
-
-    // チャット本体（名前入力画面）へ
-    location.href = "/";
-  };
+  });
 });
+
+/* ===== 入室処理 ===== */
+function enterRoom(room) {
+  localStorage.removeItem("chatRoom");
+  localStorage.removeItem("chatKey");
+
+  localStorage.setItem("chatRoom", room);
+
+  if (room.startsWith("private")) {
+    const keyInput = document.getElementById(`key-${room}`);
+    const key = keyInput?.value || "";
+    localStorage.setItem("chatKey", key);
+  }
+
+  // 今のチャット画面へ
+  location.href = "/";
+}
 </script>
 
 </body>
