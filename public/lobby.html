@@ -181,7 +181,7 @@ function enterRoom(room) {
 
   socket.emit("checkRoomKey", { room, key });
 
-  socket.once("checkResult", res => {
+  socket.on("checkResult", res => {
     if (!res.ok) {
       errorEl.textContent = res.message || "入室できません";
       return;
