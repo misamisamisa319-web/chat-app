@@ -11,6 +11,24 @@ app.use(express.static("public"));
 let users = [];
 let messagesLog = [];
 
+function getLobbyInfo() {
+  const rooms = {};
+
+  users.forEach(u => {
+    if (!rooms[u.room]) {
+      rooms[u.room] = {
+        count: 0,
+        names: []
+      };
+    }
+    rooms[u.room].count++;
+    rooms[u.room].names.push(u.name);
+  });
+
+  return rooms;
+}
+
+
 /* ===== 個室の鍵 ===== */
 const roomKeys = {
   privateA: "1234a",
@@ -195,6 +213,8 @@ io.on("connection", socket => {
 
     io.to(room).emit("userList", users.filter(u=>u.room===room));
     socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
+    io.emit("lobbyUpdate", getLobbyInfo());
+
   });
 
   /* ===== 色変更 ===== */
@@ -287,6 +307,7 @@ io.on("connection", socket => {
       resetPunishments();
       messagesLog = messagesLog.filter(m=>m.room!==socket.room);
     }
+     io.emit("lobbyUpdate", getLobbyInfo());
   });
 });
 
