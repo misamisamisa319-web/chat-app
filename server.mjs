@@ -122,20 +122,40 @@ setInterval(()=>{
 io.on("connection", socket => {
   console.log("接続:", socket.id);
 
-  socket.on("join", ({ name, color="black", room="room1" }) => {
-    let finalName = name;
-    if(users.find(u=>u.name===finalName)){
-      let i=2; while(users.find(u=>u.name===name+i)) i++; finalName=name+i;
+socket.on("join", ({ name, color="black", room="room1" }) => {
+
+  // ★ 個室A〜Dは2人まで
+  const privateRooms = ["privateA", "privateB", "privateC", "privateD"];
+  if (privateRooms.includes(room)) {
+    const count = users.filter(u => u.room === room).length;
+    if (count >= 2) {
+      socket.emit("message", {
+        name: "system",
+        text: "この個室は2人までです",
+        room,
+        time: getTimeString()
+      });
+      return; // 入室させない
     }
-    socket.username = finalName;
-    socket.room = room;
-    socket.join(room);
+  }
 
-    users.push({ id:socket.id, name:finalName, color, room, lastActive:Date.now() });
+  let finalName = name;
+  if (users.find(u=>u.name===finalName)){
+    let i=2;
+    while(users.find(u=>u.name===name+i)) i++;
+    finalName=name+i;
+  }
 
-    io.to(room).emit("userList", users.filter(u=>u.room===room));
-    socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
-  });
+  socket.username = finalName;
+  socket.room = room;
+  socket.join(room);
+
+  users.push({ id:socket.id, name:finalName, color, room, lastActive:Date.now() });
+
+  io.to(room).emit("userList", users.filter(u=>u.room===room));
+  socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
+});
+
 
   socket.on("updateColor", ({ color })=>{
     updateActive(socket);
