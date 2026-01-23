@@ -239,24 +239,16 @@ function doJoin(name, room, color) {
   colorSelect.value = color;
   roomSelect.value = room;
 
-  let key;
-  if (room.startsWith("private")) {
-    key = prompt("個室の鍵を入力してください");
-    if (key === null) return; // キャンセル
-  }
-
   socket.emit("join", {
     name: username,
     color: myColor,
-    room,
-    key
+    room
   });
 
   joined = true;
   login.style.display = "none";
   chat.style.display = "flex";
 }
-
 
 /* 手動入室 */
 joinBtn.onclick = () => {

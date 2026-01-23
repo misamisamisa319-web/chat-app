@@ -10,14 +10,6 @@ app.use(express.static("public"));
 
 let users = [];
 let messagesLog = [];
-// 個室の鍵
-const roomKeys = {
-  privateA: "1234A",
-  privateB: "1234B",
-  privateC: "1234C",
-  privateD: "1234D",
-};
-
 
 /* ===== 時刻 ===== */
 function getTimeString() {
@@ -130,28 +122,12 @@ setInterval(()=>{
 io.on("connection", socket => {
   console.log("接続:", socket.id);
 
-socket.on("join", ({ name, color="black", room="room1", key }) => {
-
-  // 鍵チェック（個室だけ）
-if (roomKeys[room]) {
-  if (!key || key !== roomKeys[room]) {
-    socket.emit("message", {
-      name: "system",
-      text: "鍵が違います",
-      room,
-      time: getTimeString()
-    });
-    return;
-  }
-}
-
+socket.on("join", ({ name, color="black", room="room1" }) => {
 
   // ★ 個室A〜Dは2人まで
   const privateRooms = ["privateA", "privateB", "privateC", "privateD"];
   if (privateRooms.includes(room)) {
-  const roomSet = io.sockets.adapter.rooms.get(room);
-  const count = roomSet ? roomSet.size : 0;
-
+    const count = users.filter(u => u.room === room).length;
     if (count >= 2) {
       socket.emit("message", {
         name: "system",
