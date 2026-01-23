@@ -189,7 +189,7 @@ if (diceMatch) {
 }
 
     updateActive(socket);
-    const text = data.text ?? "";
+    const text = (data.text ?? "").trim();
     if(!text.trim()) return;
     const user = users.find(u=>u.id===socket.id);
     const color = user?.color || "black";
