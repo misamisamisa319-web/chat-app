@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ロビー</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  font-family: sans-serif;
+  padding: 20px;
+  background: #f7f7f7;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.room {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.room-title {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.room-info {
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+.room button {
+  margin-top: 6px;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.room input {
+  margin-top: 6px;
+  padding: 6px;
+  font-size: 14px;
+  width: 160px;
+}
+</style>
+</head>
+<body>
+
+<h2>ロビー</h2>
+
+<div class="room" data-room="room1">
+  <div class="room-title">ルーム1</div>
+  <div class="room-info">人数（3人） A,B,C</div>
+  <button class="enter">入室</button>
+</div>
+
+<div class="room" data-room="room2">
+  <div class="room-title">ルーム2</div>
+  <div class="room-info">人数（4人） D,E,F,J</div>
+  <button class="enter">入室</button>
+</div>
+
+<div class="room" data-room="special">
+  <div class="room-title">スペシャル</div>
+  <div class="room-info">人数（5人）</div>
+  <button class="enter">入室</button>
+</div>
+
+<div class="room" data-room="privateA">
+  <div class="room-title">個室A</div>
+  <div class="room-info">人数（2人）</div>
+  <input class="key" placeholder="パスワード">
+  <br>
+  <button class="enter">入室</button>
+</div>
+
+<div class="room" data-room="privateB">
+  <div class="room-title">個室B</div>
+  <div class="room-info">人数（2人）</div>
+  <input class="key" placeholder="パスワード">
+  <br>
+  <button class="enter">入室</button>
+</div>
+
+<div class="room" data-room="privateC">
+  <div class="room-title">個室C</div>
+  <div class="room-info">人数（2人）</div>
+  <input class="key" placeholder="パスワード">
+  <br>
+  <button class="enter">入室</button>
+</div>
+
+<div class="room" data-room="privateD">
+  <div class="room-title">個室D</div>
+  <div class="room-info">人数（2人）</div>
+  <input class="key" placeholder="パスワード">
+  <br>
+  <button class="enter">入室</button>
+</div>
+
+<script>
+document.querySelectorAll(".enter").forEach(btn => {
+  btn.onclick = () => {
+    const roomDiv = btn.closest(".room");
+    const room = roomDiv.dataset.room;
+
+    let key = "";
+    const keyInput = roomDiv.querySelector(".key");
+    if (keyInput) {
+      key = keyInput.value.trim();
+      if (!key) {
+        alert("パスワードを入力してください");
+        return;
+      }
+      localStorage.setItem("chatKey", key);
+    } else {
+      localStorage.removeItem("chatKey");
+    }
+
+    localStorage.setItem("chatRoom", room);
+
+    // チャット本体（名前入力画面）へ
+    location.href = "/";
+  };
+});
+</script>
+
+</body>
+</html>

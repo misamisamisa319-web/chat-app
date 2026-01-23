@@ -11,16 +11,21 @@ app.use(express.static("public"));
 let users = [];
 let messagesLog = [];
 
+/* ===== 個室の鍵 ===== */
+const roomKeys = {
+  privateA: "1234a",
+  privateB: "1234b",
+  privateC: "1234c",
+  privateD: "1234d",
+};
+
 /* ===== 時刻 ===== */
 function getTimeString() {
   const d = new Date(
     new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
   );
-  const h = String(d.getHours()).padStart(2, "0");
-  const m = String(d.getMinutes()).padStart(2, "0");
-  return `${h}:${m}`;
+  return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
 }
-
 
 /* ===== 罰 ===== */
 // 女子罰30個
@@ -93,13 +98,22 @@ const boyPunishItems = [
 
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 let girlPunishStock = shuffle([...punishItems]);
-let boyPunishStock = shuffle([...boyPunishItems]);
+let boyPunishStock  = shuffle([...boyPunishItems]);
 
-function getGirlPunish(){ if(!girlPunishStock.length) girlPunishStock=shuffle([...punishItems]); return girlPunishStock.shift(); }
-function getBoyPunish(){ if(!boyPunishStock.length) boyPunishStock=shuffle([...boyPunishItems]); return boyPunishStock.shift(); }
-function resetPunishments(){ girlPunishStock=shuffle([...punishItems]); boyPunishStock=shuffle([...boyPunishItems]); }
+function getGirlPunish(){
+  if(!girlPunishStock.length) girlPunishStock = shuffle([...punishItems]);
+  return girlPunishStock.shift();
+}
+function getBoyPunish(){
+  if(!boyPunishStock.length) boyPunishStock = shuffle([...boyPunishItems]);
+  return boyPunishStock.shift();
+}
+function resetPunishments(){
+  girlPunishStock = shuffle([...punishItems]);
+  boyPunishStock  = shuffle([...boyPunishItems]);
+}
 
-/* ===== 30分無反応切断 ===== */
+/* ===== 15分無反応切断 ===== */
 const LIMIT = 15 * 60 * 1000;
 function updateActive(socket){
   const u = users.find(x=>x.id===socket.id);
@@ -111,7 +125,12 @@ setInterval(()=>{
     if(now - (u.lastActive ?? now) > LIMIT){
       const s = io.sockets.sockets.get(u.id);
       if(s){
-        s.emit("message",{ name:"system", text:"15分間反応がなかったため切断されました", room:u.room, time:getTimeString() });
+        s.emit("message", {
+          name:"system",
+          text:"15分間反応がなかったため切断されました",
+          room:u.room,
+          time:getTimeString()
+        });
         s.disconnect(true);
       }
     }
@@ -122,41 +141,63 @@ setInterval(()=>{
 io.on("connection", socket => {
   console.log("接続:", socket.id);
 
-socket.on("join", ({ name, color="black", room="room1" }) => {
+  /* ===== 入室 ===== */
+  socket.on("join", ({ name, color="black", room="room1", key }) => {
 
-  // ★ 個室A〜Dは2人まで
-  const privateRooms = ["privateA", "privateB", "privateC", "privateD"];
-  if (privateRooms.includes(room)) {
-    const count = users.filter(u => u.room === room).length;
-    if (count >= 2) {
-      socket.emit("message", {
-        name: "system",
-        text: "この個室は2人までです",
-        room,
-        time: getTimeString()
-      });
-      return; // 入室させない
+    // 鍵チェック（個室のみ）
+    if (roomKeys[room]) {
+      if (!key || key !== roomKeys[room]) {
+        socket.emit("message", {
+          name:"system",
+          text:"鍵が違います",
+          room,
+          time:getTimeString()
+        });
+        return;
+      }
     }
-  }
 
-  let finalName = name;
-  if (users.find(u=>u.name===finalName)){
-    let i=2;
-    while(users.find(u=>u.name===name+i)) i++;
-    finalName=name+i;
-  }
+    // 個室2人制限
+    const privateRooms = ["privateA","privateB","privateC","privateD"];
+    if (privateRooms.includes(room)) {
+      const roomSet = io.sockets.adapter.rooms.get(room);
+      const count = roomSet ? roomSet.size : 0;
+      if (count >= 2) {
+        socket.emit("message", {
+          name:"system",
+          text:"この個室は2人までです",
+          room,
+          time:getTimeString()
+        });
+        return;
+      }
+    }
 
-  socket.username = finalName;
-  socket.room = room;
-  socket.join(room);
+    // 名前重複回避
+    let finalName = name;
+    if (users.find(u=>u.name===finalName)) {
+      let i = 2;
+      while (users.find(u=>u.name===name+i)) i++;
+      finalName = name + i;
+    }
 
-  users.push({ id:socket.id, name:finalName, color, room, lastActive:Date.now() });
+    socket.username = finalName;
+    socket.room = room;
+    socket.join(room);
 
-  io.to(room).emit("userList", users.filter(u=>u.room===room));
-  socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
-});
+    users.push({
+      id: socket.id,
+      name: finalName,
+      color,
+      room,
+      lastActive: Date.now()
+    });
 
+    io.to(room).emit("userList", users.filter(u=>u.room===room));
+    socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
+  });
 
+  /* ===== 色変更 ===== */
   socket.on("updateColor", ({ color })=>{
     updateActive(socket);
     const u = users.find(u=>u.id===socket.id);
@@ -165,83 +206,86 @@ socket.on("join", ({ name, color="black", room="room1" }) => {
     io.to(socket.room).emit("userList", users.filter(x=>x.room===socket.room));
   });
 
+  /* ===== メッセージ ===== */
   socket.on("message", data=>{
-   // ===== ダイス判定 =====
-const diceText = (data.text ?? "").trim();
-const diceMatch = diceText.match(/^(\d+)d(\d+)([+-]\d+)?$/i);
-
-if (diceMatch) {
-  const count = Number(diceMatch[1]);
-  const sides = Number(diceMatch[2]);
-  const mod = diceMatch[3] ? Number(diceMatch[3]) : 0;
-
-  // 上限ガード
-  if (count < 1 || sides < 1 || count > 10 || sides > 1000) return;
-
-  const user = users.find(u => u.id === socket.id);
-  const color = user?.color || "black";
-
-  const rolls = [];
-  for (let i = 0; i < count; i++) {
-    rolls.push(Math.floor(Math.random() * sides) + 1);
-  }
-
-  const sum = rolls.reduce((a, b) => a + b, 0);
-  const total = sum + mod;
-
-  const modText = mod === 0 ? "" : (mod > 0 ? `+${mod}` : `${mod}`);
-  const detail =
-    mod === 0
-      ? `（${rolls.join(" + ")}）＝ ${sum}`
-      : `（${rolls.join(" + ")}）${modText} ＝ ${total}`;
-
-  const msg = {
-    name: socket.username,
-    text: `${count}d${sides}${modText} → ${detail}`,
-    color,
-    room: socket.room,
-    time: getTimeString()
-  };
-
-  messagesLog.push(msg);
-  io.to(socket.room).emit("message", msg);
-  return;
-}
-
     updateActive(socket);
     const text = (data.text ?? "").trim();
-    if(!text.trim()) return;
+    if(!text) return;
+
     const user = users.find(u=>u.id===socket.id);
     const color = user?.color || "black";
 
+    // 女子罰
     if(text==="女子罰"){
-      const msg = { name:socket.username, text:`女子罰 → ${getGirlPunish()}`, type:"girl", color:"red", room:socket.room, time:getTimeString() };
-      messagesLog.push(msg); io.to(socket.room).emit("message", msg); return;
-    }
-    if(text==="男子罰"){
-      const msg = { name:socket.username, text:`男子罰 → ${getBoyPunish()}`, type:"boy", color:"blue", room:socket.room, time:getTimeString() };
-      messagesLog.push(msg); io.to(socket.room).emit("message", msg); return;
+      const msg = {
+        name:socket.username,
+        text:`女子罰 → ${getGirlPunish()}`,
+        type:"girl",
+        color:"red",
+        room:socket.room,
+        time:getTimeString()
+      };
+      messagesLog.push(msg);
+      io.to(socket.room).emit("message", msg);
+      return;
     }
 
+    // 男子罰
+    if(text==="男子罰"){
+      const msg = {
+        name:socket.username,
+        text:`男子罰 → ${getBoyPunish()}`,
+        type:"boy",
+        color:"blue",
+        room:socket.room,
+        time:getTimeString()
+      };
+      messagesLog.push(msg);
+      io.to(socket.room).emit("message", msg);
+      return;
+    }
+
+    // 内緒
     if(data.to){
       const target = users.find(u=>u.id===data.to);
       if(!target || target.room!==socket.room) return;
-      const msg = { name:socket.username, text, color, to:target.id, private:true, room:socket.room, time:getTimeString() };
-      socket.emit("message", msg); io.to(target.id).emit("message", msg); return;
+      const msg = {
+        name:socket.username,
+        text,
+        color,
+        to:target.id,
+        private:true,
+        room:socket.room,
+        time:getTimeString()
+      };
+      socket.emit("message", msg);
+      io.to(target.id).emit("message", msg);
+      return;
     }
 
-    const msg = { name:socket.username, text, color, room:socket.room, time:getTimeString() };
-    messagesLog.push(msg); io.to(socket.room).emit("message", msg);
+    // 通常
+    const msg = {
+      name:socket.username,
+      text,
+      color,
+      room:socket.room,
+      time:getTimeString()
+    };
+    messagesLog.push(msg);
+    io.to(socket.room).emit("message", msg);
   });
 
+  /* ===== 退出 ===== */
   socket.on("leave", ()=> socket.disconnect(true));
 
   socket.on("disconnect", ()=>{
     users = users.filter(u=>u.id!==socket.id);
     io.to(socket.room).emit("userList", users.filter(u=>u.room===socket.room));
+
+    // 部屋空なら初期化
     if(!users.some(u=>u.room===socket.room)){
       resetPunishments();
-      messagesLog = messagesLog.filter(m=>m.room!==socket.room); // 部屋空でログ削除
+      messagesLog = messagesLog.filter(m=>m.room!==socket.room);
     }
   });
 });

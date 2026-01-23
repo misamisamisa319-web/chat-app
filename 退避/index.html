@@ -33,11 +33,37 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 <div id="login">
   <h2>入室</h2>
+  <div id="loginUsers"></div>
 
-  <div id="roomInfo" style="margin-bottom:10px; color:#555;"></div>
+  <label>
+    部屋:
+ <select id="roomSelect">
+  <option value="room1">ルーム1</option>
+  <option value="room2">ルーム2</option>
+  <option value="special">スペシャルルーム</option>
+  <option value="privateA">個室A</option>
+  <option value="privateB">個室B</option>
+  <option value="privateC">個室C</option>
+  <option value="privateD">個室D</option>
+</select>
+
+
+  </label>
 
   <input id="nameInput" placeholder="名前">
   <button id="joinBtn">入室</button>
+  <div style="margin-top:10px; font-size:12px; color:#555;">
+  <strong>更新内容</strong>
+  <ul style="padding-left:18px; margin:5px 0;">
+    <li>内緒メッセージ（発言者 ▶ 受信者 表示）</li>
+    <li>日本時間表示</li>
+    <li>ダイス機能（例：2d6+1）</li>
+    <li>通知音（OFF / 小 / 中 / 大）</li>
+    <li>15分無反応で自動切断</li>
+    <li>ルーム1 / ルーム2 / スペシャルルーム</li>
+  </ul>
+</div>
+
 </div>
 
 <div id="chat">
@@ -60,14 +86,15 @@ input, button, select { padding: 10px; font-size: 16px; }
       </select>
     </label>
     <label>
-      通知音:
-      <select id="soundSelect">
-        <option value="off">OFF</option>
-        <option value="small">小</option>
-        <option value="medium">中</option>
-        <option value="large">大</option>
-      </select>
-    </label>
+  通知音:
+  <select id="soundSelect">
+    <option value="off">OFF</option>
+    <option value="small">小</option>
+    <option value="medium">中</option>
+    <option value="large">大</option>
+  </select>
+</label>
+
     <button id="leaveBtn">退出</button>
   </div>
 
@@ -82,8 +109,7 @@ const login = document.getElementById("login");
 const chat = document.getElementById("chat");
 const joinBtn = document.getElementById("joinBtn");
 const nameInput = document.getElementById("nameInput");
-const roomInfo = document.getElementById("roomInfo");
-
+const roomSelect = document.getElementById("roomSelect");
 const messages = document.getElementById("messages");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
@@ -96,27 +122,23 @@ const soundSelect = document.getElementById("soundSelect");
 
 const notifySound = new Audio("/notify.mp3");
 
-const SOUND_LEVELS = { off:0, small:0.2, medium:0.5, large:1.0 };
+const SOUND_LEVELS = {
+  off: 0,
+  small: 0.2,
+  medium: 0.5,
+  large: 1.0
+};
+
 let soundLevel = localStorage.getItem("soundLevel") || "off";
 soundSelect.value = soundLevel;
+
 
 let username = "";
 let myColor = "#000000";
 let privateTo = "";
 let joined = false;
 
-// ===== ロビーからの情報 =====
-const room = localStorage.getItem("chatRoom");
-const key  = localStorage.getItem("chatKey");
-
-if (!room) {
-  alert("ロビーから入室してください");
-  location.href = "/lobby.html";
-}
-
-roomInfo.textContent = `入室先：${room}`;
-
-// ===== 表示 =====
+/* ===== 表示 ===== */
 function renderMsg(d) {
   const li = document.createElement("li");
 
@@ -129,20 +151,33 @@ function renderMsg(d) {
 
   const text = document.createElement("span");
 
-  if (d.private) {
-    let toName = d.to === socket.id ? username : "相手";
-    text.textContent = `【内緒】${d.name} ▶ ${toName}: ${d.text}`;
-    li.classList.add("private");
+if (d.private) {
+  let toName = "???";
+
+  // 自分が受信側のとき
+  if (d.to === socket.id) {
+    toName = username;
   } else {
-    text.textContent = `${d.name}: ${d.text}`;
+    // 送信側 or 履歴表示
+    const opt = document.querySelector(
+      `#privateTarget option[value="${d.to}"]`
+    );
+    if (opt) toName = opt.textContent;
   }
+
+  text.textContent = `【内緒】${d.name} ▶ ${toName}: ${d.text}`;
+  li.classList.add("private");
+} else {
+  text.textContent = `${d.name}: ${d.text}`;
+}
+
 
   li.appendChild(text);
   li.style.color = d.color || "#000";
   messages.prepend(li);
 }
 
-// ===== 受信 =====
+/* ===== 受信 ===== */
 socket.on("pastMessages", logs => {
   messages.innerHTML = "";
   logs.forEach(renderMsg);
@@ -150,22 +185,44 @@ socket.on("pastMessages", logs => {
 
 socket.on("message", d => {
   if (d.private && d.to !== socket.id && d.name !== username) return;
+
+  // ★ 通知音（他人の発言だけ）
   if (soundLevel !== "off" && d.name && d.name !== username) {
     notifySound.volume = SOUND_LEVELS[soundLevel];
     notifySound.currentTime = 0;
     notifySound.play().catch(()=>{});
   }
+
   renderMsg(d);
 });
 
 socket.on("userList", list => {
+  const loginUsers = document.getElementById("loginUsers");
+
+  if (!joined) {
+    loginUsers.innerHTML = "";
+    if (list.length === 0) {
+      loginUsers.textContent = "現在参加者はいません";
+    } else {
+      list.forEach(u => {
+        const span = document.createElement("span");
+        span.textContent = u.name;
+        span.style.color = u.color || "#000";
+        span.style.marginRight = "8px";
+        loginUsers.appendChild(span);
+      });
+    }
+  }
+
   userList.innerHTML = "";
   privateTarget.innerHTML = `<option value="">なし</option>`;
+
   list.forEach(u => {
     const li = document.createElement("li");
     li.textContent = u.name;
     li.style.color = u.color || "#000";
     userList.appendChild(li);
+
     if (u.id !== socket.id) {
       const opt = document.createElement("option");
       opt.value = u.id;
@@ -175,12 +232,18 @@ socket.on("userList", list => {
   });
 });
 
-// ===== 入室処理 =====
-joinBtn.onclick = () => {
-  if (joined || !nameInput.value.trim()) return;
+/* ===== 入室処理 ===== */
+function doJoin(name, room, color) {
+  username = name;
+  myColor = color;
+  colorSelect.value = color;
+  roomSelect.value = room;
 
-  username = nameInput.value.trim();
-  localStorage.setItem("chatName", username);
+  let key;
+  if (room.startsWith("private")) {
+    key = prompt("個室の鍵を入力してください");
+    if (key === null) return; // キャンセル
+  }
 
   socket.emit("join", {
     name: username,
@@ -192,9 +255,33 @@ joinBtn.onclick = () => {
   joined = true;
   login.style.display = "none";
   chat.style.display = "flex";
+}
+
+
+/* 手動入室 */
+joinBtn.onclick = () => {
+  if (joined || !nameInput.value.trim()) return;
+
+  const name = nameInput.value.trim();
+  const room = roomSelect.value;
+  const color = myColor;
+
+  localStorage.setItem("chatName", name);
+  localStorage.setItem("chatRoom", room);
+  localStorage.setItem("chatColor", color);
+
+  doJoin(name, room, color);
 };
 
-// ===== 操作 =====
+/* 自動再入室 */
+const savedName = localStorage.getItem("chatName");
+const savedRoom = localStorage.getItem("chatRoom");
+const savedColor = localStorage.getItem("chatColor");
+if (savedName && savedRoom && savedColor) {
+  doJoin(savedName, savedRoom, savedColor);
+}
+
+/* ===== 操作 ===== */
 colorSelect.oninput = () => {
   myColor = colorSelect.value;
   localStorage.setItem("chatColor", myColor);
@@ -206,18 +293,29 @@ soundSelect.onchange = () => {
   localStorage.setItem("soundLevel", soundLevel);
 };
 
+
+if (updateBtn) {
+  updateBtn.onclick = () => {
+    socket.emit("updateColor", { color: myColor });
+  };
+}
+
 privateTarget.onchange = () => {
   privateTo = privateTarget.value || "";
 };
 
 sendBtn.onclick = () => {
   if (!input.value.trim()) return;
+
   socket.emit("message", {
     text: input.value.trim(),
     color: myColor,
     to: privateTo || undefined
   });
+
   input.value = "";
+
+  /* ★ 内緒は1回で解除（ここが今回の変更点） */
   privateTo = "";
   privateTarget.value = "";
 };
@@ -229,14 +327,19 @@ input.addEventListener("keydown", e => {
   }
 });
 
+/* ===== 退出 ===== */
 leaveBtn.onclick = () => {
   socket.emit("leave");
   localStorage.removeItem("chatName");
   localStorage.removeItem("chatRoom");
-  localStorage.removeItem("chatKey");
-  location.href = "/lobby.html";
+  localStorage.removeItem("chatColor");
+
+  joined = false;
+  chat.style.display = "none";
+  login.style.display = "flex";
+  messages.innerHTML = "";
+  userList.innerHTML = "";
 };
 </script>
-
 </body>
 </html>
