@@ -159,16 +159,19 @@ function enterRoom(room) {
 
   socket.emit("checkRoomKey", { room, key });
 
+  socket.off("checkResult");   // ← 多重防止
   socket.on("checkResult", res => {
     if (!res.ok) {
       errorEl.textContent = res.message || "入室できません";
       return;
     }
+
     localStorage.setItem("chatRoom", room);
     localStorage.setItem("chatKey", key);
     location.href = "/";
   });
 }
+
 </script>
 
 </body>
