@@ -12,10 +12,10 @@ let users = [];
 let messagesLog = [];
 // 個室の鍵
 const roomKeys = {
-  privateA: "1234A",
-  privateB: "1234B",
-  privateC: "1234C",
-  privateD: "1234D",
+  privateA: "1234a",
+  privateB: "1234b",
+  privateC: "1234c",
+  privateD: "1234d",
 };
 
 
