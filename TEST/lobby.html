@@ -49,6 +49,8 @@ input[type="password"] {
 <body>
 
 <h2>ロビー</h2>
+<div id="error" style="color:red; margin-bottom:10px;"></div>
+
 
 <!-- ルーム1 -->
 <div class="room">
@@ -153,20 +155,30 @@ socket.on("lobbyUpdate", rooms => {
 
 /* ===== 入室処理 ===== */
 function enterRoom(room) {
-  localStorage.removeItem("chatRoom");
-  localStorage.removeItem("chatKey");
+  const errorEl = document.getElementById("error");
+  errorEl.textContent = "";
 
-  localStorage.setItem("chatRoom", room);
+  let key = "";
 
   if (room.startsWith("private")) {
     const keyInput = document.getElementById(`key-${room}`);
-    const key = keyInput?.value || "";
-    localStorage.setItem("chatKey", key);
+    key = keyInput?.value || "";
   }
 
-  // 今のチャット画面へ
-  location.href = "/";
+  socket.emit("checkRoomKey", { room, key });
+
+  socket.once("checkResult", res => {
+    if (!res.ok) {
+      errorEl.textContent = res.message || "入室できません";
+      return;
+    }
+
+    localStorage.setItem("chatRoom", room);
+    localStorage.setItem("chatKey", key);
+    location.href = "/";
+  });
 }
+
 </script>
 
 </body>
