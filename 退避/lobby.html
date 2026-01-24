@@ -17,29 +17,23 @@ body {
     sans-serif;
   padding: 20px;
 }
-
-
 .room {
   border: 1px solid #ccc;
   padding: 10px;
   margin-bottom: 12px;
 }
-
 .room-title {
   font-weight: bold;
   margin-bottom: 4px;
 }
-
 .room-info {
   font-size: 14px;
   margin-bottom: 6px;
 }
-
 button {
   padding: 6px 12px;
   margin-right: 5px;
 }
-
 input[type="password"] {
   padding: 5px;
   width: 120px;
@@ -51,8 +45,6 @@ input[type="password"] {
 <h2>ロビー</h2>
 <div id="error" style="color:red; margin-bottom:10px;"></div>
 
-
-<!-- ルーム1 -->
 <div class="room">
   <div class="room-title">ルーム1</div>
   <div class="room-info">
@@ -62,7 +54,6 @@ input[type="password"] {
   <button onclick="enterRoom('room1')">入室</button>
 </div>
 
-<!-- ルーム2 -->
 <div class="room">
   <div class="room-title">ルーム2</div>
   <div class="room-info">
@@ -72,7 +63,6 @@ input[type="password"] {
   <button onclick="enterRoom('room2')">入室</button>
 </div>
 
-<!-- スペシャル -->
 <div class="room">
   <div class="room-title">スペシャル</div>
   <div class="room-info">
@@ -82,7 +72,6 @@ input[type="password"] {
   <button onclick="enterRoom('special')">入室</button>
 </div>
 
-<!-- 個室A -->
 <div class="room">
   <div class="room-title">個室A</div>
   <div class="room-info">
@@ -93,7 +82,6 @@ input[type="password"] {
   <button onclick="enterRoom('privateA')">入室</button>
 </div>
 
-<!-- 個室B -->
 <div class="room">
   <div class="room-title">個室B</div>
   <div class="room-info">
@@ -104,7 +92,6 @@ input[type="password"] {
   <button onclick="enterRoom('privateB')">入室</button>
 </div>
 
-<!-- 個室C -->
 <div class="room">
   <div class="room-title">個室C</div>
   <div class="room-info">
@@ -115,7 +102,6 @@ input[type="password"] {
   <button onclick="enterRoom('privateC')">入室</button>
 </div>
 
-<!-- 個室D -->
 <div class="room">
   <div class="room-title">個室D</div>
   <div class="room-info">
@@ -130,7 +116,6 @@ input[type="password"] {
 <script>
 const socket = io();
 
-/* ===== ロビー更新 ===== */
 socket.on("lobbyUpdate", rooms => {
   const allRooms = [
     "room1","room2","special",
@@ -138,50 +123,44 @@ socket.on("lobbyUpdate", rooms => {
   ];
 
   allRooms.forEach(room => {
-  const countEl = document.getElementById(`count-${room}`);
-  const namesEl = document.getElementById(`names-${room}`);
-  const btn = document.querySelector(`button[onclick="enterRoom('${room}')"]`);
+    const countEl = document.getElementById(`count-${room}`);
+    const namesEl = document.getElementById(`names-${room}`);
+    const btn = document.querySelector(`button[onclick="enterRoom('${room}')"]`);
+    if (!countEl || !namesEl || !btn) return;
 
-  if (!countEl || !namesEl || !btn) return;
-
-  const info = rooms[room];
-
-  if (info) {
-    countEl.textContent = info.count;
-    namesEl.textContent = info.names.join(", ");
-
-    // 個室は2人で満室
-    if (room.startsWith("private") && info.count >= 2) {
-      btn.disabled = true;
-      btn.textContent = "満室";
+    const info = rooms[room];
+    if (info) {
+      countEl.textContent = info.count;
+      namesEl.textContent = info.names.join(", ");
+      if (room.startsWith("private") && info.count >= 2) {
+        btn.disabled = true;
+        btn.textContent = "満室";
+      } else {
+        btn.disabled = false;
+        btn.textContent = "入室";
+      }
     } else {
+      countEl.textContent = 0;
+      namesEl.textContent = "なし";
       btn.disabled = false;
       btn.textContent = "入室";
     }
-  } else {
-    countEl.textContent = 0;
-    namesEl.textContent = "なし";
-    btn.disabled = false;
-    btn.textContent = "入室";
-  }
+  });
 });
 
-
-/* ===== 入室処理 ===== */
 function enterRoom(room) {
   const errorEl = document.getElementById("error");
   errorEl.textContent = "";
 
   let key = "";
-
   if (room.startsWith("private")) {
-    const keyInput = document.getElementById(`key-${room}`);
-    key = keyInput?.value || "";
+    key = document.getElementById(`key-${room}`)?.value || "";
   }
 
   socket.emit("checkRoomKey", { room, key });
 
-  socket.once("checkResult", res => {
+  socket.off("checkResult");   // ← 多重防止
+  socket.on("checkResult", res => {
     if (!res.ok) {
       errorEl.textContent = res.message || "入室できません";
       return;
