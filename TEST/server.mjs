@@ -106,6 +106,19 @@ const boyPunishItems = [
 "男子罰29.【地獄】女性化調教。勝者に女性としての名前、名前の色をつけてもらう。一人称は「あたし」で男言葉使用禁止、女になりきってチャットすること。女性用ショーツとパンスト、家ではブラやパッド、スカートも手に入る場合は身につける。下着禁止や脱衣命令が出ても脱ぐのは禁止。おちんぽはクリ、アナルはおまんこと呼称する。オナニーする場合は普通にしごく男としてのオナニーを禁止し、女性のクリオナのように撫でるようにショーツの上から喘ぎながら行うこと。期間は次に勝負に勝つまでとする。",
 "男子罰30.【地獄】勝利者の奴隷に3日なる。",
 ];
+// ===== special用 罰 =====
+const specialGirlPunishItems = [
+  "special女子罰1",
+  "special女子罰2",
+  "special女子罰3",
+];
+
+const specialBoyPunishItems = [
+  "special男子罰1",
+  "special男子罰2",
+  "special男子罰3",
+];
+
 
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 
@@ -114,28 +127,43 @@ let punishStockByRoom = {};
 
 function initPunishRoom(room){
   if (!punishStockByRoom[room]) {
+
+    const isSpecial = room === "special";
+
     punishStockByRoom[room] = {
-      girl: shuffle([...punishItems]),
-      boy:  shuffle([...boyPunishItems])
+      girl: shuffle([...(isSpecial ? specialGirlPunishItems : punishItems)]),
+      boy:  shuffle([...(isSpecial ? specialBoyPunishItems  : boyPunishItems)])
     };
   }
 }
 
+
 function getGirlPunish(room){
   initPunishRoom(room);
+
   if (!punishStockByRoom[room].girl.length) {
-    punishStockByRoom[room].girl = shuffle([...punishItems]);
+    const isSpecial = room === "special";
+    punishStockByRoom[room].girl = shuffle([
+      ...(isSpecial ? specialGirlPunishItems : punishItems)
+    ]);
   }
+
   return punishStockByRoom[room].girl.shift();
 }
 
 function getBoyPunish(room){
   initPunishRoom(room);
+
   if (!punishStockByRoom[room].boy.length) {
-    punishStockByRoom[room].boy = shuffle([...boyPunishItems]);
+    const isSpecial = room === "special";
+    punishStockByRoom[room].boy = shuffle([
+      ...(isSpecial ? specialBoyPunishItems : boyPunishItems)
+    ]);
   }
+
   return punishStockByRoom[room].boy.shift();
 }
+
 
 /* ===== 15分無反応切断 ===== */
 const LIMIT = 15 * 60 * 1000;
