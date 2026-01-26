@@ -15,9 +15,7 @@ let messagesLog = [];
 function getLobbyInfo() {
   const rooms = {};
   users.forEach(u => {
-    if (!rooms[u.room]) {
-      rooms[u.room] = { count: 0, names: [] };
-    }
+    if (!rooms[u.room]) rooms[u.room] = { count: 0, names: [] };
     rooms[u.room].count++;
     rooms[u.room].names.push(u.name);
   });
@@ -43,7 +41,7 @@ function getTimeString() {
 /* ===== 罰 ===== */
 // 女子罰30個
 const punishItems = [
-"女子罰1.勝者の指定する方法で1d5分間の全力オナニー（ルブルにて1d5のサイコロを振り「○分間全力オナニーをします」と発言し、今の心境も書き残してくること）",
+"女子罰1.勝者の指定する方法で1d5+3分間の全力オナニー（ルブルにて1d5のサイコロを振り「○分間全力オナニーをします」と発言し、今の心境も書き残してくること）",
 "女子罰2.全裸になり脚を開き、人差し指と中指でクリトリスを軽く挟み込んで擦る。3分以内に100往復こする。",
 "女子罰3.「勝利者様にオナニーをするところを見ていただいています。見学者が多いほど興奮します。是非見に来てください♡残り罰回数は〇回です」とルブルの部屋で宣伝し、誰かが来るまでおまんこに人差し指と中指・クリトリスに親指を当て、膣の中で親指と中指をくっつけるように動かし続ける。",
 "女子罰4.利き手とは逆の手の親指と中指で左乳首を挟みクニクニしながら、利き手の中指・薬指でクリトリスを挟み左右に3分以内180往復動かす",
@@ -55,7 +53,7 @@ const punishItems = [
 "女子罰10.勝者からのフリー命令",
 "女子罰11.勝利者の指定する方法でオナニーをして寸止めする。",
 "女子罰12.入室者の数だけ寸止めオナニーをする。",
-"女子罰13.玩具を全て告白し、勝者が選んだ道具(複数同時可)を使用して一回寸止めオナニーする。",
+"女子罰13.玩具を全て告白し、勝者が選んだ道具(複数同時可)を使用して一回寸止めオナニーする。玩具がない場合は寸止め3回連続する。",
 "女子罰14.ルブルの部屋上げをして「今から寸止めオナニーします。見に来てください」とつぶやき、一回寸止めオナニーする。",
 "女子罰15.自分が思う一番惨めで恥ずかしく感じやすいオナニーの仕方を告白し、その方法で一回寸止めする。",
 "女子罰16.オナニーの頻度と一番好きなオナニーのおかず・方法を告白する。その後、告白した方法で一回寸止めする。",
@@ -65,9 +63,9 @@ const punishItems = [
 "女子罰20.今まで受けた最も恥ずかしい体験を告白する。",
 "女子罰21.現在の下半身を写真に取り、携帯に1週間保管する",
 "女子罰22.勝利者から好きな箇所に落書きを1つして写真を撮りロック画面に3日する。",
-"女子罰23.勝利者から好きな箇所に落書きを1つしてラインorカカオの異性に1人に「今の姿を説明しどう思う？」と送る。",
-"女子罰24.ラインorカカオの異性に1人に「私にエッチな命令して」と送る。",
-"女子罰25.HNを勝利者の指定する名前に変えるそして、ラインorカカオの名前を現状の名前に終わるまで変える。（例：雑魚マンコ名前）",
+"女子罰23.勝利者から好きな箇所に落書きを1つしてラインorカカオの異性に1人に「今の姿を説明しどう思う？」と送る。出来ない場合は勝利者がフリー命令。",
+"女子罰24.ラインorカカオの異性に1人に「私にエッチな命令して」と送る。出来ない場合は勝利者がフリー命令。",
+"女子罰25.HNを勝利者の指定する名前に変えるそして、ラインorカカオの名前を現状の名前に終わるまで変える。出来ない場合は勝利者がフリー命令。（例：雑魚マンコ名前）",
 "女子罰26.HNを勝利者の指定する名前に変える。ルブルの部屋上げをして、勝利者の指定した言葉をつぶやく",
 "女子罰27.実況しながら寸止めオナニー（保留可）",
 "女子罰28.実況しながらイクまでオナニー(保留可)",
@@ -90,7 +88,7 @@ const boyPunishItems = [
 "男子罰11.勝者からのフリー命令",
 "男子罰12.勝利者の指定する方法でオナニーをして寸止めする。",
 "男子罰13.入室者の数だけ寸止めオナニーをする。",
-"男子罰14.玩具を全て告白し、勝者が選んだ道具(複数同時可)を使用して一回寸止めオナニーする。",
+"男子罰14.玩具を全て告白し、勝者が選んだ道具(複数同時可)を使用して一回寸止めオナニーする。玩具がない場合は寸止め3回連続する。",
 "男子罰15.ルブルの部屋上げをして「今から寸止めオナニーします。見に来てください」とつぶやき、一回寸止めオナニーする。",
 "男子罰16.自分が思う一番惨めで恥ずかしく感じやすいオナニーの仕方を告白し、その方法で一回寸止めする。",
 "男子罰17.オナニーの頻度と一番好きなオナニーのおかず・方法を告白する。その後、告白した方法で一回寸止めする。",
@@ -99,9 +97,9 @@ const boyPunishItems = [
 "男子罰20.今まで受けた最も恥ずかしい体験を告白する。",
 "男子罰21.現在の下半身を写真に取り、携帯に3日保管する",
 "男子罰22.勝利者から好きな箇所に落書きを1つして写真を撮りロック画面に3日する。",
-"男子罰23.勝利者から好きな箇所に落書きを1つしてラインorカカオの異性に1人に「今の姿を説明しどう思う？」と送る。",
-"男子罰24.ラインorカカオの異性に1人に「私にエッチな命令して」と送る。",
-"男子罰25.HNを勝利者の指定する名前に変えるそして、ラインorカカオの名前を現状の名前に終わるまで変える。（例：雑魚マンコ名前）",
+"男子罰23.勝利者から好きな箇所に落書きを1つしてラインorカカオの異性に1人に「今の姿を説明しどう思う？」と送る。出来ない場合は勝利者がフリー命令。",
+"男子罰24.ラインorカカオの異性に1人に「私にエッチな命令して」と送る。出来ない場合は勝利者がフリー命令。",
+"男子罰25.HNを勝利者の指定する名前に変えるそして、ラインorカカオの名前を現状の名前に終わるまで変える。出来ない場合は勝利者がフリー命令。（例：雑魚マンコ名前）",
 "男子罰26.HNを勝利者の指定する名前に変える。ルブルにもその名前でログインし勝者の指定した言葉をつぶやく",
 "男子罰27.実況しながら寸止めオナニー（保留可）",
 "男子罰28.実況しながらイクまでオナニー(保留可)",
@@ -110,20 +108,33 @@ const boyPunishItems = [
 ];
 
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
-let girlPunishStock = shuffle([...punishItems]);
-let boyPunishStock  = shuffle([...boyPunishItems]);
 
-function getGirlPunish(){
-  if(!girlPunishStock.length) girlPunishStock = shuffle([...punishItems]);
-  return girlPunishStock.shift();
+/* ===== 部屋別 罰ストック ===== */
+let punishStockByRoom = {};
+
+function initPunishRoom(room){
+  if (!punishStockByRoom[room]) {
+    punishStockByRoom[room] = {
+      girl: shuffle([...punishItems]),
+      boy:  shuffle([...boyPunishItems])
+    };
+  }
 }
-function getBoyPunish(){
-  if(!boyPunishStock.length) boyPunishStock = shuffle([...boyPunishItems]);
-  return boyPunishStock.shift();
+
+function getGirlPunish(room){
+  initPunishRoom(room);
+  if (!punishStockByRoom[room].girl.length) {
+    punishStockByRoom[room].girl = shuffle([...punishItems]);
+  }
+  return punishStockByRoom[room].girl.shift();
 }
-function resetPunishments(){
-  girlPunishStock = shuffle([...punishItems]);
-  boyPunishStock  = shuffle([...boyPunishItems]);
+
+function getBoyPunish(room){
+  initPunishRoom(room);
+  if (!punishStockByRoom[room].boy.length) {
+    punishStockByRoom[room].boy = shuffle([...boyPunishItems]);
+  }
+  return punishStockByRoom[room].boy.shift();
 }
 
 /* ===== 15分無反応切断 ===== */
@@ -148,71 +159,35 @@ setInterval(()=>{
       }
     }
   });
-}, 60*1000);
+}, 60000);
 
 /* ===== 接続 ===== */
 io.on("connection", socket => {
-  console.log("接続:", socket.id);
 
-  /* ===== ロビー鍵チェック ===== */
   socket.on("checkRoomKey", ({ room, key }) => {
-
-    // 鍵チェック
-    if (roomKeys[room]) {
-      if (!key || key !== roomKeys[room]) {
-        socket.emit("checkResult", { ok:false, message:"鍵が違います" });
-        return;
-      }
+    if (roomKeys[room] && key !== roomKeys[room]) {
+      socket.emit("checkResult", { ok:false, message:"鍵が違います" });
+      return;
     }
-
-    // 個室満室チェック
     const privateRooms = ["privateA","privateB","privateC","privateD"];
     if (privateRooms.includes(room)) {
-      const roomSet = io.sockets.adapter.rooms.get(room);
-      const count = roomSet ? roomSet.size : 0;
-      if (count >= 2) {
+      const r = io.sockets.adapter.rooms.get(room);
+      if (r && r.size >= 2) {
         socket.emit("checkResult", { ok:false, message:"この個室は満室です" });
         return;
       }
     }
-
     socket.emit("checkResult", { ok:true });
   });
 
-  /* ===== 入室 ===== */
   socket.on("join", ({ name, color="black", room="room1" }) => {
-
-    // 個室2人制限（保険）
-    const privateRooms = ["privateA","privateB","privateC","privateD"];
-    if (privateRooms.includes(room)) {
-      const roomSet = io.sockets.adapter.rooms.get(room);
-      const count = roomSet ? roomSet.size : 0;
-      if (count >= 2) {
-        socket.emit("message", {
-          name:"system",
-          text:"この個室は2人までです",
-          room,
-          time:getTimeString()
-        });
-        return;
-      }
-    }
-
-    // 名前重複回避
-    let finalName = name;
-    if (users.find(u=>u.name===finalName)) {
-      let i = 2;
-      while (users.find(u=>u.name===name+i)) i++;
-      finalName = name + i;
-    }
-
-    socket.username = finalName;
+    socket.username = name;
     socket.room = room;
     socket.join(room);
 
     users.push({
       id: socket.id,
-      name: finalName,
+      name,
       color,
       room,
       lastActive: Date.now()
@@ -223,29 +198,24 @@ io.on("connection", socket => {
     io.emit("lobbyUpdate", getLobbyInfo());
   });
 
-  /* ===== 色変更 ===== */
   socket.on("updateColor", ({ color })=>{
     updateActive(socket);
     const u = users.find(u=>u.id===socket.id);
-    if(!u) return;
-    u.color = color;
-    io.to(socket.room).emit("userList", users.filter(x=>x.room===socket.room));
+    if(u){
+      u.color = color;
+      io.to(socket.room).emit("userList", users.filter(x=>x.room===socket.room));
+    }
   });
 
-  /* ===== メッセージ ===== */
   socket.on("message", data=>{
     updateActive(socket);
     const text = (data.text ?? "").trim();
     if(!text) return;
 
-    const user = users.find(u=>u.id===socket.id);
-    const color = user?.color || "black";
-
     if(text==="女子罰"){
       const msg = {
         name:socket.username,
-        text:`女子罰 → ${getGirlPunish()}`,
-        type:"girl",
+        text:`女子罰 → ${getGirlPunish(socket.room)}`,
         color:"red",
         room:socket.room,
         time:getTimeString()
@@ -258,8 +228,7 @@ io.on("connection", socket => {
     if(text==="男子罰"){
       const msg = {
         name:socket.username,
-        text:`男子罰 → ${getBoyPunish()}`,
-        type:"boy",
+        text:`男子罰 → ${getBoyPunish(socket.room)}`,
         color:"blue",
         room:socket.room,
         time:getTimeString()
@@ -269,27 +238,10 @@ io.on("connection", socket => {
       return;
     }
 
-    if(data.to){
-      const target = users.find(u=>u.id===data.to);
-      if(!target || target.room!==socket.room) return;
-      const msg = {
-        name:socket.username,
-        text,
-        color,
-        to:target.id,
-        private:true,
-        room:socket.room,
-        time:getTimeString()
-      };
-      socket.emit("message", msg);
-      io.to(target.id).emit("message", msg);
-      return;
-    }
-
     const msg = {
       name:socket.username,
       text,
-      color,
+      color:data.color || "black",
       room:socket.room,
       time:getTimeString()
     };
@@ -297,17 +249,11 @@ io.on("connection", socket => {
     io.to(socket.room).emit("message", msg);
   });
 
-  /* ===== 退出 ===== */
   socket.on("leave", ()=> socket.disconnect(true));
 
   socket.on("disconnect", ()=>{
     users = users.filter(u=>u.id!==socket.id);
     io.to(socket.room).emit("userList", users.filter(u=>u.room===socket.room));
-
-    if(!users.some(u=>u.room===socket.room)){
-      resetPunishments();
-      messagesLog = messagesLog.filter(m=>m.room!==socket.room);
-    }
     io.emit("lobbyUpdate", getLobbyInfo());
   });
 });
