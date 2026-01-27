@@ -119,17 +119,43 @@ let username = "";
 let myColor = "#000000";
 let privateTo = "";
 let joined = false;
+window.addEventListener("load", () => {
+  const savedName  = localStorage.getItem("chatName");
+  const savedRoom  = localStorage.getItem("chatRoom");
+  const savedColor = localStorage.getItem("chatColor") || "#000000";
+
+  if (savedName && savedRoom) {
+    username = savedName;
+    myColor = savedColor;
+    colorSelect.value = myColor;
+
+    socket.emit("join", {
+      name: username,
+      color: myColor,
+      room: savedRoom
+    });
+
+    joined = true;
+    login.style.display = "none";
+    chat.style.display = "flex";
+  }
+});
+
 
 // ===== ロビーからの情報 =====
 const room = localStorage.getItem("chatRoom");
 const key  = localStorage.getItem("chatKey");
 
-if (!room) {
+if (!room && !joined) {
   alert("ロビーから入室してください");
   location.href = "/lobby.html";
 }
 
-roomInfo.textContent = `入室先：${room}`;
+
+if (room) {
+  roomInfo.textContent = `入室先：${room}`;
+}
+
 
 // ===== 表示 =====
 function renderMsg(d) {
