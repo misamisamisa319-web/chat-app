@@ -43,6 +43,24 @@ input[type="password"] {
 <body>
 
 <h2>ロビー</h2>
+<div id="features" style="
+  border:1px solid #ccc;
+  padding:12px;
+  margin-bottom:20px;
+  background:#f9f9f9;
+">
+  <h3 style="margin-top:0;">機能</h3>
+  <ul style="margin:0; padding-left:20px; line-height:1.6;">
+    <li>ルーム1、ルーム2のみ使用可能</li>
+    <li>電気椅子部屋、観戦可</li>
+    <li>スペシャル、個室は立入禁止</li>
+    <li>ダイス機能（例：1d6+1）</li> 
+    <li>女子罰 / 男子罰 </li>
+    <li>15分間無反応で自動切断</li>
+    
+  </ul>
+</div>
+
 <div id="error" style="color:red; margin-bottom:10px;"></div>
 
 <div class="room">
@@ -61,6 +79,15 @@ input[type="password"] {
     <span id="names-room2">なし</span>
   </div>
   <button onclick="enterRoom('room2')">入室</button>
+</div>
+
+<div class="room" style="border:2px solid #ff6666; background:#fff5f5;">
+  <div class="room-title">⚡ 電気椅子部屋（観戦可）</div>
+  <div class="room-info">
+    人数（<span id="count-denki">0</span>人）
+    <span id="names-denki">なし</span>
+  </div>
+  <button onclick="enterRoom('denki')">入室</button>
 </div>
 
 <div class="room">
@@ -118,9 +145,13 @@ const socket = io();
 
 socket.on("lobbyUpdate", rooms => {
   const allRooms = [
-    "room1","room2","special",
-    "privateA","privateB","privateC","privateD"
-  ];
+  "room1",
+  "room2",
+  "denki",     // ← 追加
+  "special",
+  "privateA","privateB","privateC","privateD"
+];
+
 
   allRooms.forEach(room => {
     const countEl = document.getElementById(`count-${room}`);
