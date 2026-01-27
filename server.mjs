@@ -384,20 +384,26 @@ io.on("connection", socket => {
     io.to(room).emit("userList", users.filter(u=>u.room===room));
     socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
     io.emit("lobbyUpdate", getLobbyInfo());
-      // ===== denki 役割判定 =====
-  if (room === "denki") {
-    if (!denkiState.players.includes(socket.id) && denkiState.players.length < 2) {
-      denkiState.players.push(socket.id);
-    }
-
-    let role = "viewer";
-    if (denkiState.players[0] === socket.id) role = "player1";
-    if (denkiState.players[1] === socket.id) role = "player2";
-
-    socket.emit("denkiRole", role);
-  }
 
   });
+// ===== 電気椅子：通電 =====
+socket.on("denkiFire", () => {
+  if (socket.room !== "denki") return;
+
+  const seat = Math.floor(Math.random() * 12) + 1;
+  const hit = Math.random() < 0.3;
+
+  io.to("denki").emit("message", {
+    name: "⚡ 電気椅子",
+    text: hit
+      ? `💥 ${seat}番の椅子に電流！ ビリビリ！！！`
+      : `😌 ${seat}番の椅子…セーフ`,
+    color: hit ? "red" : "green",
+    room: "denki",
+    time: getTimeString()
+  });
+});
+
 
   socket.on("updateColor", ({ color })=>{
     updateActive(socket);
