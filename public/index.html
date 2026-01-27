@@ -62,10 +62,15 @@ input, button, select { padding: 10px; font-size: 16px; }
     <button id="updateBtn">更新</button>
   </div>
 
-  <div>
-    <strong>参加者:</strong>
-    <ul id="userList"></ul>
-  </div>
+  <div id="denkiRole" style="
+  margin:6px 0;
+  font-weight:bold;
+"></div>
+
+<div>
+  <strong>参加者:</strong>
+  <ul id="userList"></ul>
+</div>
 
   <div id="settings">
     <label>文字色: <input type="color" id="colorSelect" value="#000000"></label>
@@ -214,6 +219,21 @@ socket.on("userList", list => {
       privateTarget.appendChild(opt);
     }
   });
+});
+socket.on("denkiRole", role => {
+  const el = document.getElementById("denkiRole");
+  if (!el) return;
+
+  if (role === "player1") {
+    el.textContent = "⚡ あなたはプレイヤー1です";
+    el.style.color = "red";
+  } else if (role === "player2") {
+    el.textContent = "⚡ あなたはプレイヤー2です";
+    el.style.color = "blue";
+  } else {
+    el.textContent = "👀 あなたは観戦中です";
+    el.style.color = "gray";
+  }
 });
 
 // ===== 入室処理 =====

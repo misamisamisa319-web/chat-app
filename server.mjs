@@ -11,6 +11,11 @@ const io = new Server(server);
 let users = [];
 let messagesLog = [];
 
+// ===== 電気椅子部屋の役割管理 =====
+const denkiState = {
+  players: [] // socket.id を最大2つ
+};
+
 const LOG_FILE = "./logs.json";
 
 if (fs.existsSync(LOG_FILE)) {
@@ -379,6 +384,19 @@ io.on("connection", socket => {
     io.to(room).emit("userList", users.filter(u=>u.room===room));
     socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
     io.emit("lobbyUpdate", getLobbyInfo());
+      // ===== denki 役割判定 =====
+  if (room === "denki") {
+    if (!denkiState.players.includes(socket.id) && denkiState.players.length < 2) {
+      denkiState.players.push(socket.id);
+    }
+
+    let role = "viewer";
+    if (denkiState.players[0] === socket.id) role = "player1";
+    if (denkiState.players[1] === socket.id) role = "player2";
+
+    socket.emit("denkiRole", role);
+  }
+
   });
 
   socket.on("updateColor", ({ color })=>{
@@ -396,7 +414,7 @@ io.on("connection", socket => {
     // ===== ダイス（XdY+Z 形式のみ）=====
 const diceMatch = text.match(/^(\d+)d(\d+)(?:\+(\d+))?$/i);
 if (diceMatch) {
-  let count = Math.min(parseInt(diceMatch[1], 10), 20);       // 最大10個
+  let count = Math.min(parseInt(diceMatch[1], 10), 20);       // 最大20個
   let faces = Math.min(parseInt(diceMatch[2], 10), 10000);   // 最大10000
   let plus  = parseInt(diceMatch[3] || "0", 10);
 
@@ -507,6 +525,9 @@ if (diceMatch) {
     users = users.filter(u=>u.id!==socket.id);
     io.to(socket.room).emit("userList", users.filter(u=>u.room===socket.room));
     io.emit("lobbyUpdate", getLobbyInfo());
+      // ===== denki 役割解除 =====
+  denkiState.players = denkiState.players.filter(id => id !== socket.id);
+
    // その部屋に誰もいなくなったら、通常ログだけ消す
 const stillInRoom = users.some(u => u.room === socket.room);
 if (!stillInRoom) {
