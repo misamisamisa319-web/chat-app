@@ -265,6 +265,24 @@ io.on("connection", socket => {
       io.to(socket.room).emit("message", msg);
       return;
     }
+  // ===== 内緒メッセージ =====
+  if (data.to) {
+    const msg = {
+      name: socket.username,
+      text,
+      color: data.color || "black",
+      room: socket.room,
+      time: getTimeString(),
+      private: true,
+      to: data.to
+    };
+
+    messagesLog.push(msg);
+
+    socket.emit("message", msg);         // 自分に表示
+    io.to(data.to).emit("message", msg); // 相手にだけ送信
+    return;
+  }
 
     const msg = {
       name:socket.username,
