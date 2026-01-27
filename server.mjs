@@ -398,7 +398,6 @@ io.on("connection", socket => {
     const me = denkiState.players.find(p=>p.id===socket.id);
     if (!me || !me.isTurn || denkiState.phase!=="set") return;
     denkiState.trapSeat = seat;
-    denkiState.seats = denkiState.seats.filter(s=>s!==seat);
     denkiState.phase = "sit";
     emitDenki();
   });
