@@ -393,6 +393,33 @@ io.on("connection", socket => {
   socket.on("message", data=>{
     updateActive(socket);
     const text = (data.text ?? "").trim();
+    // ===== ダイス（XdY+Z 形式のみ）=====
+const diceMatch = text.match(/^(\d+)d(\d+)(?:\+(\d+))?$/i);
+if (diceMatch) {
+  let count = Math.min(parseInt(diceMatch[1], 10), 20);       // 最大10個
+  let faces = Math.min(parseInt(diceMatch[2], 10), 10000);   // 最大10000
+  let plus  = parseInt(diceMatch[3] || "0", 10);
+
+  const rolls = Array.from({ length: count }, () =>
+    Math.floor(Math.random() * faces) + 1
+  );
+  const sum = rolls.reduce((a, b) => a + b, 0);
+  const total = sum + plus;
+
+  const msg = {
+    name: socket.username,
+    text: `${count}d${faces}${plus ? "+" + plus : ""} →（${rolls.join(",")}）${plus ? "+" + plus : ""}＝${total}`,
+    color: data.color || "black",
+    room: socket.room,
+    time: getTimeString()
+  };
+
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
+
     if(!text) return;
 
     if(text==="女子罰"){
