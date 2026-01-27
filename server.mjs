@@ -323,13 +323,18 @@ let denkiState = {
 
 function resetDenki() {
   denkiState.phase = "set";
-  denkiState.turnIndex = 0;
   denkiState.seats = [1,2,3,4,5,6,7,8,9,10,11,12];
   denkiState.trapSeat = null;
-  denkiState.players.forEach((p,i)=>p.isTurn = i===0);
+
+}
+function syncDenkiTurn() {
+  denkiState.players.forEach((p,i)=>{
+    p.isTurn = (i === denkiState.turnIndex);
+  });
 }
 
 function emitDenki() {
+   syncDenkiTurn(); 
   io.to(DENKI_ROOM).emit("denkiState", {
     phase: denkiState.phase,
     remainingSeats: denkiState.seats,
@@ -411,26 +416,42 @@ io.on("connection", socket => {
   });
 
   socket.on("denkiFire", () => {
-    if (socket.room !== DENKI_ROOM) return;
-    const me = denkiState.players.find(p=>p.id===socket.id);
-    if (!me || !me.isTurn || denkiState.phase!=="fire") return;
+  if (socket.room !== DENKI_ROOM) return;
+  const me = denkiState.players.find(p=>p.id===socket.id);
+  if (!me || !me.isTurn || denkiState.phase!=="fire") return;
 
-    const victim = denkiState.players.find(p=>p.id!==me.id);
-    if (!victim) return;
+  const victim = denkiState.players.find(p=>p.id!==me.id);
+  if (!victim) return;
 
-    if (socket.selectedSeat === denkiState.trapSeat) {
-      victim.shock += 1;
-      me.score += 1;
-    }
+  let resultText = "";
 
-    denkiState.players.forEach(p=>p.isTurn=false);
-    denkiState.turnIndex = (denkiState.turnIndex+1)%denkiState.players.length;
-    denkiState.players[denkiState.turnIndex].isTurn = true;
+  if (socket.selectedSeat === denkiState.trapSeat) {
+    victim.shock += 1;
+    me.score += 1;
+    resultText = `⚡ 成功！ ${me.name} が ${victim.name} に電流を流しました`;
+  } else {
+    resultText = `❌ 失敗… ${me.name} の電気は空振りでした`;
+  }
 
-    resetDenki();
-    emitDenki();
-  });
+  const msg = {
+    name: "system",
+    text: resultText,
+    room: socket.room,
+    time: getTimeString()
+  };
 
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+
+  denkiState.turnIndex =
+    (denkiState.turnIndex + 1) % denkiState.players.length;
+
+  resetDenki();
+  emitDenki();
+});
+
+  
   socket.on("message", data=>{
     updateActive(socket);
     const text = (data.text ?? "").trim();
