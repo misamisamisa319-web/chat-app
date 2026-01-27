@@ -245,7 +245,7 @@ const specialPainPunishItems = [
 "苦痛罰20.おまんこに刺激物を塗る",
 ];
 
-/* ===== 罰ロジック ===== */
+/* ===== 罰ロジック（既存） ===== */
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 let punishStockByRoom = {};
 function initPunishRoom(room){
@@ -309,7 +309,48 @@ setInterval(()=>{
 /* ===============================
    ⚡ 電気椅子ゲーム（水ダウ仕様）
 ================================ */
-// （※ユーザー貼付のまま変更なし）
+// 仕様：2人対戦／観戦可／ターン制
+// phase: set → sit → fire
+// 椅子は 1〜6
+// 得点：電流が流れた側に shock 加算、相手に score 加算
+
+const DENKI_ROOM = "denki";
+
+let denkiState = {
+  phase: "set",
+  turnIndex: 0,
+  seats: [1,2,3,4,5,6],
+  trapSeat: null,
+  players: [] // {id,name,score,shock,isTurn}
+};
+
+function resetDenki() {
+  denkiState = {
+    phase: "set",
+    turnIndex: 0,
+    seats: [1,2,3,4,5,6],
+    trapSeat: null,
+    players: denkiState.players.map(p=>({
+      ...p,
+      isTurn: false
+    }))
+  };
+  if (denkiState.players[0]) denkiState.players[0].isTurn = true;
+}
+
+function emitDenki() {
+  io.to(DENKI_ROOM).emit("denkiState", {
+    phase: denkiState.phase,
+    remainingSeats: denkiState.seats,
+    players: denkiState.players.map(p=>({
+      id:p.id,
+      name:p.name,
+      score:p.score,
+      shock:p.shock,
+      isTurn:p.isTurn
+    }))
+  });
+}
 
 /* ===============================
    Socket.IO
@@ -340,6 +381,20 @@ io.on("connection", socket => {
     io.to(room).emit("userList", users.filter(u=>u.room===room));
     socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
     io.emit("lobbyUpdate", getLobbyInfo());
+
+    // 電気椅子参加
+    if (room === DENKI_ROOM) {
+      if (denkiState.players.length < 2) {
+        denkiState.players.push({
+          id: socket.id,
+          name,
+          score: 0,
+          shock: 0,
+          isTurn: denkiState.players.length === 0
+        });
+        emitDenki();
+      }
+    }
   });
 
   socket.on("updateColor", ({ color })=>{
@@ -351,12 +406,54 @@ io.on("connection", socket => {
     }
   });
 
+  /* ===== ⚡ 電気椅子操作 ===== */
+  socket.on("denkiSet", seat => {
+    if (socket.room !== DENKI_ROOM) return;
+    const me = denkiState.players.find(p=>p.id===socket.id);
+    if (!me || !me.isTurn || denkiState.phase!=="set") return;
+    denkiState.trapSeat = seat;
+    denkiState.seats = denkiState.seats.filter(s=>s!==seat);
+    denkiState.phase = "sit";
+    emitDenki();
+  });
+
+  socket.on("denkiSit", seat => {
+    if (socket.room !== DENKI_ROOM) return;
+    if (denkiState.phase!=="sit") return;
+    socket.selectedSeat = seat;
+    emitDenki();
+  });
+
+  socket.on("denkiFire", () => {
+    if (socket.room !== DENKI_ROOM) return;
+    const me = denkiState.players.find(p=>p.id===socket.id);
+    if (!me || !me.isTurn || denkiState.phase!=="fire") return;
+
+    const victim = denkiState.players.find(p=>p.id!==me.id);
+    if (!victim) return;
+
+    if (socket.selectedSeat === denkiState.trapSeat) {
+      victim.shock += 1;
+      me.score += 1;
+    }
+
+    // ターン交代
+    denkiState.players.forEach(p=>p.isTurn=false);
+    denkiState.turnIndex = (denkiState.turnIndex+1)%denkiState.players.length;
+    denkiState.players[denkiState.turnIndex].isTurn = true;
+
+    denkiState.phase = "set";
+    denkiState.seats = [1,2,3,4,5,6];
+    denkiState.trapSeat = null;
+
+    emitDenki();
+  });
+
   socket.on("message", data=>{
     updateActive(socket);
     const text = (data.text ?? "").trim();
     if(!text) return;
 
-    // ===== 罰 =====
     if (text === "女子罰") {
       const msg = {
         name: socket.username,
@@ -394,7 +491,6 @@ io.on("connection", socket => {
       return;
     }
 
-    // ===== ダイス =====
     const m = text.match(/^(\d+)d(\d+)(?:\+(\d+))?$/i);
     if (m) {
       const c = Math.min(parseInt(m[1]), 20);
@@ -414,7 +510,6 @@ io.on("connection", socket => {
       return;
     }
 
-    // ===== 内緒 =====
     if (data.to) {
       const msg = {
         name: socket.username,
@@ -445,7 +540,9 @@ io.on("connection", socket => {
   socket.on("leave", ()=> socket.disconnect(true));
   socket.on("disconnect", ()=>{
     users = users.filter(u=>u.id!==socket.id);
+    denkiState.players = denkiState.players.filter(p=>p.id!==socket.id);
     io.emit("lobbyUpdate", getLobbyInfo());
+    emitDenki();
   });
 });
 
