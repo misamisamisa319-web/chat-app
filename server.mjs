@@ -396,7 +396,7 @@ io.on("connection", socket => {
     // ===== ダイス（XdY+Z 形式のみ）=====
 const diceMatch = text.match(/^(\d+)d(\d+)(?:\+(\d+))?$/i);
 if (diceMatch) {
-  let count = Math.min(parseInt(diceMatch[1], 10), 10);       // 最大10個
+  let count = Math.min(parseInt(diceMatch[1], 10), 20);       // 最大10個
   let faces = Math.min(parseInt(diceMatch[2], 10), 10000);   // 最大10000
   let plus  = parseInt(diceMatch[3] || "0", 10);
 
