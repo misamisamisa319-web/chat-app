@@ -61,27 +61,11 @@ input, button, select { padding: 10px; font-size: 16px; }
     <button id="sendBtn">送信</button>
     <button id="updateBtn">更新</button>
   </div>
-  <div id="denkiGame" style="
-  margin:8px;
-  padding:10px;
-  background:#bfe3ee;
-  border-radius:8px;
-">
-  <div style="font-weight:bold;">⚡ 電気椅子</div>
-  <div id="denkiStatus">待機中</div>
-  <div id="denkiSeats"></div>
-  <button id="denkiFire" disabled>電流を流す</button>
-</div>
 
-  <div id="denkiRole" style="
-  margin:6px 0;
-  font-weight:bold;
-"></div>
-
-<div>
-  <strong>参加者:</strong>
-  <ul id="userList"></ul>
-</div>
+  <div>
+    <strong>参加者:</strong>
+    <ul id="userList"></ul>
+  </div>
 
   <div id="settings">
     <label>文字色: <input type="color" id="colorSelect" value="#000000"></label>
@@ -231,47 +215,6 @@ socket.on("userList", list => {
     }
   });
 });
-// ===== 電気椅子 =====
-let myDenkiRole = "viewer";
-
-const statusEl = document.getElementById("denkiStatus");
-const seatsEl = document.getElementById("denkiSeats");
-const fireBtn = document.getElementById("denkiFire");
-
-// 椅子を12個作る
-for (let i = 1; i <= 12; i++) {
-  const b = document.createElement("button");
-  b.textContent = i;
-  b.style.margin = "4px";
-  b.onclick = () => {
-    if (myDenkiRole === "viewer") return;
-    socket.emit("denkiSelect", i);
-  };
-  seatsEl.appendChild(b);
-}
-
-// 役割を受信
-socket.on("denkiRole", role => {
-  myDenkiRole = role;
-  if (role === "player1") {
-    statusEl.textContent = "⚡ あなたは通電役";
-    fireBtn.disabled = false;
-  } else if (role === "player2") {
-    statusEl.textContent = "⚡ あなたは着席役";
-    fireBtn.disabled = true;
-  } else {
-    statusEl.textContent = "👀 観戦中";
-    fireBtn.disabled = true;
-  }
-});
-
-// 通電ボタン
-fireBtn.onclick = () => {
-  if (myDenkiRole !== "player1") return;
-  socket.emit("denkiFire");
-};
-
-
 
 // ===== 入室処理 =====
 joinBtn.onclick = () => {
