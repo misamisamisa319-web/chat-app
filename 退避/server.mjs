@@ -6,10 +6,59 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static("public"));
-
 let users = [];
 let messagesLog = [];
+
+app.use(express.static("public"));
+
+
+// ===== 管理者用ログ確認（ミサ専用）=====
+app.get("/admin", (req, res) => {
+  const key = req.query.key;
+  if (key !== process.env.ADMIN_KEY) {
+    return res.status(403).send("Forbidden");
+  }
+
+  const rows = messagesLog.map(m => `
+    <tr>
+      <td>${m.time || ""}</td>
+      <td>${m.room}</td>
+      <td>${m.name}</td>
+      <td>${m.private ? "内緒" : "通常"}</td>
+      <td>${m.text}</td>
+    </tr>
+  `).join("");
+
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+      <meta charset="UTF-8" />
+      <title>管理者ログ</title>
+      <style>
+        body { font-family: sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 6px; }
+        th { background: #f0f0f0; }
+        tr:nth-child(even){ background:#fafafa; }
+      </style>
+    </head>
+    <body>
+      <h2>管理者ログ（全ルーム・内緒含む）</h2>
+      <table>
+        <tr>
+          <th>時刻</th>
+          <th>部屋</th>
+          <th>名前</th>
+          <th>種別</th>
+          <th>内容</th>
+        </tr>
+        ${rows}
+      </table>
+    </body>
+    </html>
+  `);
+});
 
 /* ===== ロビー情報 ===== */
 function getLobbyInfo() {
