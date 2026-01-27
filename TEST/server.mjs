@@ -245,7 +245,7 @@ const specialPainPunishItems = [
 "苦痛罰20.おまんこに刺激物を塗る",
 ];
 
-/* ===== 罰ロジック（既存） ===== */
+/* ===== 罰ロジック ===== */
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 let punishStockByRoom = {};
 function initPunishRoom(room){
@@ -281,7 +281,7 @@ function getPainPunish(room){
 }
 
 /* ===============================
-   15分無反応切断（既存）
+   15分無反応切断
 ================================ */
 const LIMIT = 15 * 60 * 1000;
 function updateActive(socket){
@@ -307,35 +307,24 @@ setInterval(()=>{
 }, 60000);
 
 /* ===============================
-   ⚡ 電気椅子ゲーム（水ダウ仕様）
+   ⚡ 電気椅子ゲーム
 ================================ */
-// 仕様：2人対戦／観戦可／ターン制
-// phase: set → sit → fire
-// 椅子は 1〜6
-// 得点：電流が流れた側に shock 加算、相手に score 加算
-
 const DENKI_ROOM = "denki";
 
 let denkiState = {
   phase: "set",
   turnIndex: 0,
-  seats: [1,2,3,4,5,6],
+  seats: [1,2,3,4,5,6,7,8,9,10,11,12],
   trapSeat: null,
-  players: [] // {id,name,score,shock,isTurn}
+  players: []
 };
 
 function resetDenki() {
-  denkiState = {
-    phase: "set",
-    turnIndex: 0,
-    seats: [1,2,3,4,5,6],
-    trapSeat: null,
-    players: denkiState.players.map(p=>({
-      ...p,
-      isTurn: false
-    }))
-  };
-  if (denkiState.players[0]) denkiState.players[0].isTurn = true;
+  denkiState.phase = "set";
+  denkiState.turnIndex = 0;
+  denkiState.seats = [1,2,3,4,5,6,7,8,9,10,11,12];
+  denkiState.trapSeat = null;
+  denkiState.players.forEach((p,i)=>p.isTurn = i===0);
 }
 
 function emitDenki() {
@@ -382,18 +371,12 @@ io.on("connection", socket => {
     socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
     io.emit("lobbyUpdate", getLobbyInfo());
 
-    // 電気椅子参加
     if (room === DENKI_ROOM) {
-      if (denkiState.players.length < 2) {
-        denkiState.players.push({
-          id: socket.id,
-          name,
-          score: 0,
-          shock: 0,
-          isTurn: denkiState.players.length === 0
-        });
-        emitDenki();
+      if (!denkiState.players.find(p=>p.id===socket.id) && denkiState.players.length < 2) {
+        denkiState.players.push({ id:socket.id, name, score:0, shock:0, isTurn:false });
       }
+      if (denkiState.players.length >= 1) resetDenki();
+      emitDenki();
     }
   });
 
@@ -406,7 +389,6 @@ io.on("connection", socket => {
     }
   });
 
-  /* ===== ⚡ 電気椅子操作 ===== */
   socket.on("denkiSet", seat => {
     if (socket.room !== DENKI_ROOM) return;
     const me = denkiState.players.find(p=>p.id===socket.id);
@@ -421,6 +403,7 @@ io.on("connection", socket => {
     if (socket.room !== DENKI_ROOM) return;
     if (denkiState.phase!=="sit") return;
     socket.selectedSeat = seat;
+    denkiState.phase = "fire";
     emitDenki();
   });
 
@@ -428,24 +411,18 @@ io.on("connection", socket => {
     if (socket.room !== DENKI_ROOM) return;
     const me = denkiState.players.find(p=>p.id===socket.id);
     if (!me || !me.isTurn || denkiState.phase!=="fire") return;
-
     const victim = denkiState.players.find(p=>p.id!==me.id);
     if (!victim) return;
-
     if (socket.selectedSeat === denkiState.trapSeat) {
       victim.shock += 1;
       me.score += 1;
     }
-
-    // ターン交代
     denkiState.players.forEach(p=>p.isTurn=false);
     denkiState.turnIndex = (denkiState.turnIndex+1)%denkiState.players.length;
     denkiState.players[denkiState.turnIndex].isTurn = true;
-
     denkiState.phase = "set";
     denkiState.seats = [1,2,3,4,5,6];
     denkiState.trapSeat = null;
-
     emitDenki();
   });
 
@@ -455,40 +432,16 @@ io.on("connection", socket => {
     if(!text) return;
 
     if (text === "女子罰") {
-      const msg = {
-        name: socket.username,
-        text: `女子罰 → ${getGirlPunish(socket.room)}`,
-        color: "red",
-        room: socket.room,
-        time: getTimeString()
-      };
-      messagesLog.push(msg); saveLogs();
-      io.to(socket.room).emit("message", msg);
-      return;
+      const msg = { name: socket.username, text: `女子罰 → ${getGirlPunish(socket.room)}`, color:"red", room:socket.room, time:getTimeString() };
+      messagesLog.push(msg); saveLogs(); io.to(socket.room).emit("message", msg); return;
     }
     if (text === "男子罰") {
-      const msg = {
-        name: socket.username,
-        text: `男子罰 → ${getBoyPunish(socket.room)}`,
-        color: "blue",
-        room: socket.room,
-        time: getTimeString()
-      };
-      messagesLog.push(msg); saveLogs();
-      io.to(socket.room).emit("message", msg);
-      return;
+      const msg = { name: socket.username, text: `男子罰 → ${getBoyPunish(socket.room)}`, color:"blue", room:socket.room, time:getTimeString() };
+      messagesLog.push(msg); saveLogs(); io.to(socket.room).emit("message", msg); return;
     }
     if (text === "苦痛罰" && socket.room === "special") {
-      const msg = {
-        name: socket.username,
-        text: `苦痛罰 → ${getPainPunish(socket.room)}`,
-        color: "purple",
-        room: socket.room,
-        time: getTimeString()
-      };
-      messagesLog.push(msg); saveLogs();
-      io.to(socket.room).emit("message", msg);
-      return;
+      const msg = { name: socket.username, text: `苦痛罰 → ${getPainPunish(socket.room)}`, color:"purple", room:socket.room, time:getTimeString() };
+      messagesLog.push(msg); saveLogs(); io.to(socket.room).emit("message", msg); return;
     }
 
     const m = text.match(/^(\d+)d(\d+)(?:\+(\d+))?$/i);
@@ -498,43 +451,17 @@ io.on("connection", socket => {
       const p = parseInt(m[3]||"0");
       const r = Array.from({length:c},()=>Math.floor(Math.random()*f)+1);
       const total = r.reduce((a,b)=>a+b,0)+p;
-      const msg = {
-        name: socket.username,
-        text: `${c}d${f}${p?`+${p}`:""} →（${r.join(",")}）＝${total}`,
-        color: data.color || "black",
-        room: socket.room,
-        time: getTimeString()
-      };
-      messagesLog.push(msg); saveLogs();
-      io.to(socket.room).emit("message", msg);
-      return;
+      const msg = { name: socket.username, text: `${c}d${f}${p?`+${p}`:""} →（${r.join(",")}）＝${total}`, color:data.color||"black", room:socket.room, time:getTimeString() };
+      messagesLog.push(msg); saveLogs(); io.to(socket.room).emit("message", msg); return;
     }
 
     if (data.to) {
-      const msg = {
-        name: socket.username,
-        text,
-        color: data.color || "black",
-        room: socket.room,
-        time: getTimeString(),
-        private: true,
-        to: data.to
-      };
-      messagesLog.push(msg); saveLogs();
-      socket.emit("message", msg);
-      io.to(data.to).emit("message", msg);
-      return;
+      const msg = { name: socket.username, text, color:data.color||"black", room:socket.room, time:getTimeString(), private:true, to:data.to };
+      messagesLog.push(msg); saveLogs(); socket.emit("message", msg); io.to(data.to).emit("message", msg); return;
     }
 
-    const msg = {
-      name: socket.username,
-      text,
-      color: data.color || "black",
-      room: socket.room,
-      time: getTimeString()
-    };
-    messagesLog.push(msg); saveLogs();
-    io.to(socket.room).emit("message", msg);
+    const msg = { name: socket.username, text, color:data.color||"black", room:socket.room, time:getTimeString() };
+    messagesLog.push(msg); saveLogs(); io.to(socket.room).emit("message", msg);
   });
 
   socket.on("leave", ()=> socket.disconnect(true));
