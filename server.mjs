@@ -480,11 +480,15 @@ io.on("connection", socket => {
     users = users.filter(u=>u.id!==socket.id);
     io.to(socket.room).emit("userList", users.filter(u=>u.room===socket.room));
     io.emit("lobbyUpdate", getLobbyInfo());
-    // その部屋に誰もいなくなったら、通常ログだけ消す
+   // その部屋に誰もいなくなったら、通常ログだけ消す
 const stillInRoom = users.some(u => u.room === socket.room);
 if (!stillInRoom) {
-  messagesLog = messagesLog.filter(m => m.room !== socket.room);
+  messagesLog = messagesLog.filter(m =>
+    m.room !== socket.room || m.private === true
+  );
+  saveLogs();
 }
+
 
   });
 });
