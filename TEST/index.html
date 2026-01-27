@@ -112,7 +112,6 @@ input, button, select { padding: 10px; font-size: 16px; }
     <button id="updateBtn">更新</button>
   </div>
 
-  <!-- ⚡ 電気椅子 -->
   <div id="denkiGame" style="display:none;">
     <div style="font-weight:bold;">⚡ 電気椅子</div>
     <div id="denkiInfo"></div>
@@ -153,7 +152,6 @@ input, button, select { padding: 10px; font-size: 16px; }
 <script>
 const socket = io();
 
-/* ===== 既存変数 ===== */
 const login = document.getElementById("login");
 const chat = document.getElementById("chat");
 const joinBtn = document.getElementById("joinBtn");
@@ -178,20 +176,16 @@ soundSelect.value = soundLevel;
 let username = "";
 let myColor = "#000000";
 let privateTo = "";
-let joined = false;
 let myId = "";
 
-/* ===== 電気椅子 ===== */
 const denkiBox = document.getElementById("denkiGame");
 const denkiInfo = document.getElementById("denkiInfo");
 const denkiSeats = document.getElementById("denkiSeats");
 const denkiSet = document.getElementById("denkiSet");
 const denkiSit = document.getElementById("denkiSit");
 const denkiFire = document.getElementById("denkiFire");
-
 let selectedSeat = null;
 
-/* ===== Socket ===== */
 socket.on("connect", ()=> myId = socket.id);
 
 socket.on("pastMessages", logs => {
@@ -226,7 +220,6 @@ socket.on("userList", list => {
   });
 });
 
-/* ===== 電気椅子状態 ===== */
 socket.on("denkiState", state => {
   denkiBox.style.display = "block";
   denkiSeats.innerHTML = "";
@@ -253,7 +246,6 @@ denkiSet.onclick  = ()=> selectedSeat && socket.emit("denkiSet", selectedSeat);
 denkiSit.onclick  = ()=> selectedSeat && socket.emit("denkiSit", selectedSeat);
 denkiFire.onclick = ()=> socket.emit("denkiFire");
 
-/* ===== 表示 ===== */
 function renderMsg(d) {
   const li = document.createElement("li");
   if (d.time) {
@@ -274,7 +266,6 @@ function renderMsg(d) {
   messages.prepend(li);
 }
 
-/* ===== 操作 ===== */
 colorSelect.oninput = () => {
   myColor = colorSelect.value;
   localStorage.setItem("chatColor", myColor);
@@ -301,6 +292,13 @@ sendBtn.onclick = () => {
   privateTo = "";
   privateTarget.value = "";
 };
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendBtn.click();
+  }
+});
 
 updateBtn.onclick = () => {
   socket.emit("updateColor", { color: myColor });
