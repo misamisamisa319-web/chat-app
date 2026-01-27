@@ -1,6 +1,8 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
+import fs from "fs";
+
 
 const app = express();
 const server = http.createServer(app);
@@ -8,6 +10,21 @@ const io = new Server(server);
 
 let users = [];
 let messagesLog = [];
+
+const LOG_FILE = "./logs.json";
+
+if (fs.existsSync(LOG_FILE)) {
+  try {
+    messagesLog = JSON.parse(fs.readFileSync(LOG_FILE, "utf8"));
+  } catch {
+    messagesLog = [];
+  }
+}
+
+function saveLogs() {
+  fs.writeFileSync(LOG_FILE, JSON.stringify(messagesLog, null, 2));
+}
+
 
 app.use(express.static("public"));
 
@@ -387,6 +404,8 @@ io.on("connection", socket => {
         time:getTimeString()
       };
       messagesLog.push(msg);
+      saveLogs();
+
       io.to(socket.room).emit("message", msg);
       return;
     }
@@ -400,6 +419,8 @@ io.on("connection", socket => {
         time:getTimeString()
       };
       messagesLog.push(msg);
+      saveLogs();
+
       io.to(socket.room).emit("message", msg);
       return;
     }
@@ -413,6 +434,8 @@ io.on("connection", socket => {
     time: getTimeString()
   };
   messagesLog.push(msg);
+  saveLogs();
+
   io.to(socket.room).emit("message", msg);
   return;
 }
@@ -430,6 +453,8 @@ io.on("connection", socket => {
     };
 
     messagesLog.push(msg);
+    saveLogs();
+
 
     socket.emit("message", msg);         // 自分に表示
     io.to(data.to).emit("message", msg); // 相手にだけ送信
@@ -444,6 +469,8 @@ io.on("connection", socket => {
       time:getTimeString()
     };
     messagesLog.push(msg);
+    saveLogs();
+
     io.to(socket.room).emit("message", msg);
   });
 
