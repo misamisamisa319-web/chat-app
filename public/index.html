@@ -112,14 +112,29 @@ input, button, select { padding: 10px; font-size: 16px; }
     <button id="updateBtn">更新</button>
   </div>
 
-  <div id="denkiGame" style="display:none;">
-    <div style="font-weight:bold;">⚡ 電気椅子</div>
-    <div id="denkiInfo"></div>
-    <div id="denkiSeats"></div>
-    <button id="denkiSet">仕掛ける</button>
-    <button id="denkiSit">座る</button>
-    <button id="denkiFire">電流を流す</button>
-  </div>
+ <div id="denkiGame" style="display:none;">
+  <div style="font-weight:bold;">⚡ 電気椅子</div>
+
+  <!-- ★ ここから表 -->
+  <table id="denkiTable" border="1" style="margin:8px 0; width:100%;">
+    <thead>
+      <tr>
+        <th>名前</th>
+        <th>合計点</th>
+        <th>被電流</th>
+        <th>ターン</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <!-- ★ ここまで -->
+
+  <div id="denkiSeats"></div>
+  <button id="denkiSet">仕掛ける</button>
+  <button id="denkiSit">座る</button>
+  <button id="denkiFire">電流を流す</button>
+</div>
+
 
   <div>
     <strong>参加者:</strong>
@@ -179,7 +194,6 @@ let privateTo = "";
 let myId = "";
 
 const denkiBox = document.getElementById("denkiGame");
-const denkiInfo = document.getElementById("denkiInfo");
 const denkiSeats = document.getElementById("denkiSeats");
 const denkiSet = document.getElementById("denkiSet");
 const denkiSit = document.getElementById("denkiSit");
@@ -232,9 +246,22 @@ socket.on("denkiState", state => {
     denkiSeats.appendChild(b);
   });
 
-  denkiInfo.innerHTML = state.players.map(p =>
-    `${p.name}: ${p.score}点 / 電流${p.shock}${p.isTurn?" ←ターン":""}`
-  ).join("<br>");
+  const tbody = document.querySelector("#denkiTable tbody");
+tbody.innerHTML = "";
+
+state.players.forEach(p => {
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td>${p.name}</td>
+    <td>${p.score}</td>
+    <td>${p.shock}</td>
+    <td>${p.isTurn ? "●" : ""}</td>
+  `;
+
+  tbody.appendChild(tr);
+});
+
 
   const me = state.players.find(p=>p.id===myId);
   denkiSet.disabled  = !(me?.isTurn && state.phase==="set");
