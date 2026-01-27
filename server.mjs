@@ -6,10 +6,22 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static("public"));
-
 let users = [];
 let messagesLog = [];
+
+app.use(express.static("public"));
+
+// ===== 管理者用ログ確認（ミサ専用）=====
+app.get("/admin-log", (req, res) => {
+  const key = req.query.key;
+
+  if (key !== process.env.ADMIN_KEY) {
+    return res.status(403).send("Forbidden");
+  }
+
+  // 全部屋・内緒含むログを返す
+  res.json(messagesLog);
+});
 
 /* ===== ロビー情報 ===== */
 function getLobbyInfo() {
