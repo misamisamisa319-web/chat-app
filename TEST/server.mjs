@@ -330,9 +330,8 @@ function resetDenki(){
    Socket.IO
 ================================ */
 io.on("connection", socket => {
-  socket.on("denkiPredict", seat => {
-  socket.emit("denkiSet", seat);
-});
+  
+
 
   socket.on("checkRoomKey", ({ room, key }) => {
     if (roomKeys[room] && key !== roomKeys[room]) {
@@ -361,10 +360,22 @@ io.on("connection", socket => {
     socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
     io.emit("lobbyUpdate", getLobbyInfo());
 
-    if (room === DENKI_ROOM && denki.players.length < 2) {
-      denki.players.push({ id:socket.id, name, score:0, shock:0 });
-      io.to(DENKI_ROOM).emit("denkiState", denkiState());
-    }
+    if (room === DENKI_ROOM) {
+  // 既にいなければ追加
+  if (!denki.players.find(p => p.id === socket.id) && denki.players.length < 2) {
+    denki.players.push({
+      id: socket.id,
+      name,
+      score: 0,
+      shock: 0
+    });
+  }
+
+  // ★ ここが重要：必ず送る
+  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+}
+
+      
   });
 
   socket.on("denkiSet", seat=>{

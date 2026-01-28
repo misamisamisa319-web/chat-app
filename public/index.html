@@ -265,9 +265,10 @@ socket.on("userList", list => {
 
 /* ===== 電気椅子：状態 ===== */
 socket.on("denkiState", state => {
-  denkiState = state || [];
+  denkiState = state;   // オブジェクトとして保持
   updateDenkiUI();
 });
+
 
 function updateDenkiUI() {
   if (room !== "denki") {
@@ -276,33 +277,40 @@ function updateDenkiUI() {
   }
   denkiWrap.style.display = "block";
 
-  const me = denkiState.find(p => p.id === myId);
-  const other = denkiState.find(p => p.id !== myId);
+const players = denkiState.players || [];
+const me = players.find(p => p.id === myId);
+const other = players.find(p => p.id !== myId);
+
 
   if (!me) {
     denkiStatus.textContent = "観戦中";
-  } else if (me.turn) {
+  } else if (me.isTurn) {
+
     denkiStatus.textContent = "あなたの番：相手の椅子を予想";
   } else {
     denkiStatus.textContent = "相手の番：椅子に座る";
   }
 
-  denkiScore.textContent = denkiState.map(p =>
-    `${p.name}: ${p.score}点 / ⚡${p.shock}`
-  ).join(" ｜ ");
+  denkiScore.textContent = players.map(p =>
+  `${p.name}: ${p.score}点 / ⚡${p.shock}`
+).join(" ｜ ");
+
 }
 
 function onDenkiSelect(seat) {
   if (room !== "denki") return;
-  const me = denkiState.find(p => p.id === myId);
+
+  const players = denkiState.players || [];
+  const me = players.find(p => p.id === myId);
   if (!me) return;
 
-  if (me.turn) {
-    socket.emit("denkiPredict", seat);
+  if (me.isTurn) {
+    socket.emit("denkiSet", seat);
   } else {
     socket.emit("denkiSit", seat);
   }
 }
+
 
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
