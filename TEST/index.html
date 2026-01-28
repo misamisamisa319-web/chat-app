@@ -24,56 +24,52 @@ body {
 #login, #chat { flex: 1; display: flex; flex-direction: column; }
 #chat { display: none; }
 
-#controls {
-  display: flex;
-  gap: 5px;
-  padding: 5px;
-  position: sticky;
-  top: 0;
-  background: #fff;
-  z-index: 10;
-}
+.system { color: gray; }
+.system.girl { color: red; font-weight: bold; }
+.system.boy { color: blue; font-weight: bold; }
 
+#controls { display: flex; gap: 5px; padding: 5px; position: sticky; top: 0; background: #fff; z-index: 10; }
 input, button, select { padding: 10px; font-size: 16px; }
 
-#userList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  background: #f0f0f0;
-  padding: 5px;
-  list-style: none;
-  max-height: 100px;
-  overflow-x: auto;
-}
+#userList { display: flex; flex-wrap: wrap; gap: 10px; background: #f0f0f0; padding: 5px; list-style: none; max-height: 100px; overflow-x: auto; }
+#userList li { padding: 3px 8px; border-radius: 5px; }
 
-#messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-  list-style: none;
-}
+#settings { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; padding: 5px; background: #f9f9f9; border-bottom: 1px solid #ccc; }
+#settings input, #settings button, #settings select { padding: 5px; font-size: 14px; }
 
+#messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; }
 #messages li { margin-bottom: 5px; }
-.private { background:#fff3cd; padding:4px; border-radius:4px; }
+.private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
 
-.time { opacity:.6; margin-right:4px; }
+.time { opacity: .6; margin-right: 4px; }
 
-/* ===== 電気椅子 ===== */
-#denkiGame {
+/* ===== 電気椅子UI ===== */
+#denkiWrap {
   margin: 8px;
   padding: 10px;
-  background: #bfe3ee;
+  background: #e8f5fb;
   border-radius: 8px;
+  display: none;
 }
-#denkiSeats button {
-  margin: 4px;
-  width: 40px;
-  height: 40px;
+#denkiHeader {
+  font-weight: bold;
+  margin-bottom: 6px;
 }
-.preview {
-  background: orange !important;
-  color: #000;
+#denkiStatus {
+  margin-bottom: 6px;
+}
+#denkiBoard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+#denkiBoard button {
+  width: 44px;
+}
+#denkiScore {
+  font-size: 14px;
+  margin-bottom: 6px;
 }
 </style>
 </head>
@@ -81,6 +77,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 <div id="login">
   <h2>入室</h2>
+  <div id="roomInfo" style="margin-bottom:10px; color:#555;"></div>
   <input id="nameInput" placeholder="名前">
   <button id="joinBtn">入室</button>
 </div>
@@ -89,32 +86,40 @@ input, button, select { padding: 10px; font-size: 16px; }
   <div id="controls">
     <input id="input" placeholder="メッセージ">
     <button id="sendBtn">送信</button>
+    <button id="updateBtn">更新</button>
   </div>
 
-  <div id="denkiGame" style="display:none;">
-    <strong>⚡ 電気椅子</strong>
-
-    <table border="1" width="100%" style="margin:8px 0;">
-      <thead>
-        <tr>
-          <th>名前</th>
-          <th>点数</th>
-          <th>被電流</th>
-          <th>ターン</th>
-        </tr>
-      </thead>
-      <tbody id="denkiTable"></tbody>
-    </table>
-
-    <div id="denkiSeats"></div>
-
-    <button id="denkiSet">仕掛ける</button>
-    <button id="denkiSit">座る</button>
-    <button id="denkiFire">電流</button>
+  <!-- ⚡ 電気椅子（denki ルームのみ表示） -->
+  <div id="denkiWrap">
+    <div id="denkiHeader">⚡ 電気椅子ゲーム</div>
+    <div id="denkiStatus">待機中</div>
+    <div id="denkiScore"></div>
+    <div id="denkiBoard"></div>
   </div>
 
-  <strong>参加者</strong>
-  <ul id="userList"></ul>
+  <div>
+    <strong>参加者:</strong>
+    <ul id="userList"></ul>
+  </div>
+
+  <div id="settings">
+    <label>文字色: <input type="color" id="colorSelect" value="#000000"></label>
+    <label>内緒相手:
+      <select id="privateTarget">
+        <option value="">なし</option>
+      </select>
+    </label>
+    <label>
+      通知音:
+      <select id="soundSelect">
+        <option value="off">OFF</option>
+        <option value="small">小</option>
+        <option value="medium">中</option>
+        <option value="large">大</option>
+      </select>
+    </label>
+    <button id="leaveBtn">退出</button>
+  </div>
 
   <ul id="messages"></ul>
 </div>
@@ -122,106 +127,245 @@ input, button, select { padding: 10px; font-size: 16px; }
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
-let myId = "";
-let selectedPreviewSeat = null;
 
 const login = document.getElementById("login");
-const chat  = document.getElementById("chat");
+const chat = document.getElementById("chat");
+const joinBtn = document.getElementById("joinBtn");
+const nameInput = document.getElementById("nameInput");
+const roomInfo = document.getElementById("roomInfo");
 
-const denkiGame = document.getElementById("denkiGame");
-const denkiSeats = document.getElementById("denkiSeats");
-const denkiTable = document.getElementById("denkiTable");
+const messages = document.getElementById("messages");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("sendBtn");
+const updateBtn = document.getElementById("updateBtn");
+const leaveBtn = document.getElementById("leaveBtn");
+const userList = document.getElementById("userList");
+const colorSelect = document.getElementById("colorSelect");
+const privateTarget = document.getElementById("privateTarget");
+const soundSelect = document.getElementById("soundSelect");
 
-const denkiSet  = document.getElementById("denkiSet");
-const denkiSit  = document.getElementById("denkiSit");
-const denkiFire = document.getElementById("denkiFire");
+const notifySound = new Audio("/notify.mp3");
+const SOUND_LEVELS = { off:0, small:0.2, medium:0.5, large:1.0 };
+let soundLevel = localStorage.getItem("soundLevel") || "off";
+soundSelect.value = soundLevel;
 
-socket.on("connect", ()=> myId = socket.id);
+let username = "";
+let myColor = "#000000";
+let privateTo = "";
+let joined = false;
 
-/* ===== チャット ===== */
-socket.on("message", d=>{
+/* ===== 電気椅子DOM ===== */
+const denkiWrap = document.getElementById("denkiWrap");
+const denkiStatus = document.getElementById("denkiStatus");
+const denkiBoard = document.getElementById("denkiBoard");
+const denkiScore = document.getElementById("denkiScore");
+
+let denkiState = [];
+let myId = null;
+
+/* 椅子12個 */
+for (let i = 1; i <= 12; i++) {
+  const b = document.createElement("button");
+  b.textContent = i;
+  b.onclick = () => onDenkiSelect(i);
+  denkiBoard.appendChild(b);
+}
+
+window.addEventListener("load", () => {
+  const savedName  = localStorage.getItem("chatName");
+  const savedRoom  = localStorage.getItem("chatRoom");
+  const savedColor = localStorage.getItem("chatColor") || "#000000";
+
+  if (savedName && savedRoom) {
+    username = savedName;
+    myColor = savedColor;
+    colorSelect.value = myColor;
+
+    socket.emit("join", {
+      name: username,
+      color: myColor,
+      room: savedRoom
+    });
+
+    joined = true;
+    login.style.display = "none";
+    chat.style.display = "flex";
+  }
+});
+
+/* ===== ロビーからの情報 ===== */
+const room = localStorage.getItem("chatRoom");
+const key  = localStorage.getItem("chatKey");
+
+if (!room && !joined) {
+  alert("ロビーから入室してください");
+  location.href = "/lobby.html";
+}
+if (room) roomInfo.textContent = `入室先：${room}`;
+
+/* ===== 表示 ===== */
+function renderMsg(d) {
   const li = document.createElement("li");
+
   if (d.time) {
     const t = document.createElement("span");
     t.textContent = `[${d.time}] `;
     t.className = "time";
     li.appendChild(t);
   }
+
   const text = document.createElement("span");
-  text.textContent = d.private ? `【内緒】${d.name}: ${d.text}` : `${d.name}: ${d.text}`;
+  if (d.private) {
+    let toName = d.to === myId ? username : "相手";
+    text.textContent = `【内緒】${d.name} ▶ ${toName}: ${d.text}`;
+    li.classList.add("private");
+  } else {
+    text.textContent = `${d.name}: ${d.text}`;
+  }
+
   li.appendChild(text);
-  document.getElementById("messages").prepend(li);
+  li.style.color = d.color || "#000";
+  messages.prepend(li);
+}
+
+/* ===== 受信 ===== */
+socket.on("connect", () => { myId = socket.id; });
+
+socket.on("pastMessages", logs => {
+  messages.innerHTML = "";
+  logs.forEach(renderMsg);
 });
 
-socket.on("userList", list=>{
-  const ul = document.getElementById("userList");
-  ul.innerHTML = "";
-  list.forEach(u=>{
+socket.on("message", d => {
+  if (d.private && d.to !== myId && d.name !== username) return;
+  if (soundLevel !== "off" && d.name && d.name !== username) {
+    notifySound.volume = SOUND_LEVELS[soundLevel];
+    notifySound.currentTime = 0;
+    notifySound.play().catch(()=>{});
+  }
+  renderMsg(d);
+});
+
+socket.on("userList", list => {
+  userList.innerHTML = "";
+  privateTarget.innerHTML = `<option value="">なし</option>`;
+  list.forEach(u => {
     const li = document.createElement("li");
     li.textContent = u.name;
-    ul.appendChild(li);
-  });
-});
-
-/* ===== 電気椅子 ===== */
-socket.on("denkiState", state=>{
-  denkiGame.style.display = "block";
-  denkiSeats.innerHTML = "";
-  denkiTable.innerHTML = "";
-
-  state.players.forEach(p=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${p.name}</td>
-      <td>${p.score}</td>
-      <td>${p.shock}</td>
-      <td>${p.isTurn ? "●" : ""}</td>
-    `;
-    denkiTable.appendChild(tr);
-  });
-
-  state.remainingSeats.forEach(n=>{
-    const b = document.createElement("button");
-    b.textContent = n;
-
-    if (state.preview && state.preview.seat === n) {
-      b.classList.add("preview");
+    li.style.color = u.color || "#000";
+    userList.appendChild(li);
+    if (u.id !== myId) {
+      const opt = document.createElement("option");
+      opt.value = u.id;
+      opt.textContent = u.name;
+      privateTarget.appendChild(opt);
     }
-
-    b.onclick = ()=>{
-      selectedPreviewSeat = n;
-      socket.emit("denkiPreview", n);
-    };
-
-    denkiSeats.appendChild(b);
   });
-
-  const me = state.players.find(p=>p.id===myId);
-
-  denkiSet.disabled  = !(me?.isTurn && state.phase==="set" && selectedPreviewSeat);
-  denkiSit.disabled  = !(state.phase==="sit" && selectedPreviewSeat);
-  denkiFire.disabled = !(me?.isTurn && state.phase==="fire");
 });
 
-denkiSet.onclick  = ()=> socket.emit("denkiSet", selectedPreviewSeat);
-denkiSit.onclick  = ()=> socket.emit("denkiSit");
-denkiFire.onclick = ()=> socket.emit("denkiFire");
+/* ===== 電気椅子：状態 ===== */
+socket.on("denkiState", state => {
+  denkiState = state || [];
+  updateDenkiUI();
+});
 
-/* ===== 入室 ===== */
-document.getElementById("joinBtn").onclick = ()=>{
-  const name = document.getElementById("nameInput").value.trim();
-  if (!name) return;
-  socket.emit("join", { name, room: localStorage.getItem("chatRoom") });
+function updateDenkiUI() {
+  if (room !== "denki") {
+    denkiWrap.style.display = "none";
+    return;
+  }
+  denkiWrap.style.display = "block";
+
+  const me = denkiState.find(p => p.id === myId);
+  const other = denkiState.find(p => p.id !== myId);
+
+  if (!me) {
+    denkiStatus.textContent = "観戦中";
+  } else if (me.turn) {
+    denkiStatus.textContent = "あなたの番：相手の椅子を予想";
+  } else {
+    denkiStatus.textContent = "相手の番：椅子に座る";
+  }
+
+  denkiScore.textContent = denkiState.map(p =>
+    `${p.name}: ${p.score}点 / ⚡${p.shock}`
+  ).join(" ｜ ");
+}
+
+function onDenkiSelect(seat) {
+  if (room !== "denki") return;
+  const me = denkiState.find(p => p.id === myId);
+  if (!me) return;
+
+  if (me.turn) {
+    socket.emit("denkiPredict", seat);
+  } else {
+    socket.emit("denkiSit", seat);
+  }
+}
+
+/* ===== 入室処理 ===== */
+joinBtn.onclick = () => {
+  if (joined || !nameInput.value.trim()) return;
+
+  username = nameInput.value.trim();
+  localStorage.setItem("chatName", username);
+
+  socket.emit("join", {
+    name: username,
+    color: myColor,
+    room,
+    key
+  });
+
+  joined = true;
   login.style.display = "none";
   chat.style.display = "flex";
 };
 
-document.getElementById("sendBtn").onclick = ()=>{
-  const input = document.getElementById("input");
+/* ===== 操作 ===== */
+colorSelect.oninput = () => {
+  myColor = colorSelect.value;
+  localStorage.setItem("chatColor", myColor);
+  socket.emit("updateColor", { color: myColor });
+};
+
+soundSelect.onchange = () => {
+  soundLevel = soundSelect.value;
+  localStorage.setItem("soundLevel", soundLevel);
+};
+
+privateTarget.onchange = () => {
+  privateTo = privateTarget.value || "";
+};
+
+sendBtn.onclick = () => {
   if (!input.value.trim()) return;
-  socket.emit("message", { text: input.value });
+  socket.emit("message", {
+    text: input.value.trim(),
+    color: myColor,
+    to: privateTo || undefined
+  });
   input.value = "";
+  privateTo = "";
+  privateTarget.value = "";
+};
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendBtn.click();
+  }
+});
+
+leaveBtn.onclick = () => {
+  socket.emit("leave");
+  localStorage.removeItem("chatName");
+  localStorage.removeItem("chatRoom");
+  localStorage.removeItem("chatKey");
+  location.href = "/lobby.html";
 };
 </script>
+
 </body>
 </html>
