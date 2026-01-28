@@ -318,6 +318,8 @@ let denkiState = {
   turnIndex: 0,
   seats: [1,2,3,4,5,6,7,8,9,10,11,12],
   trapSeat: null,
+  previewSeat: null,
+
   players: []
 };
 
@@ -325,6 +327,8 @@ function resetDenki() {
   denkiState.phase = "set";
   denkiState.seats = [1,2,3,4,5,6,7,8,9,10,11,12];
   denkiState.trapSeat = null;
+  denkiState.previewSeat = null;
+
 
 }
 function syncDenkiTurn() {
@@ -338,7 +342,9 @@ function emitDenki() {
   io.to(DENKI_ROOM).emit("denkiState", {
     phase: denkiState.phase,
     remainingSeats: denkiState.seats,
-    players: denkiState.players
+    players: denkiState.players,
+    previewSeat: denkiState.previewSeat
+
   });
 }
 
@@ -410,6 +416,8 @@ io.on("connection", socket => {
   socket.on("denkiSit", seat => {
     if (socket.room !== DENKI_ROOM) return;
     if (denkiState.phase!=="sit") return;
+    denkiState.seats = denkiState.seats.filter(s => s !== seat);
+    denkiState.previewSeat = seat;
     socket.selectedSeat = seat;
     denkiState.phase = "fire";
     emitDenki();
@@ -426,8 +434,9 @@ io.on("connection", socket => {
   let resultText = "";
 
   if (socket.selectedSeat === denkiState.trapSeat) {
-    victim.shock += 1;
-    me.score += 1;
+  victim.shock += 1;
+  me.score += socket.selectedSeat;
+
     resultText = `⚡ 成功！ ${me.name} が ${victim.name} に電流を流しました`;
   } else {
     resultText = `❌ 失敗… ${me.name} の電気は空振りでした`;

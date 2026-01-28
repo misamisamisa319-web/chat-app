@@ -237,14 +237,22 @@ socket.on("userList", list => {
 socket.on("denkiState", state => {
   denkiBox.style.display = "block";
   denkiSeats.innerHTML = "";
-  selectedSeat = null;
 
-  state.remainingSeats.forEach(n => {
-    const b = document.createElement("button");
-    b.textContent = n;
-    b.onclick = () => selectedSeat = n;
-    denkiSeats.appendChild(b);
-  });
+state.remainingSeats.forEach(n => {
+  const b = document.createElement("button");
+  b.textContent = n;
+
+  // ★ 仮・確定で座っている椅子を表示
+  if (state.previewSeat === n) {
+    b.style.background = "red";
+    b.style.color = "white";
+    b.disabled = true; // 座られてる椅子は押せない
+  }
+
+  b.onclick = () => selectedSeat = n;
+  denkiSeats.appendChild(b);
+});
+
 
   const tbody = document.querySelector("#denkiTable tbody");
 tbody.innerHTML = "";
