@@ -330,6 +330,9 @@ function resetDenki(){
    Socket.IO
 ================================ */
 io.on("connection", socket => {
+  socket.on("denkiPredict", seat => {
+  socket.emit("denkiSet", seat);
+});
 
   socket.on("checkRoomKey", ({ room, key }) => {
     if (roomKeys[room] && key !== roomKeys[room]) {
@@ -373,10 +376,17 @@ io.on("connection", socket => {
     io.to(DENKI_ROOM).emit("denkiState", denkiState());
   });
 
-  socket.on("denkiSit", seat=>{
-    if(socket.room!==DENKI_ROOM || denki.phase!=="sit") return;
-    const victim = denki.players.find(p=>p.id!==denki.players[denki.turn].id);
-    if(!victim || victim.id!==socket.id) return;
+  socket.on("denkiSit", seat => {
+  if (socket.room !== DENKI_ROOM) return;
+  if (denki.phase !== "sit") return;
+  if (denki.players.length !== 2) return;
+
+  const attacker = denki.players[denki.turn];
+  if (!attacker) return;
+
+  const victim = denki.players.find(p => p.id !== attacker.id);
+  if (!victim) return;
+  if (victim.id !== socket.id) return;
 
     let text, color;
     if(seat===denki.trapSeat){
