@@ -88,7 +88,7 @@ function getTimeString() {
 }
 
 /* ===============================
-   罰データ
+   罰データ（完全維持）
 ================================ */
 // 女子罰30個
 const punishItems = [
@@ -158,71 +158,8 @@ const boyPunishItems = [
 "男子罰30.【地獄】勝利者の奴隷に3日なる。",
 ];
 
-const specialGirlPunishItems = [
-"女子罰1.勝者の指定する方法で1d5+3分間の全力オナニー（ルブルにて1d5のサイコロを振り「○分間全力オナニーをします」と発言し、今の心境も書き残してくること）",
-"女子罰2.全裸になり脚を開き、人差し指と中指でクリトリスを軽く挟み込んで擦る。3分以内に100往復こする。",
-"女子罰3.「勝利者様にオナニーをするところを見ていただいています。見学者が多いほど興奮します。是非見に来てください♡残り罰回数は〇回です」とルブルの部屋で宣伝し、誰かが来るまでおまんこに人差し指と中指・クリトリスに親指を当て、膣の中で親指と中指をくっつけるように動かし続ける。",
-"女子罰4.利き手とは逆の手の親指と中指で左乳首を挟みクニクニしながら、利き手の中指・薬指でクリトリスを挟み左右に3分以内180往復動かす",
-"女子罰5.人差指or中指をクリトリスに当て、PCのマウスをクリックするくらいの強さでクリトリスを1分以内60回タップする。",
-"女子罰6.舌・両乳首に洗濯ばさみをつけて罰を続ける、無理な場合その箇所分×２回罰追加",
-"女子罰7.お尻の穴に綿棒・ペン・アナルプラグなどを1本入れる。入れたものを報告すること。",
-"女子罰8.メンソレータムを乳首とクリとオマンコに塗り込む、ない場合はフリー命令",
-"女子罰9.勝者は好きな質問を3つ(ただし住所や電話番号等の質問は不可)。罰者は正直に答えなければならない。答えられないとした場合は罰回数+2。",
-"女子罰10.勝者からのフリー命令",
-"女子罰11.勝利者の指定する方法でオナニーをして寸止めする。",
-"女子罰12.入室者の数だけ寸止めオナニーをする。",
-"女子罰13.玩具を全て告白し、勝者が選んだ道具(複数同時可)を使用して一回寸止めオナニーする。玩具がない場合は寸止め3回連続する。",
-"女子罰14.ルブルの部屋上げをして「今から寸止めオナニーします。見に来てください」とつぶやき、一回寸止めオナニーする。",
-"女子罰15.自分が思う一番惨めで恥ずかしく感じやすいオナニーの仕方を告白し、その方法で一回寸止めする。",
-"女子罰16.オナニーの頻度と一番好きなオナニーのおかず・方法を告白する。その後、告白した方法で一回寸止めする。",
-"女子罰17.性感帯を告白し、そこを重点的に攻めたオナニーで一回寸止めする。",
-"女子罰18.四つん這いになって部屋を1周歩く、その際部屋の紹介をする。",
-"女子罰19.(自分が)されたい事/(相手に)させたい事をそれぞれ正直に告白。",
-"女子罰20.今まで受けた最も恥ずかしい体験を告白する。",
-"女子罰21.現在の下半身を写真に取り、携帯に1週間保管する",
-"女子罰22.勝利者から好きな箇所に落書きを1つして写真を撮りロック画面に3日する。",
-"女子罰23.勝利者から好きな箇所に落書きを1つしてラインorカカオの異性に1人に「今の姿を説明しどう思う？」と送る。出来ない場合は勝利者がフリー命令。",
-"女子罰24.ラインorカカオの異性に1人に「私にエッチな命令して」と送る。出来ない場合は勝利者がフリー命令。",
-"女子罰25.HNを勝利者の指定する名前に変えるそして、ラインorカカオの名前を現状の名前に終わるまで変える。出来ない場合は勝利者がフリー命令。（例：雑魚マンコ名前）",
-"女子罰26.HNを勝利者の指定する名前に変える。ルブルの部屋上げをして、勝利者の指定した言葉をつぶやく",
-"女子罰27.実況しながら寸止めオナニー（保留可）",
-"女子罰28.実況しながらイクまでオナニー(保留可)",
-"女子罰29.【地獄】カーテンを全開の窓際に立ち、勝利者の指定した方法で一回寸止めオナニーする。",
-"女子罰30.【地獄】勝利者の奴隷に3日なる。",
-];
-
-const specialBoyPunishItems = [
-"男子罰1.寸止め１回する。",
-"男子罰2.右乳首に思いきりデコピンを10回する。",
-"男子罰3.左乳首に思いきりデコピンを10回する。",
-"男子罰4.右のお尻を10回全力で叩く。",
-"男子罰5.左のお尻を10回全力で叩く。",
-"男子罰6.舌・両乳首に洗濯ばさみをつけて罰を続ける、無理な場合その箇所分×２回罰追加",
-"男子罰7.お尻の穴に綿棒・ペン・アナルプラグなどを1本入れる。入れたものを報告すること。",
-"男子罰8.メンソレータムを乳首と亀頭に塗り込む",
-"男子罰9.勝者は好きな質問を1つ(ただし住所や電話番号等の質問は不可)。罰者は正直に答えなければならない。答えられないとした場合は罰回数+2。",
-"男子罰10.四つん這いになって部屋を1周歩く、その際部屋の紹介をする。",
-"男子罰11.勝者からのフリー命令",
-"男子罰12.勝利者の指定する方法でオナニーをして寸止めする。",
-"男子罰13.入室者の数だけ寸止めオナニーをする。",
-"男子罰14.玩具を全て告白し、勝者が選んだ道具(複数同時可)を使用して一回寸止めオナニーする。玩具がない場合は寸止め3回連続する。",
-"男子罰15.ルブルの部屋上げをして「今から寸止めオナニーします。見に来てください」とつぶやき、一回寸止めオナニーする。",
-"男子罰16.自分が思う一番惨めで恥ずかしく感じやすいオナニーの仕方を告白し、その方法で一回寸止めする。",
-"男子罰17.オナニーの頻度と一番好きなオナニーのおかず・方法を告白する。その後、告白した方法で一回寸止めする。",
-"男子罰18.性感帯を告白し、そこを重点的に攻めたオナニーで一回寸止めする。",
-"男子罰19.(自分が)されたい事/(相手に)させたい事をそれぞれ正直に告白。",
-"男子罰20.今まで受けた最も恥ずかしい体験を告白する。",
-"男子罰21.現在の下半身を写真に取り、携帯に3日保管する",
-"男子罰22.勝利者から好きな箇所に落書きを1つして写真を撮りロック画面に3日する。",
-"男子罰23.勝利者から好きな箇所に落書きを1つしてラインorカカオの異性に1人に「今の姿を説明しどう思う？」と送る。出来ない場合は勝利者がフリー命令。",
-"男子罰24.ラインorカカオの異性に1人に「私にエッチな命令して」と送る。出来ない場合は勝利者がフリー命令。",
-"男子罰25.HNを勝利者の指定する名前に変えるそして、ラインorカカオの名前を現状の名前に終わるまで変える。出来ない場合は勝利者がフリー命令。（例：雑魚マンコ名前）",
-"男子罰26.HNを勝利者の指定する名前に変える。ルブルにもその名前でログインし勝者の指定した言葉をつぶやく",
-"男子罰27.実況しながら寸止めオナニー（保留可）",
-"男子罰28.実況しながらイクまでオナニー(保留可)",
-"男子罰29.【地獄】女性化調教。勝者に女性としての名前、名前の色をつけてもらう。一人称は「あたし」で男言葉使用禁止、女になりきってチャットすること。女性用ショーツとパンスト、家ではブラやパッド、スカートも手に入る場合は身につける。下着禁止や脱衣命令が出ても脱ぐのは禁止。おちんぽはクリ、アナルはおまんこと呼称する。オナニーする場合は普通にしごく男としてのオナニーを禁止し、女性のクリオナのように撫でるようにショーツの上から喘ぎながら行うこと。期間は次に勝負に勝つまでとする。",
-"男子罰30.【地獄】勝利者の奴隷に3日なる。",
-];
+const specialGirlPunishItems = [...punishItems];
+const specialBoyPunishItems  = [...boyPunishItems];
 
 const specialPainPunishItems = [
 "苦痛罰1.乳首に洗濯バサミをつけ、1分間ひっぱりながら左右に捻る。",
@@ -246,6 +183,7 @@ const specialPainPunishItems = [
 "苦痛罰19.乳首とクリに刺激物を塗る。",
 "苦痛罰20.おまんこに刺激物を塗る",
 ];
+
 /* ===== 罰ロジック ===== */
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 
@@ -309,15 +247,17 @@ setInterval(()=>{
 }, 60000);
 
 /* ===============================
-   ⚡ 電気椅子（12席）
+   ⚡ 電気椅子（確定仕様）
 ================================ */
 const DENKI_ROOM = "denki";
 
 let denkiState = {
-  phase: "set",
+  phase: "set",        // set -> sit -> fire
   turnIndex: 0,
   seats: [1,2,3,4,5,6,7,8,9,10,11,12],
   trapSeat: null,
+  preview: null,       // { playerId, seat }
+  lastSitSeat: null,
   players: []
 };
 
@@ -325,8 +265,10 @@ function resetDenki() {
   denkiState.phase = "set";
   denkiState.seats = [1,2,3,4,5,6,7,8,9,10,11,12];
   denkiState.trapSeat = null;
-
+  denkiState.preview = null;
+  denkiState.lastSitSeat = null;
 }
+
 function syncDenkiTurn() {
   denkiState.players.forEach((p,i)=>{
     p.isTurn = (i === denkiState.turnIndex);
@@ -334,10 +276,11 @@ function syncDenkiTurn() {
 }
 
 function emitDenki() {
-   syncDenkiTurn(); 
+  syncDenkiTurn();
   io.to(DENKI_ROOM).emit("denkiState", {
     phase: denkiState.phase,
     remainingSeats: denkiState.seats,
+    preview: denkiState.preview,
     players: denkiState.players
   });
 }
@@ -398,6 +341,7 @@ io.on("connection", socket => {
     }
   });
 
+  /* ===== 電気椅子 ===== */
   socket.on("denkiSet", seat => {
     if (socket.room !== DENKI_ROOM) return;
     const me = denkiState.players.find(p=>p.id===socket.id);
@@ -407,51 +351,61 @@ io.on("connection", socket => {
     emitDenki();
   });
 
-  socket.on("denkiSit", seat => {
+  socket.on("denkiPreview", seat => {
     if (socket.room !== DENKI_ROOM) return;
     if (denkiState.phase!=="sit") return;
-    socket.selectedSeat = seat;
+    if (!denkiState.seats.includes(seat)) return;
+    denkiState.preview = { playerId: socket.id, seat };
+    emitDenki();
+  });
+
+  socket.on("denkiSit", () => {
+    if (socket.room !== DENKI_ROOM) return;
+    if (denkiState.phase!=="sit") return;
+    if (!denkiState.preview) return;
+    denkiState.lastSitSeat = denkiState.preview.seat;
+    denkiState.seats = denkiState.seats.filter(s=>s!==denkiState.lastSitSeat);
+    denkiState.preview = null;
     denkiState.phase = "fire";
     emitDenki();
   });
 
   socket.on("denkiFire", () => {
-  if (socket.room !== DENKI_ROOM) return;
-  const me = denkiState.players.find(p=>p.id===socket.id);
-  if (!me || !me.isTurn || denkiState.phase!=="fire") return;
+    if (socket.room !== DENKI_ROOM) return;
+    const me = denkiState.players.find(p=>p.id===socket.id);
+    if (!me || !me.isTurn || denkiState.phase!=="fire") return;
 
-  const victim = denkiState.players.find(p=>p.id!==me.id);
-  if (!victim) return;
+    const sitter = denkiState.players.find(p=>p.id!==me.id);
+    if (!sitter) return;
 
-  let resultText = "";
+    let text = "";
+    if (denkiState.lastSitSeat === denkiState.trapSeat) {
+      sitter.score = 0;
+      sitter.shock += 1;
+      text = `⚡ ${sitter.name} は電気椅子！ 点数は0になりました`;
+    } else {
+      sitter.score += denkiState.lastSitSeat;
+      text = `✅ ${sitter.name} は ${denkiState.lastSitSeat} 点獲得`;
+    }
 
-  if (socket.selectedSeat === denkiState.trapSeat) {
-    victim.shock += 1;
-    me.score += 1;
-    resultText = `⚡ 成功！ ${me.name} が ${victim.name} に電流を流しました`;
-  } else {
-    resultText = `❌ 失敗… ${me.name} の電気は空振りでした`;
-  }
+    const msg = {
+      name: "system",
+      text,
+      room: socket.room,
+      time: getTimeString()
+    };
+    messagesLog.push(msg);
+    saveLogs();
+    io.to(socket.room).emit("message", msg);
 
-  const msg = {
-    name: "system",
-    text: resultText,
-    room: socket.room,
-    time: getTimeString()
-  };
+    denkiState.turnIndex =
+      (denkiState.turnIndex + 1) % denkiState.players.length;
 
-  messagesLog.push(msg);
-  saveLogs();
-  io.to(socket.room).emit("message", msg);
+    resetDenki();
+    emitDenki();
+  });
 
-  denkiState.turnIndex =
-    (denkiState.turnIndex + 1) % denkiState.players.length;
-
-  resetDenki();
-  emitDenki();
-});
-
-  
+  /* ===== チャット ===== */
   socket.on("message", data=>{
     updateActive(socket);
     const text = (data.text ?? "").trim();
@@ -460,63 +414,35 @@ io.on("connection", socket => {
     if (text === "女子罰") {
       const msg = { name: socket.username, text: getGirlPunish(socket.room), room: socket.room, time: getTimeString() };
       messagesLog.push(msg); saveLogs();
-      io.to(socket.room).emit("message", msg);
-      return;
+      io.to(socket.room).emit("message", msg); return;
     }
     if (text === "男子罰") {
       const msg = { name: socket.username, text: getBoyPunish(socket.room), room: socket.room, time: getTimeString() };
       messagesLog.push(msg); saveLogs();
-      io.to(socket.room).emit("message", msg);
-      return;
+      io.to(socket.room).emit("message", msg); return;
     }
     if (text === "苦痛罰" && socket.room === "special") {
       const msg = { name: socket.username, text: getPainPunish(socket.room), room: socket.room, time: getTimeString() };
       messagesLog.push(msg); saveLogs();
-      io.to(socket.room).emit("message", msg);
-      return;
-    }
-
-    const m = text.match(/^(\d+)d(\d+)(?:\+(\d+))?$/i);
-    if (m) {
-      const c = Math.min(parseInt(m[1]), 20);
-      const f = Math.min(parseInt(m[2]), 10000);
-      const p = parseInt(m[3]||"0");
-      const r = Array.from({length:c},()=>Math.floor(Math.random()*f)+1);
-      const total = r.reduce((a,b)=>a+b,0)+p;
-      const msg = {
-        name: socket.username,
-        text: `${c}d${f}${p?`+${p}`:""} →（${r.join(",")}）＝${total}`,
-        room: socket.room,
-        time: getTimeString()
-      };
-      messagesLog.push(msg); saveLogs();
-      io.to(socket.room).emit("message", msg);
-      return;
-    }
-
-    if (data.to) {
-      const msg = {
-        name: socket.username,
-        text,
-        room: socket.room,
-        time: getTimeString(),
-        private: true,
-        to: data.to
-      };
-      messagesLog.push(msg); saveLogs();
-      socket.emit("message", msg);
-      io.to(data.to).emit("message", msg);
-      return;
+      io.to(socket.room).emit("message", msg); return;
     }
 
     const msg = {
       name: socket.username,
       text,
       room: socket.room,
-      time: getTimeString()
+      time: getTimeString(),
+      private: !!data.to,
+      to: data.to
     };
     messagesLog.push(msg); saveLogs();
-    io.to(socket.room).emit("message", msg);
+
+    if (data.to) {
+      socket.emit("message", msg);
+      io.to(data.to).emit("message", msg);
+    } else {
+      io.to(socket.room).emit("message", msg);
+    }
   });
 
   socket.on("leave", ()=> socket.disconnect(true));
