@@ -308,6 +308,7 @@ let denki = {
   phase: "set",
   trapSeat: null,
   sitSeat: null, 
+  sitPreview: null, // ★ 仮座り用（追加）
 };
 
 function denkiState(){
@@ -336,6 +337,24 @@ function resetDenki(){
    Socket.IO
 ================================ */
 io.on("connection", socket => {
+socket.on("denkiSitConfirm", () => {
+  if (socket.room !== DENKI_ROOM) return;
+  if (denki.phase !== "sit") return;
+
+  const victim = denki.players.find(p => !p.isTurn);
+  if (!victim || victim.id !== socket.id) return;
+
+  // ★ 仮座りを確定
+  if (denki.sitPreview == null) return;
+
+  denki.sitSeat = denki.sitPreview;
+  denki.sitPreview = null;
+
+  // 次フェーズへ
+  denki.phase = "shock";
+
+  io.to(DENKI_ROOM).emit("denkiState", denki);
+});
   
 
 
@@ -384,28 +403,35 @@ io.on("connection", socket => {
       
   });
 
-  socket.on("denkiSet", seat=>{
-    if(socket.room!==DENKI_ROOM) return;
-    const me = denki.players[denki.turn];
-    if(!me || me.id!==socket.id || denki.phase!=="set") return;
-    denki.trapSeat = seat;
-    denki.phase = "sit";
-    io.to(DENKI_ROOM).emit("denkiState", denkiState());
-  });
+  socket.on("denkiSet", seat => {
+  if (socket.room !== DENKI_ROOM) return;
+  if (denki.phase !== "set") return;
 
- socket.on("denkiSit", seat => {
+  const me = denki.players[denki.turn];
+  if (!me || me.id !== socket.id) return;
+
+  // ★ 仮仕掛けとして保存
+  denki.trapPreview = seat;
+
+  // フェーズだけ進める
+  denki.phase = "sit";
+
+  io.to(DENKI_ROOM).emit("denkiState", denki);
+});
+
+socket.on("denkiSit", seat => {
   if (socket.room !== DENKI_ROOM) return;
   if (denki.phase !== "sit") return;
 
-  const attacker = denki.players[denki.turn];
-  const victim = denki.players.find(p => p.id !== attacker?.id);
+  const victim = denki.players.find(p => !p.isTurn);
   if (!victim || victim.id !== socket.id) return;
 
-  denki.sitSeat = seat;      // ★座った椅子を記録
-  denki.phase = "shock";     // ★次は電流待ち
+  // ★ 仮座りとして保存（確定しない）
+  denki.sitPreview = seat;
 
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+  io.to(DENKI_ROOM).emit("denkiState", denki);
 });
+
 socket.on("denkiShock", () => {
   if (socket.room !== DENKI_ROOM) return;
   if (denki.phase !== "shock") return;
