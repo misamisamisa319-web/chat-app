@@ -22,36 +22,6 @@ function saveLogs() {
   fs.writeFileSync(LOG_FILE, JSON.stringify(messagesLog, null, 2));
 }
 
-/* ===== 管理者ログ ===== */
-app.get("/admin", (req, res) => {
-  if (req.query.key !== process.env.ADMIN_KEY) {
-    return res.status(403).send("Forbidden");
-  }
-  const rows = messagesLog.map(m => `
-    <tr>
-      <td>${m.time || ""}</td>
-      <td>${m.room}</td>
-      <td>${m.name}</td>
-      <td>${m.private ? "内緒" : "通常"}</td>
-      <td>${m.text}</td>
-    </tr>
-  `).join("");
-  res.send(`<!doctype html><html lang="ja"><head><meta charset="utf-8">
-  <title>管理者ログ</title>
-  <style>
-  body{font-family:sans-serif;padding:20px}
-  table{border-collapse:collapse;width:100%}
-  th,td{border:1px solid #ccc;padding:6px}
-  th{background:#f0f0f0}
-  </style></head><body>
-  <h2>管理者ログ</h2>
-  <table>
-    <tr><th>時刻</th><th>部屋</th><th>名前</th><th>種別</th><th>内容</th></tr>
-    ${rows}
-  </table>
-  </body></html>`);
-});
-
 /* ===== ロビー情報 ===== */
 function getLobbyInfo() {
   const rooms = {};
@@ -63,14 +33,6 @@ function getLobbyInfo() {
   return rooms;
 }
 
-/* ===== 個室鍵 ===== */
-const roomKeys = {
-  privateA: "1234a",
-  privateB: "1234b",
-  privateC: "1234c",
-  privateD: "1234d",
-};
-
 /* ===== 時刻 ===== */
 function getTimeString() {
   const d = new Date(new Date().toLocaleString("ja-JP",{timeZone:"Asia/Tokyo"}));
@@ -78,7 +40,7 @@ function getTimeString() {
 }
 
 /* ===============================
-   罰機能（完全維持）
+   罰（色つき・完全維持）
 ================================ */
 // 女子罰30個
 const punishItems = [
@@ -239,73 +201,34 @@ const specialPainPunishItems = [
 
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 let punishStockByRoom = {};
-
 function initPunishRoom(room){
-  if (!punishStockByRoom[room]) {
-    const isSpecial = room === "special";
-    punishStockByRoom[room] = {
-      girl: shuffle([...(isSpecial?specialGirlPunishItems:punishItems)]),
-      boy:  shuffle([...(isSpecial?specialBoyPunishItems:boyPunishItems)]),
-      pain: isSpecial ? shuffle([...specialPainPunishItems]) : []
+  if(!punishStockByRoom[room]){
+    punishStockByRoom[room]={
+      girl:shuffle([...punishItems]),
+      boy:shuffle([...boyPunishItems]),
+      pain:shuffle([...specialPainPunishItems])
     };
   }
 }
-function getGirlPunish(room){
-  initPunishRoom(room);
-  if (!punishStockByRoom[room].girl.length)
-    punishStockByRoom[room].girl = shuffle([...punishItems]);
-  return punishStockByRoom[room].girl.shift();
-}
-function getBoyPunish(room){
-  initPunishRoom(room);
-  if (!punishStockByRoom[room].boy.length)
-    punishStockByRoom[room].boy = shuffle([...boyPunishItems]);
-  return punishStockByRoom[room].boy.shift();
-}
-function getPainPunish(room){
-  initPunishRoom(room);
-  if (!punishStockByRoom[room].pain.length)
-    punishStockByRoom[room].pain = shuffle([...specialPainPunishItems]);
-  return punishStockByRoom[room].pain.shift();
-}
+function getGirlPunish(room){ initPunishRoom(room); return punishStockByRoom[room].girl.shift(); }
+function getBoyPunish(room){ initPunishRoom(room); return punishStockByRoom[room].boy.shift(); }
+function getPainPunish(room){ initPunishRoom(room); return punishStockByRoom[room].pain.shift(); }
 
 /* ===============================
-   15分無反応切断
-================================ */
-const LIMIT = 15*60*1000;
-function updateActive(socket){
-  const u = users.find(x=>x.id===socket.id);
-  if(u) u.lastActive = Date.now();
-}
-setInterval(()=>{
-  const now = Date.now();
-  users.forEach(u=>{
-    if(now - (u.lastActive ?? now) > LIMIT){
-      const s = io.sockets.sockets.get(u.id);
-      if(s){
-        s.emit("message",{name:"system",text:"15分間反応がなかったため切断されました",room:u.room,time:getTimeString()});
-        s.disconnect(true);
-      }
-    }
-  });
-},60000);
-
-/* ===============================
-   ⚡ 電気椅子ゲーム（完成）
+   ⚡ 電気椅子（完成A）
 ================================ */
 const DENKI_ROOM = "denki";
 
 let denki = {
   players: [],
   turn: 0,
-  trapSeat: null,
-  phase: "set", // set → sit → result
+  phase: "set",   // set → sit
+  trapSeat: null
 };
 
 function denkiState(){
   return {
     phase: denki.phase,
-    trapSeat: null,
     players: denki.players.map((p,i)=>({
       id:p.id,
       name:p.name,
@@ -325,18 +248,6 @@ function resetDenki(){
 ================================ */
 io.on("connection", socket => {
 
-  socket.on("checkRoomKey", ({ room, key }) => {
-    if (roomKeys[room] && key !== roomKeys[room])
-      return socket.emit("checkResult",{ok:false,message:"鍵が違います"});
-    const privateRooms = ["privateA","privateB","privateC","privateD"];
-    if (privateRooms.includes(room)) {
-      const r = io.sockets.adapter.rooms.get(room);
-      if (r && r.size >= 2)
-        return socket.emit("checkResult",{ok:false,message:"この個室は満室です"});
-    }
-    socket.emit("checkResult",{ok:true});
-  });
-
   socket.on("join", ({ name, color="black", room="room1" }) => {
     socket.username=name;
     socket.room=room;
@@ -353,52 +264,61 @@ io.on("connection", socket => {
     }
   });
 
+  /* 仕掛ける */
   socket.on("denkiSet", seat=>{
     if(socket.room!==DENKI_ROOM) return;
     const me = denki.players[denki.turn];
     if(!me || me.id!==socket.id || denki.phase!=="set") return;
     denki.trapSeat = seat;
-    denki.phase="sit";
+    denki.phase = "sit";
     io.to(DENKI_ROOM).emit("denkiState", denkiState());
   });
 
+  /* 座る */
   socket.on("denkiSit", seat=>{
     if(socket.room!==DENKI_ROOM || denki.phase!=="sit") return;
     const victim = denki.players.find(p=>p.id!==denki.players[denki.turn].id);
     if(!victim || victim.id!==socket.id) return;
 
+    let text,color;
     if(seat===denki.trapSeat){
       victim.score = 0;
       victim.shock += 1;
-      io.to(DENKI_ROOM).emit("message",{name:"system",text:`⚡ 電流！${victim.name} は0点`,room:DENKI_ROOM,time:getTimeString()});
-    }else{
+      text = `⚡ 電流！${victim.name} は0点`;
+      color = "red";
+    } else {
       victim.score += seat;
-      io.to(DENKI_ROOM).emit("message",{name:"system",text:`😌 セーフ！${victim.name} は${seat}点獲得`,room:DENKI_ROOM,time:getTimeString()});
+      text = `😌 セーフ！${victim.name} は${seat}点`;
+      color = "green";
     }
+
+    const msg={name:"system",text,color,room:DENKI_ROOM,time:getTimeString()};
+    messagesLog.push(msg); saveLogs();
+    io.to(DENKI_ROOM).emit("message",msg);
+
     denki.turn = 1-denki.turn;
     resetDenki();
     io.to(DENKI_ROOM).emit("denkiState", denkiState());
   });
 
   socket.on("message", data=>{
-    updateActive(socket);
     const text=(data.text??"").trim();
     if(!text) return;
 
     if(text==="女子罰"){
-      const msg={name:socket.username,text:getGirlPunish(socket.room),room:socket.room,time:getTimeString()};
+      const msg={name:"system",text:getGirlPunish(socket.room),color:"red",room:socket.room,time:getTimeString()};
       messagesLog.push(msg); saveLogs(); io.to(socket.room).emit("message",msg); return;
     }
     if(text==="男子罰"){
-      const msg={name:socket.username,text:getBoyPunish(socket.room),room:socket.room,time:getTimeString()};
+      const msg={name:"system",text:getBoyPunish(socket.room),color:"blue",room:socket.room,time:getTimeString()};
       messagesLog.push(msg); saveLogs(); io.to(socket.room).emit("message",msg); return;
     }
     if(text==="苦痛罰" && socket.room==="special"){
-      const msg={name:socket.username,text:getPainPunish(socket.room),room:socket.room,time:getTimeString()};
+      const msg={name:"system",text:getPainPunish(socket.room),color:"purple",room:socket.room,time:getTimeString()};
       messagesLog.push(msg); saveLogs(); io.to(socket.room).emit("message",msg); return;
     }
 
-    const msg={name:socket.username,text,room:socket.room,time:getTimeString()};
+    const msg={name:socket.username,text,color:data.color||"black",room:socket.room,time:getTimeString()};
     messagesLog.push(msg); saveLogs(); io.to(socket.room).emit("message",msg);
   });
 
