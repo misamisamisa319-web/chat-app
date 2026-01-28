@@ -306,12 +306,15 @@ let denki = {
   players: [],
   turn: 0,
   phase: "set",
-  trapSeat: null
+  trapSeat: null,
+  sitSeat: null, 
 };
 
 function denkiState(){
   return {
     phase: denki.phase,
+    trapSeat: denki.phase === "shock" ? denki.trapSeat : null,
+    sitSeat: denki.sitSeat,
     players: denki.players.map((p,i)=>({
       id:p.id,
       name:p.name,
@@ -321,10 +324,13 @@ function denkiState(){
     }))
   };
 }
+
 function resetDenki(){
-  denki.phase="set";
-  denki.trapSeat=null;
+  denki.phase = "set";
+  denki.trapSeat = null;
+  denki.sitSeat = null;
 }
+
 
 /* ===============================
    Socket.IO
@@ -387,38 +393,60 @@ io.on("connection", socket => {
     io.to(DENKI_ROOM).emit("denkiState", denkiState());
   });
 
-  socket.on("denkiSit", seat => {
+ socket.on("denkiSit", seat => {
   if (socket.room !== DENKI_ROOM) return;
   if (denki.phase !== "sit") return;
-  if (denki.players.length !== 2) return;
 
   const attacker = denki.players[denki.turn];
-  if (!attacker) return;
+  const victim = denki.players.find(p => p.id !== attacker?.id);
+  if (!victim || victim.id !== socket.id) return;
+
+  denki.sitSeat = seat;      // ★座った椅子を記録
+  denki.phase = "shock";     // ★次は電流待ち
+
+  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+});
+socket.on("denkiShock", () => {
+  if (socket.room !== DENKI_ROOM) return;
+  if (denki.phase !== "shock") return;
+
+  const attacker = denki.players[denki.turn];
+  if (!attacker || attacker.id !== socket.id) return;
 
   const victim = denki.players.find(p => p.id !== attacker.id);
   if (!victim) return;
-  if (victim.id !== socket.id) return;
 
-    let text, color;
-    if(seat===denki.trapSeat){
-      victim.score = 0;
-      victim.shock += 1;
-      text = `⚡ 電流！${victim.name} は0点`;
-      color = "red";
-    } else {
-      victim.score += seat;
-      text = `😌 セーフ！${victim.name} は${seat}点`;
-      color = "green";
-    }
+  let text, color;
 
-    const msg={name:"system",text,color,room:DENKI_ROOM,time:getTimeString()};
-    messagesLog.push(msg); saveLogs();
-    io.to(DENKI_ROOM).emit("message",msg);
+  if (denki.sitSeat === denki.trapSeat) {
+    victim.score = 0;
+    victim.shock += 1;
+    text = `⚡ 電流！${victim.name} は0点`;
+    color = "red";
+  } else {
+    victim.score += denki.sitSeat;
+    text = `😌 セーフ！${victim.name} は${denki.sitSeat}点`;
+    color = "green";
+  }
 
-    denki.turn = 1-denki.turn;
-    resetDenki();
-    io.to(DENKI_ROOM).emit("denkiState", denkiState());
-  });
+  const msg = {
+    name: "system",
+    text,
+    color,
+    room: DENKI_ROOM,
+    time: getTimeString()
+  };
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(DENKI_ROOM).emit("message", msg);
+
+  denki.turn = 1 - denki.turn;
+  denki.phase = "set";
+  denki.trapSeat = null;
+  denki.sitSeat = null;
+
+  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+});
 
   socket.on("message", data=>{
     updateActive(socket);
