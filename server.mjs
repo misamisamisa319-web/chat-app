@@ -430,18 +430,49 @@ io.on("connection", socket => {
     }
 
     if(text==="女子罰"){
-      const msg={name:"system",text:getGirlPunish(socket.room),color:"red",room:socket.room,time:getTimeString()};
-      messagesLog.push(msg); saveLogs(); io.to(socket.room).emit("message",msg); return;
-    }
-    if(text==="男子罰"){
-      const msg={name:"system",text:getBoyPunish(socket.room),color:"blue",room:socket.room,time:getTimeString()};
-      messagesLog.push(msg); saveLogs(); io.to(socket.room).emit("message",msg); return;
-    }
-    if(text==="苦痛罰" && socket.room==="special"){
-      const msg={name:"system",text:getPainPunish(socket.room),color:"purple",room:socket.room,time:getTimeString()};
-      messagesLog.push(msg); saveLogs(); io.to(socket.room).emit("message",msg); return;
-    }
+  const msg={
+    name: socket.username,   // ★ ここ変更
+    text: getGirlPunish(socket.room),
+    color: "red",
+    room: socket.room,
+    time: getTimeString()
+  };
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
 
+if(text==="男子罰"){
+  const msg={
+    name: socket.username,   // ★
+    text: getBoyPunish(socket.room),
+    color: "blue",
+    room: socket.room,
+    time: getTimeString()
+  };
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
+
+if(text==="苦痛罰" && socket.room==="special"){
+  const msg={
+    name: socket.username,   // ★
+    text: getPainPunish(socket.room),
+    color: "purple",
+    room: socket.room,
+    time: getTimeString()
+  };
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
+
+ 
+    
     if(data.to){
       const msg={name:socket.username,text,room:socket.room,time:getTimeString(),private:true,to:data.to};
       messagesLog.push(msg); saveLogs();
