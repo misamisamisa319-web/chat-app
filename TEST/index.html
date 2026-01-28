@@ -95,6 +95,7 @@ input, button, select { padding: 10px; font-size: 16px; }
     <div id="denkiStatus">待機中</div>
     <div id="denkiScore"></div>
     <div id="denkiBoard"></div>
+    <button id="denkiSetBtn" style="display:none;">仕掛ける</button>
     <button id="denkiShockBtn" style="display:none;">⚡ 電流流す</button>
 
   </div>
@@ -162,12 +163,21 @@ const denkiStatus = document.getElementById("denkiStatus");
 const denkiBoard = document.getElementById("denkiBoard");
 const denkiScore = document.getElementById("denkiScore");
 const denkiShockBtn = document.getElementById("denkiShockBtn");
+const denkiSetBtn = document.getElementById("denkiSetBtn");
+
 
 
 let denkiState = [];
 let myId = null;
+let selectedSeat = null; // ★ 仕掛け用に一時保存
 denkiShockBtn.onclick = () => {
   socket.emit("denkiShock");
+};
+denkiSetBtn.onclick = () => {
+  if (selectedSeat !== null) {
+    socket.emit("denkiSet", selectedSeat);
+    selectedSeat = null;
+  }
 };
 
 
@@ -276,6 +286,25 @@ socket.on("denkiState", state => {
   denkiState = state;   // オブジェクトとして保持
   updateDenkiUI();
 });
+function onDenkiSelect(seat) {
+  if (room !== "denki") return;
+
+  const players = denkiState.players || [];
+  const me = players.find(p => p.id === myId);
+  if (!me) return;
+
+  // 仕掛ける側
+  if (denkiState.phase === "set" && me.isTurn) {
+    selectedSeat = seat;
+    updateDenkiUI();
+    return;
+  }
+
+  // 座る側
+  if (denkiState.phase === "sit" && !me.isTurn) {
+    socket.emit("denkiSit", seat);
+  }
+}
 
 
 function updateDenkiUI() {
@@ -312,6 +341,15 @@ function updateDenkiUI() {
 
     const num = Number(b.textContent);
     b.style.background = "";
+    // 自分が選択中の椅子（仕掛け前）
+if (
+  denkiState.phase === "set" &&
+  me?.isTurn &&
+  selectedSeat === num
+) {
+  b.style.background = "#ffe066";
+}
+
     // ===== 押せる / 押せない制御 =====
 b.disabled = true;
 
@@ -339,12 +377,24 @@ if (denkiState.phase === "shock") {
     }
   });
 
-  // ===== 電流ボタン =====
-  if (denkiState.phase === "shock" && me && me.isTurn) {
-    denkiShockBtn.style.display = "block";
-  } else {
-    denkiShockBtn.style.display = "none";
-  }
+// ===== 仕掛けるボタン =====
+if (
+  denkiState.phase === "set" &&
+  me &&
+  me.isTurn &&
+  selectedSeat !== null
+) {
+  denkiSetBtn.style.display = "block";
+} else {
+  denkiSetBtn.style.display = "none";
+}
+
+// ===== 電流ボタン =====
+if (denkiState.phase === "shock" && me && me.isTurn) {
+  denkiShockBtn.style.display = "block";
+} else {
+  denkiShockBtn.style.display = "none";
+}
 }
 
 
