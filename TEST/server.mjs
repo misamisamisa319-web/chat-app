@@ -558,8 +558,16 @@ if(text==="苦痛罰" && socket.room==="special"){
       io.to(data.to).emit("message",msg);
       return;
     }
+const u = users.find(x => x.id === socket.id);
 
-    const msg={name:socket.username,text,room:socket.room,time:getTimeString()};
+    const msg = {
+  name: socket.username,
+  text,
+  color: data.color || u?.color,
+  room: socket.room,
+  time: getTimeString()
+};
+
     messagesLog.push(msg); saveLogs();
     io.to(socket.room).emit("message",msg);
   });
