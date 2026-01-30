@@ -503,7 +503,8 @@ denki.players.forEach(p => {
   p.shock = 0;
   p.turns = [];
 });
-denki.turn = 0;
+denki.turn = denki.turn === 0 ? 1 : 0;
+
 denki.phase = "set";
 denki.trapSeat = null;
 denki.sitSeat = null;
