@@ -314,10 +314,12 @@ function denkiState(){
   return {
     phase: denki.phase,
 
-    // ★ 電流フェーズまで仕掛け位置は非表示
+    // shock になるまで仕掛け位置は非表示
     trapSeat: denki.phase === "shock" ? denki.trapSeat : null,
 
     sitSeat: denki.sitSeat,
+    sitPreview: denki.sitPreview, // ★ 追加
+
     players: denki.players.map((p,i)=>({
       id: p.id,
       name: p.name,
@@ -327,6 +329,7 @@ function denkiState(){
     }))
   };
 }
+
 
 
 

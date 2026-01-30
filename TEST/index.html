@@ -494,6 +494,12 @@ buttons.forEach(b => {
     b.disabled = false;
   }
 
+  // sit：仮で座った椅子を表示
+  if (denkiState.phase === "sit" && denkiState.sitPreview === num) {
+  b.style.background = "#ccccff";
+}
+
+
   // shock：座った椅子表示
   if (denkiState.phase === "shock" && denkiState.sitSeat === num) {
     b.style.background = "#ccccff";
