@@ -516,11 +516,16 @@ if (denkiState.phase === "set" && me.isTurn) {
   }
 }
 
-// 座るフェーズ（自分の番）
-if (denkiState.phase === "sit" && !me.isTurn) {
+// 座るフェーズ：椅子を選んだら決定できる
+if (
+  denkiState.phase === "sit" &&
+  !me.isTurn &&
+  denkiState.sitPreview !== null
+) {
   denkiSitBtn.style.display = "inline-block";
   denkiSitBtn.disabled = false;
 }
+
 
 // 電流フェーズ（自分の番）
 if (denkiState.phase === "shock" && me.isTurn) {
