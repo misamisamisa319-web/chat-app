@@ -405,11 +405,12 @@ if (!me) {
 // ===== ボタン初期化（毎回リセット）=====
 denkiSetBtn.style.display = "none";
 denkiShockBtn.style.display = "none";
-denkiSitBtn.style.display = "none";
+// denkiSitBtn は sitPreview に応じて制御する
 
 denkiSetBtn.disabled = true;
 denkiShockBtn.disabled = true;
-denkiSitBtn.disabled = true;
+// denkiSitBtn.disabled は後段で決める
+
 
  
 
