@@ -373,8 +373,12 @@ function onDenkiSelect(seat) {
   }
 
   // 座る側
+  {
   if (denkiState.phase === "sit" && !me.isTurn) {
-    socket.emit("denkiSit", seat);
+  socket.emit("denkiSit", seat);
+  updateDenkiUI(); // ★ これを追加
+}
+
   }
 }
 
