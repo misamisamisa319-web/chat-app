@@ -366,7 +366,7 @@ socket.on("denkiSitConfirm", () => {
   // 次フェーズへ
   denki.phase = "shock";
 
-  io.to(DENKI_ROOM).emit("denkiState", denki);
+  io.to(DENKI_ROOM).emit("denkiState", denkiState());
 });
   
 
@@ -425,12 +425,12 @@ socket.on("denkiSitConfirm", () => {
 
   // ★ 仮仕掛けとして保存
   denki.trapPreview = seat;
+　denki.trapSeat = seat;
 
   // フェーズだけ進める
   denki.phase = "sit";
-
-  io.to(DENKI_ROOM).emit("denkiState", denki);
-});
+ io.to(DENKI_ROOM).emit("denkiState", denkiState());
+  });
 
 socket.on("denkiSit", seat => {
   if (socket.room !== DENKI_ROOM) return;
@@ -442,7 +442,7 @@ socket.on("denkiSit", seat => {
   // ★ 仮座りとして保存（確定しない）
   denki.sitPreview = seat;
 
-  io.to(DENKI_ROOM).emit("denkiState", denki);
+io.to(DENKI_ROOM).emit("denkiState", denkiState());
 });
 
 socket.on("denkiShock", () => {
@@ -458,11 +458,21 @@ socket.on("denkiShock", () => {
   let text, color;
 
   if (denki.sitSeat === denki.trapSeat) {
+    if ((victim.turns?.length || 0) >= 10) return;
     victim.score = 0;
     victim.shock += 1;
+    victim.turns = victim.turns || [];
+    victim.turns.push("shock");
+
     text = `⚡ 電流！${victim.name} は0点`;
     color = "red";
   } else {
+    if ((victim.turns?.length || 0) >= 10) return;
+
+    victim.turns = victim.turns || [];
+    victim.turns.push(denki.sitSeat);
+
+
     victim.score += denki.sitSeat;
     text = `😌 セーフ！${victim.name} は${denki.sitSeat}点`;
     color = "green";
@@ -478,13 +488,43 @@ socket.on("denkiShock", () => {
   messagesLog.push(msg);
   saveLogs();
   io.to(DENKI_ROOM).emit("message", msg);
+  // ★ 次ゲーム用リセット
+denki.players.forEach(p => {
+  p.score = 0;
+  p.shock = 0;
+  p.turns = [];
+});
+denki.turn = 0;
+denki.phase = "set";
+denki.trapSeat = null;
+denki.sitSeat = null;
+denki.sitPreview = null;
 
-  denki.turn = 1 - denki.turn;
-  denki.phase = "set";
-  denki.trapSeat = null;
-  denki.sitSeat = null;
 
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+  
+  // ★ 10ターン終了チェック
+if ((victim.turns?.length || 0) >= 10) {
+  const [p1, p2] = denki.players;
+
+  const score1 = p1.turns?.reduce((a, b) => a + (b === "shock" ? 0 : b), 0) || 0;
+  const score2 = p2.turns?.reduce((a, b) => a + (b === "shock" ? 0 : b), 0) || 0;
+
+  let resultText = "引き分け！";
+  if (score1 > score2) resultText = `🏆 勝者：${p1.name}（${score1}点）`;
+  if (score2 > score1) resultText = `🏆 勝者：${p2.name}（${score2}点）`;
+
+  const msg = {
+    name: "system",
+    text: resultText,
+    room: DENKI_ROOM,
+    time: getTimeString()
+  };
+
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(DENKI_ROOM).emit("message", msg);
+}
+io.to(DENKI_ROOM).emit("denkiState", denkiState());
 });
 
   socket.on("message", data=>{

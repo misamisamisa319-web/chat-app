@@ -91,12 +91,71 @@ input, button, select { padding: 10px; font-size: 16px; }
 
   <!-- ⚡ 電気椅子（denki ルームのみ表示） -->
   <div id="denkiWrap">
+    <!-- ===== 電気椅子 点数表 ===== -->
+<table id="denkiTable" style="
+  width:100%;
+  border-collapse:collapse;
+  margin-bottom:10px;
+  font-size:14px;
+">
+  <thead>
+    <tr>
+      <th style="border:1px solid #999;">名前</th>
+      <th style="border:1px solid #999;">1</th>
+      <th style="border:1px solid #999;">2</th>
+      <th style="border:1px solid #999;">3</th>
+      <th style="border:1px solid #999;">4</th>
+      <th style="border:1px solid #999;">5</th>
+      <th style="border:1px solid #999;">6</th>
+      <th style="border:1px solid #999;">7</th>
+      <th style="border:1px solid #999;">8</th>
+      <th style="border:1px solid #999;">9</th>
+      <th style="border:1px solid #999;">10</th>
+      <th style="border:1px solid #999;">合計</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id="denkiRowA">
+      <td style="border:1px solid #999;">A</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">0</td>
+    </tr>
+    <tr id="denkiRowB">
+      <td style="border:1px solid #999;">B</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">0</td>
+    </tr>
+  </tbody>
+</table>
+
     <div id="denkiHeader">⚡ 電気椅子ゲーム</div>
     <div id="denkiStatus">待機中</div>
     <div id="denkiScore"></div>
     <div id="denkiBoard"></div>
-    <button id="denkiSetBtn" style="display:none;">仕掛ける</button>
-    <button id="denkiShockBtn" style="display:none;">⚡ 電流流す</button>
+<button id="denkiSetBtn">仕掛ける</button>
+<button id="denkiShockBtn">⚡ 電流流す</button>
+<button id="denkiSitBtn">座る</button>
+
+
+
 
   </div>
 
@@ -164,6 +223,11 @@ const denkiBoard = document.getElementById("denkiBoard");
 const denkiScore = document.getElementById("denkiScore");
 const denkiShockBtn = document.getElementById("denkiShockBtn");
 const denkiSetBtn = document.getElementById("denkiSetBtn");
+denkiSetBtn.disabled = true;
+denkiShockBtn.disabled = true;
+const denkiSitBtn = document.getElementById("denkiSitBtn");
+denkiSitBtn.disabled = true;
+
 
 
 
@@ -178,6 +242,9 @@ denkiSetBtn.onclick = () => {
     socket.emit("denkiSet", selectedSeat);
     selectedSeat = null;
   }
+};
+denkiSitBtn.onclick = () => {
+  socket.emit("denkiSitConfirm");
 };
 
 
@@ -283,15 +350,19 @@ socket.on("userList", list => {
 
 /* ===== 電気椅子：状態 ===== */
 socket.on("denkiState", state => {
-  denkiState = state;   // オブジェクトとして保持
+  denkiState = state;
+
+  if (!denkiState || !denkiState.players) return;
+
   updateDenkiUI();
 });
+
 function onDenkiSelect(seat) {
   if (room !== "denki") return;
 
   const players = denkiState.players || [];
   const me = players.find(p => p.id === myId);
-  if (!me) return;
+  if (!me) return; // ← これだけでOK
 
   // 仕掛ける側
   if (denkiState.phase === "set" && me.isTurn) {
@@ -306,7 +377,6 @@ function onDenkiSelect(seat) {
   }
 }
 
-
 function updateDenkiUI() {
   if (room !== "denki") {
     denkiWrap.style.display = "none";
@@ -314,13 +384,38 @@ function updateDenkiUI() {
   }
   denkiWrap.style.display = "block";
 
-  const players = denkiState.players || [];
+  if (!denkiState || !denkiState.players) return;
+
+  const players = denkiState.players;
   const me = players.find(p => p.id === myId);
+// ===== 観戦者 =====
+if (!me) {
+  denkiStatus.textContent = "観戦中";
+
+  // ボタン全部非表示
+  denkiSetBtn.style.display = "none";
+  denkiShockBtn.style.display = "none";
+  denkiSitBtn.style.display = "none";
+
+  denkiSetBtn.disabled = true;
+  denkiShockBtn.disabled = true;
+  denkiSitBtn.disabled = true;
+
+  return;
+}
+// ===== ボタン初期化（毎回リセット）=====
+denkiSetBtn.style.display = "none";
+denkiShockBtn.style.display = "none";
+denkiSitBtn.style.display = "none";
+
+denkiSetBtn.disabled = true;
+denkiShockBtn.disabled = true;
+denkiSitBtn.disabled = true;
+
+ 
 
   // ===== ステータス文言 =====
-  if (!me) {
-    denkiStatus.textContent = "観戦中";
-  } else if (denkiState.phase === "set" && me.isTurn) {
+  if (denkiState.phase === "set" && me.isTurn) {
     denkiStatus.textContent = "あなたの番：椅子を仕掛ける";
   } else if (denkiState.phase === "sit" && !me.isTurn) {
     denkiStatus.textContent = "あなたの番：椅子に座る";
@@ -334,68 +429,110 @@ function updateDenkiUI() {
   denkiScore.textContent = players.map(p =>
     `${p.name}: ${p.score}点 / ⚡${p.shock}`
   ).join(" ｜ ");
+    // ===== 点数表 =====
+  const rowA = document.getElementById("denkiRowA");
+  const rowB = document.getElementById("denkiRowB");
+
+  const pA = players[0];
+  const pB = players[1];
+
+  if (pA && rowA) {
+    rowA.children[0].textContent = pA.name;
+
+    let totalA = 0;
+    for (let i = 1; i <= 10; i++) {
+      const v = pA.turns?.[i - 1];
+      if (v === "shock") {
+        rowA.children[i].textContent = "⚡";
+      } else if (typeof v === "number") {
+        rowA.children[i].textContent = v;
+        totalA += v;
+      } else {
+        rowA.children[i].textContent = "-";
+      }
+    }
+    rowA.children[11].textContent = totalA;
+  }
+
+  if (pB && rowB) {
+    rowB.children[0].textContent = pB.name;
+
+    let totalB = 0;
+    for (let i = 1; i <= 10; i++) {
+      const v = pB.turns?.[i - 1];
+      if (v === "shock") {
+        rowB.children[i].textContent = "⚡";
+      } else if (typeof v === "number") {
+        rowB.children[i].textContent = v;
+        totalB += v;
+      } else {
+        rowB.children[i].textContent = "-";
+      }
+    }
+    rowB.children[11].textContent = totalB;
+  }
+
 
   // ===== 椅子の色 =====
-  const buttons = denkiBoard.querySelectorAll("button");
-  buttons.forEach(b => {
+const buttons = denkiBoard.querySelectorAll("button");
+buttons.forEach(b => {
+  const num = Number(b.textContent);
 
-    const num = Number(b.textContent);
-    b.style.background = "";
-    // 自分が選択中の椅子（仕掛け前）
-if (
-  denkiState.phase === "set" &&
-  me?.isTurn &&
-  selectedSeat === num
-) {
-  b.style.background = "#ffe066";
+  // ★ 椅子 初期化
+  b.style.background = "";
+  b.disabled = true;
+
+  // 仕掛ける側：選択中
+  if (
+    denkiState.phase === "set" &&
+    me.isTurn &&
+    selectedSeat === num
+  ) {
+    b.style.background = "#ffe066";
+    b.disabled = false;
+  }
+
+  // 座る側
+  if (denkiState.phase === "sit" && !me.isTurn) {
+    b.disabled = false;
+  }
+
+  // 仕掛けられた椅子
+  if (denkiState.phase !== "set" && denkiState.trapSeat === num) {
+    b.style.background = "#ffcccc";
+  }
+
+  // 座った椅子
+  if (denkiState.phase === "shock" && denkiState.sitSeat === num) {
+    b.style.background = "#ccccff";
+  }
+});
+
+// 仕掛けるフェーズ（自分の番）
+if (denkiState.phase === "set" && me.isTurn) {
+  denkiSetBtn.style.display = "inline-block";
+
+  if (selectedSeat !== null) {
+    denkiSetBtn.disabled = false;
+  }
 }
 
-    // ===== 押せる / 押せない制御 =====
-b.disabled = true;
-
-if (denkiState.phase === "set" && me?.isTurn) {
-  b.disabled = false;   // 仕掛ける側
+// 座るフェーズ（自分の番）
+if (denkiState.phase === "sit" && !me.isTurn) {
+  denkiSitBtn.style.display = "inline-block";
+  denkiSitBtn.disabled = false;
 }
 
-if (denkiState.phase === "sit" && me && !me.isTurn) {
-  b.disabled = false;   // 座る側
+// 電流フェーズ（自分の番）
+if (denkiState.phase === "shock" && me.isTurn) {
+  denkiShockBtn.style.display = "inline-block";
+  denkiShockBtn.disabled = false;
 }
 
-if (denkiState.phase === "shock") {
-  b.disabled = true;    // 電流待ちは全部不可
 }
 
 
-    // 仕掛けた椅子（全員に見える）
-    if (denkiState.phase !== "set" && denkiState.trapSeat === num) {
-      b.style.background = "#ffcccc";
-    }
 
-    // 座った椅子（shock中）
-    if (denkiState.phase === "shock" && denkiState.sitSeat === num) {
-      b.style.background = "#ccccff";
-    }
-  });
-
-// ===== 仕掛けるボタン =====
-if (
-  denkiState.phase === "set" &&
-  me &&
-  me.isTurn &&
-  selectedSeat !== null
-) {
-  denkiSetBtn.style.display = "block";
-} else {
-  denkiSetBtn.style.display = "none";
-}
-
-// ===== 電流ボタン =====
-if (denkiState.phase === "shock" && me && me.isTurn) {
-  denkiShockBtn.style.display = "block";
-} else {
-  denkiShockBtn.style.display = "none";
-}
-}
 
 
 /* ===== 入室処理 ===== */
