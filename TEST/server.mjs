@@ -337,6 +337,8 @@ function resetDenki(){
    Socket.IO
 ================================ */
 io.on("connection", socket => {
+  socket.emit("lobbyUpdate", getLobbyInfo());
+
     /* ===== 文字色更新 ===== */
   socket.on("updateColor", ({ color }) => {
     const u = users.find(u => u.id === socket.id);
@@ -591,13 +593,27 @@ if(text==="苦痛罰" && socket.room==="special"){
 
  
     
-    if(data.to){
-      const msg={name:socket.username,text,room:socket.room,time:getTimeString(),private:true,to:data.to};
-      messagesLog.push(msg); saveLogs();
-      socket.emit("message",msg);
-      io.to(data.to).emit("message",msg);
-      return;
-    }
+if (data.to) {
+  const targetUser = users.find(u => u.id === data.to);
+
+  const msg = {
+    name: socket.username,
+    text,
+    room: socket.room,
+    time: getTimeString(),
+    private: true,
+    to: data.to,
+    toName: targetUser?.name || "不明"
+  };
+
+  messagesLog.push(msg);
+  saveLogs();
+  socket.emit("message", msg);
+  io.to(data.to).emit("message", msg);
+  return;
+}
+
+
 const u = users.find(x => x.id === socket.id);
 
     const msg = {
