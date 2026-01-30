@@ -463,13 +463,15 @@ socket.on("denkiShock", () => {
   const attacker = denki.players[denki.turn];
   if (!attacker || attacker.id !== socket.id) return;
 
-  const victim = denki.players.find(p => p.id !== attacker.id);
+  const victimIndex = denki.turn === 0 ? 1 : 0;
+  const victim = denki.players[victimIndex];
   if (!victim) return;
 
-  let text, color;
+  let text;
+  let color;
 
+  // ===== 判定 =====
   if (denki.sitSeat === denki.trapSeat) {
-    if ((victim.turns?.length || 0) >= 10) return;
     victim.score = 0;
     victim.shock += 1;
     victim.turns = victim.turns || [];
@@ -478,45 +480,19 @@ socket.on("denkiShock", () => {
     text = `⚡ 電流！${victim.name} は0点`;
     color = "red";
   } else {
-    if ((victim.turns?.length || 0) >= 10) return;
-
     victim.turns = victim.turns || [];
     victim.turns.push(denki.sitSeat);
-
 
     victim.score += denki.sitSeat;
     text = `😌 セーフ！${victim.name} は${denki.sitSeat}点`;
     color = "green";
   }
 
+  // ===== チャット表示 =====
   const msg = {
     name: "system",
-    text,
-    color,
-    room: DENKI_ROOM,
-    time: getTimeString()
-  };
-  messagesLog.push(msg);
-  saveLogs();
-  io.to(DENKI_ROOM).emit("message", msg);
-
-
-
-  
- // ★ 10ターン終了チェック
-if ((victim.turns?.length || 0) >= 10) {
-  const [p1, p2] = denki.players;
-
-  const score1 = p1.turns?.reduce((a, b) => a + (b === "shock" ? 0 : b), 0) || 0;
-  const score2 = p2.turns?.reduce((a, b) => a + (b === "shock" ? 0 : b), 0) || 0;
-
-  let resultText = "引き分け！";
-  if (score1 > score2) resultText = `🏆 勝者：${p1.name}（${score1}点）`;
-  if (score2 > score1) resultText = `🏆 勝者：${p2.name}（${score2}点）`;
-
-  const msg = {
-    name: "system",
-    text: resultText,
+    text: text,
+    color: color,
     room: DENKI_ROOM,
     time: getTimeString()
   };
@@ -525,21 +501,47 @@ if ((victim.turns?.length || 0) >= 10) {
   saveLogs();
   io.to(DENKI_ROOM).emit("message", msg);
 
-  // ★ ここにリセットを移動（全部貼る）
-  denki.players.forEach(p => {
-    p.score = 0;
-    p.shock = 0;
-    p.turns = [];
-  });
+  // ===== 10ターン終了チェック =====
+  if (victim.turns.length >= 10) {
+    const p1 = denki.players[0];
+    const p2 = denki.players[1];
+
+    const score1 = p1.turns.reduce((a, b) => a + (b === "shock" ? 0 : b), 0);
+    const score2 = p2.turns.reduce((a, b) => a + (b === "shock" ? 0 : b), 0);
+
+    let resultText = "引き分け！";
+    if (score1 > score2) resultText = `🏆 勝者：${p1.name}（${score1}点）`;
+    if (score2 > score1) resultText = `🏆 勝者：${p2.name}（${score2}点）`;
+
+    const resultMsg = {
+      name: "system",
+      text: resultText,
+      room: DENKI_ROOM,
+      time: getTimeString()
+    };
+
+    messagesLog.push(resultMsg);
+    saveLogs();
+    io.to(DENKI_ROOM).emit("message", resultMsg);
+
+    // 次ゲーム用リセット
+    denki.players.forEach(p => {
+      p.score = 0;
+      p.shock = 0;
+      p.turns = [];
+    });
+  }
+
+  // ===== ラウンド終了処理（必ず1回）=====
   denki.turn = denki.turn === 0 ? 1 : 0;
   denki.phase = "set";
   denki.trapSeat = null;
   denki.sitSeat = null;
   denki.sitPreview = null;
-}
 
-io.to(DENKI_ROOM).emit("denkiState", denkiState());
+  io.to(DENKI_ROOM).emit("denkiState", denkiState());
 });
+
 
   socket.on("message", data=>{
     updateActive(socket);
