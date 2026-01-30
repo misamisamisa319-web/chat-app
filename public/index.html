@@ -387,11 +387,10 @@ function updateDenkiUI() {
 
   const players = denkiState.players;
   const me = players.find(p => p.id === myId);
-// ===== 観戦者 =====
-if (!me) {
+// ===== 観戦者（2人未満のときだけ）=====
+if (players.length < 2) {
   denkiStatus.textContent = "観戦中";
 
-  // ボタン全部非表示
   denkiSetBtn.style.display = "none";
   denkiShockBtn.style.display = "none";
   denkiSitBtn.style.display = "none";
@@ -402,6 +401,7 @@ if (!me) {
 
   return;
 }
+
 // ===== ボタン初期化（毎回リセット）=====
 denkiSetBtn.style.display = "none";
 denkiShockBtn.style.display = "none";
