@@ -373,12 +373,8 @@ function onDenkiSelect(seat) {
   }
 
   // 座る側
-  {
   if (denkiState.phase === "sit" && !me.isTurn) {
-  socket.emit("denkiSit", seat);
-  updateDenkiUI(); // ★ これを追加
-}
-
+    socket.emit("denkiSit", seat);
   }
 }
 
@@ -475,27 +471,25 @@ denkiSitBtn.disabled = true;
   }
 
 
-  // ===== 椅子の色 =====
+ // ===== 椅子の色 =====
 const buttons = denkiBoard.querySelectorAll("button");
 buttons.forEach(b => {
   const num = Number(b.textContent);
 
-// ★ 椅子 初期化
-b.style.background = "";
-b.disabled = true;
+  // 初期化
+  b.style.background = "";
+  b.disabled = true;
 
-// 仕掛ける側：選択前・選択中
-if (denkiState.phase === "set" && me.isTurn) {
-  b.disabled = false;
-
-  if (selectedSeat === num) {
-    b.style.background = "#ffe066";
+  // 仕掛ける側
+  if (denkiState.phase === "set" && me.isTurn) {
+    b.disabled = false;
+    if (selectedSeat === num) {
+      b.style.background = "#ffe066";
+    }
   }
-}
 
-
-  // 座る側
-  if (denkiState.phase === "sit" && !me.isTurn) {
+  // 座るフェーズ（★役割チェックしない）
+  if (denkiState.phase === "sit") {
     b.disabled = false;
   }
 
@@ -509,6 +503,7 @@ if (denkiState.phase === "set" && me.isTurn) {
     b.style.background = "#ccccff";
   }
 });
+
 
 // 仕掛けるフェーズ（自分の番）
 if (denkiState.phase === "set" && me.isTurn) {

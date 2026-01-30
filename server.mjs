@@ -314,7 +314,8 @@ let denki = {
 function denkiState(){
   return {
     phase: denki.phase,
-    trapSeat: denki.phase === "shock" ? denki.trapSeat : null,
+   trapSeat: denki.trapSeat,
+
     sitSeat: denki.sitSeat,
     players: denki.players.map((p,i)=>({
       id:p.id,
