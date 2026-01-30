@@ -476,19 +476,19 @@ const buttons = denkiBoard.querySelectorAll("button");
 buttons.forEach(b => {
   const num = Number(b.textContent);
 
-  // ★ 椅子 初期化
-  b.style.background = "";
-  b.disabled = true;
+// ★ 椅子 初期化
+b.style.background = "";
+b.disabled = true;
 
-  // 仕掛ける側：選択中
-  if (
-    denkiState.phase === "set" &&
-    me.isTurn &&
-    selectedSeat === num
-  ) {
+// 仕掛ける側：選択前・選択中
+if (denkiState.phase === "set" && me.isTurn) {
+  b.disabled = false;
+
+  if (selectedSeat === num) {
     b.style.background = "#ffe066";
-    b.disabled = false;
   }
+}
+
 
   // 座る側
   if (denkiState.phase === "sit" && !me.isTurn) {
