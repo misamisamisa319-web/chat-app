@@ -379,10 +379,7 @@ function onDenkiSelect(seat) {
 }
 
 function updateDenkiUI() {
-  if (room !== "denki") {
-    denkiWrap.style.display = "none";
-    return;
-  }
+ 
   denkiWrap.style.display = "block";
 
   if (!denkiState || !denkiState.players) return;
