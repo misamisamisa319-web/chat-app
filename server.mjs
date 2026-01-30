@@ -363,21 +363,20 @@ socket.on("denkiSitConfirm", () => {
   if (socket.room !== DENKI_ROOM) return;
   if (denki.phase !== "sit") return;
 
-  const victim = denki.players.find(p => !p.isTurn);
+  // 座る側＝turnじゃない方
+  const victimIndex = denki.turn === 0 ? 1 : 0;
+  const victim = denki.players[victimIndex];
   if (!victim || victim.id !== socket.id) return;
 
-  // ★ 仮座りを確定
   if (denki.sitPreview == null) return;
 
   denki.sitSeat = denki.sitPreview;
   denki.sitPreview = null;
-
-  // 次フェーズへ
   denki.phase = "shock";
 
   io.to(DENKI_ROOM).emit("denkiState", denkiState());
 });
-  
+
 
 
   socket.on("checkRoomKey", ({ room, key }) => {
