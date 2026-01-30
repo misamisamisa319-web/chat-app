@@ -372,10 +372,11 @@ function onDenkiSelect(seat) {
     return;
   }
 
-  // 座る側
-  if (denkiState.phase === "sit" && !me.isTurn) {
-    socket.emit("denkiSit", seat);
-  }
+  // 座るフェーズは無条件で送る（判定はサーバー側）
+if (denkiState.phase === "sit") {
+  socket.emit("denkiSit", seat);
+}
+
 }
 
 function updateDenkiUI() {
