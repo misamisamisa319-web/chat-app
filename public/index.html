@@ -472,7 +472,7 @@ denkiSitBtn.disabled = true;
   }
 
 
- // ===== 椅子の色 =====
+// ===== 椅子の色・有効化 =====
 const buttons = denkiBoard.querySelectorAll("button");
 buttons.forEach(b => {
   const num = Number(b.textContent);
@@ -481,7 +481,7 @@ buttons.forEach(b => {
   b.style.background = "";
   b.disabled = true;
 
-  // 仕掛ける側
+  // set：仕掛ける側だけ押せる
   if (denkiState.phase === "set" && me.isTurn) {
     b.disabled = false;
     if (selectedSeat === num) {
@@ -489,17 +489,12 @@ buttons.forEach(b => {
     }
   }
 
-  // 座るフェーズ（★役割チェックしない）
+  // sit：参加者なら必ず押せる
   if (denkiState.phase === "sit") {
     b.disabled = false;
   }
 
-  // 仕掛けられた椅子
-  if (denkiState.phase !== "set" && denkiState.trapSeat === num) {
-    b.style.background = "#ffcccc";
-  }
-
-  // 座った椅子
+  // shock：座った椅子表示
   if (denkiState.phase === "shock" && denkiState.sitSeat === num) {
     b.style.background = "#ccccff";
   }

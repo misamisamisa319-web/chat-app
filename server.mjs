@@ -442,13 +442,14 @@ socket.on("denkiSit", seat => {
   if (socket.room !== DENKI_ROOM) return;
   if (denki.phase !== "sit") return;
 
-  const victim = denki.players.find(p => !p.isTurn);
+  // ★ 座る側 = turn じゃない方
+  const victimIndex = denki.turn === 0 ? 1 : 0;
+  const victim = denki.players[victimIndex];
   if (!victim || victim.id !== socket.id) return;
 
-  // ★ 仮座りとして保存（確定しない）
   denki.sitPreview = seat;
 
-io.to(DENKI_ROOM).emit("denkiState", denkiState());
+  io.to(DENKI_ROOM).emit("denkiState", denkiState());
 });
 
 socket.on("denkiShock", () => {
