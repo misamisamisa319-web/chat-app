@@ -320,13 +320,15 @@ function denkiState(){
     sitSeat: denki.sitSeat,
     sitPreview: denki.sitPreview, // ★ 追加
 
-    players: denki.players.map((p,i)=>({
-      id: p.id,
-      name: p.name,
-      score: p.score,
-      shock: p.shock,
-      isTurn: denki.turn === i
-    }))
+   players: denki.players.map((p,i)=>( {
+  id: p.id,
+  name: p.name,
+  score: p.score,
+  shock: p.shock,
+  turns: p.turns || [],   // ★ これを追加
+  isTurn: denki.turn === i
+}))
+
   };
 }
 
@@ -432,8 +434,8 @@ socket.on("denkiSitConfirm", () => {
   if (!me || me.id !== socket.id) return;
 
   // ★ 仮仕掛けとして保存
-  denki.trapPreview = seat;
-　denki.trapSeat = seat;
+ denki.trapPreview = seat;
+ denki.trapSeat = seat;
 
   // フェーズだけ進める
   denki.phase = "sit";
@@ -497,22 +499,11 @@ socket.on("denkiShock", () => {
   messagesLog.push(msg);
   saveLogs();
   io.to(DENKI_ROOM).emit("message", msg);
-  // ★ 次ゲーム用リセット
-denki.players.forEach(p => {
-  p.score = 0;
-  p.shock = 0;
-  p.turns = [];
-});
-denki.turn = denki.turn === 0 ? 1 : 0;
 
-denki.phase = "set";
-denki.trapSeat = null;
-denki.sitSeat = null;
-denki.sitPreview = null;
 
 
   
-  // ★ 10ターン終了チェック
+ // ★ 10ターン終了チェック
 if ((victim.turns?.length || 0) >= 10) {
   const [p1, p2] = denki.players;
 
@@ -533,7 +524,20 @@ if ((victim.turns?.length || 0) >= 10) {
   messagesLog.push(msg);
   saveLogs();
   io.to(DENKI_ROOM).emit("message", msg);
+
+  // ★ ここにリセットを移動（全部貼る）
+  denki.players.forEach(p => {
+    p.score = 0;
+    p.shock = 0;
+    p.turns = [];
+  });
+  denki.turn = denki.turn === 0 ? 1 : 0;
+  denki.phase = "set";
+  denki.trapSeat = null;
+  denki.sitSeat = null;
+  denki.sitPreview = null;
 }
+
 io.to(DENKI_ROOM).emit("denkiState", denkiState());
 });
 

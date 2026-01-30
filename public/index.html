@@ -517,7 +517,8 @@ if (denkiState.phase === "set" && me.isTurn) {
   }
 }
 
-// 座るフェーズ：椅子を選んだら決定できる
+
+// 座るボタン制御
 if (
   denkiState.phase === "sit" &&
   !me.isTurn &&
@@ -525,6 +526,9 @@ if (
 ) {
   denkiSitBtn.style.display = "inline-block";
   denkiSitBtn.disabled = false;
+} else {
+  denkiSitBtn.style.display = "none";
+  denkiSitBtn.disabled = true;
 }
 
 
