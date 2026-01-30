@@ -337,6 +337,19 @@ function resetDenki(){
    Socket.IO
 ================================ */
 io.on("connection", socket => {
+    /* ===== 文字色更新 ===== */
+  socket.on("updateColor", ({ color }) => {
+    const u = users.find(u => u.id === socket.id);
+    if (!u) return;
+
+    u.color = color;
+
+    io.to(u.room).emit(
+      "userList",
+      users.filter(x => x.room === u.room)
+    );
+  });
+
 socket.on("denkiSitConfirm", () => {
   if (socket.room !== DENKI_ROOM) return;
   if (denki.phase !== "sit") return;
