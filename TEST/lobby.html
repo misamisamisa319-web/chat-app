@@ -22,6 +22,23 @@ body {
   padding: 10px;
   margin-bottom: 12px;
 }
+/* ===== ルーム別カラー ===== */
+.room.room1 {
+  background: #ffdddd;
+}
+
+.room.room2 {
+  background: #dde8ff;
+}
+
+.room.denki {
+  background: #fff4cc;
+}
+
+.room.special {
+  background: #ffddee;
+}
+
 .room-title {
   font-weight: bold;
   margin-bottom: 4px;
@@ -69,7 +86,7 @@ input[type="password"] {
 
 <div id="error" style="color:red; margin-bottom:10px;"></div>
 
-<div class="room">
+<div class="room room1">
   <div class="room-title">ルーム1</div>
   <div class="room-info">
     人数（<span id="count-room1">0</span>人）
@@ -78,7 +95,7 @@ input[type="password"] {
   <button onclick="enterRoom('room1')">入室</button>
 </div>
 
-<div class="room">
+<div class="room room2">
   <div class="room-title">ルーム2</div>
   <div class="room-info">
     人数（<span id="count-room2">0</span>人）
@@ -87,7 +104,7 @@ input[type="password"] {
   <button onclick="enterRoom('room2')">入室</button>
 </div>
 
-<div class="room" style="border:2px solid #ff6666; background:#fff5f5;">
+<div class="room denki">
   <div class="room-title">⚡ 電気椅子</div>
   <div class="room-info">
     人数（<span id="count-denki">0</span>人）
@@ -96,7 +113,7 @@ input[type="password"] {
   <button onclick="enterRoom('denki')">入室</button>
 </div>
 
-<div class="room">
+<div class="room special">
   <div class="room-title">スペシャル</div>
   <div class="room-info">
     人数（<span id="count-special">0</span>人）
