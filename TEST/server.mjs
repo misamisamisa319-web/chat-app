@@ -316,6 +316,7 @@ let denki = {
 function denkiState(){
   return {
     phase: denki.phase,
+    ended: denki.ended,
 
     // shock になるまで仕掛け位置は非表示
     trapSeat: denki.phase === "shock" ? denki.trapSeat : null,
