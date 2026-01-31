@@ -622,13 +622,14 @@ if (resultText) {
   io.to(DENKI_ROOM).emit("message", resultMsg);
 
  denki.ended = true;
+ denki.phase = "end";
 io.to(DENKI_ROOM).emit("denkiState", denkiState());
 return;
 
 }
 
   // ===== ラウンド終了処理 =====
-denki.phase = "end";
+denki.phase = "set";
 
 denki.trapSeat = null;
 denki.sitSeat = null;

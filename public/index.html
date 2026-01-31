@@ -560,7 +560,8 @@ if (denkiState.phase === "shock" && me.isTurn) {
   denkiShockBtn.disabled = false;
 }
 // ===== 再戦ボタン表示（仮）=====
-if (denkiState.phase === "end") {
+if (denkiState.phase === "end" && denkiState.ended === true) {
+
   denkiRematchBtn.style.display = "inline-block";
 } else {
   denkiRematchBtn.style.display = "none";
