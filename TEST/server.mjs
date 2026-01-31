@@ -493,28 +493,26 @@ socket.on("denkiShock", () => {
   let color;
 
 // ===== 判定 =====
-if (denki.sitSeat === denki.trapSeat) {
-  // 感電：すべてリセット
+const trap = denki.trapSeat;
+const sit = denki.sitSeat;
+
+if (sit === trap) {
   victim.score = 0;
   victim.shock += 1;
-
-  // ★ これまでの点数を全リセット
-  victim.turns = [];
-
-  // ★ 電気をくらったターンを記録
+  victim.turns = victim.turns || [];
   victim.turns.push("shock");
 
-  text = `⚡ 電流！${victim.name} は0点`;
+  text = `⚡ 電流！${victim.name} は0点（仕掛け：${trap} / 座った：${sit}）`;
   color = "red";
 } else {
-  // セーフ：通常加算
   victim.turns = victim.turns || [];
-  victim.turns.push(denki.sitSeat);
+  victim.turns.push(sit);
 
-  victim.score += denki.sitSeat;
-  text = `😌 セーフ！${victim.name} は${denki.sitSeat}点`;
+  victim.score += sit;
+  text = `😌 セーフ！${victim.name} は${sit}点（仕掛け：${trap} / 座った：${sit}）`;
   color = "green";
 }
+
 
   // ===== チャット表示 =====
   const msg = {
