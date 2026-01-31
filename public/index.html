@@ -388,14 +388,21 @@ function updateDenkiUI() {
   const players = denkiState.players;
   const me = players.find(p => p.id === myId);
   if (!me) return;
+  // ★ ボタンは最初から常に表示
+denkiSetBtn.style.display = "inline-block";
+denkiSitBtn.style.display = "inline-block";
+denkiShockBtn.style.display = "inline-block";
+
+// ★ まず全部押せなくする
+denkiSetBtn.disabled = true;
+denkiSitBtn.disabled = true;
+denkiShockBtn.disabled = true;
+
 
 // ===== 観戦者（2人未満のときだけ）=====
 if (players.length < 2) {
   denkiStatus.textContent = "観戦中";
 
-  denkiSetBtn.style.display = "none";
-  denkiShockBtn.style.display = "none";
-  denkiSitBtn.style.display = "none";
 
   denkiSetBtn.disabled = true;
   denkiShockBtn.disabled = true;
@@ -405,9 +412,7 @@ if (players.length < 2) {
 }
 
 // ===== ボタン初期化（毎回リセット）=====
-denkiSetBtn.style.display = "none";
-denkiShockBtn.style.display = "none";
-// denkiSitBtn は sitPreview に応じて制御する
+
 
 denkiSetBtn.disabled = true;
 denkiShockBtn.disabled = true;
@@ -523,19 +528,17 @@ if (
   !me.isTurn &&
   denkiState.sitPreview !== null
 ) {
-  denkiSitBtn.style.display = "inline-block";
   denkiSitBtn.disabled = false;
 } else {
-  denkiSitBtn.style.display = "none";
   denkiSitBtn.disabled = true;
 }
 
-
 // 電流フェーズ（自分の番）
 if (denkiState.phase === "shock" && me.isTurn) {
-  denkiShockBtn.style.display = "inline-block";
   denkiShockBtn.disabled = false;
 }
+
+
 
 }
 
