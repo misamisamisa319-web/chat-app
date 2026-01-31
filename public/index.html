@@ -387,6 +387,8 @@ function updateDenkiUI() {
 
   const players = denkiState.players;
   const me = players.find(p => p.id === myId);
+  if (!me) return;
+
 // ===== 観戦者（2人未満のときだけ）=====
 if (players.length < 2) {
   denkiStatus.textContent = "観戦中";
