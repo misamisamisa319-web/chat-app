@@ -606,14 +606,11 @@ if (sit === trap) {
   // ===== 勝利条件チェック =====
 
 // 合計点（shock は 0）
-const calcScore = p =>
-  (p.turns || []).reduce((a, b) => a + (typeof b === "number" ? b : 0), 0);
-
 const p1 = denki.players[0];
 const p2 = denki.players[1];
 
-const score1 = calcScore(p1);
-const score2 = calcScore(p2);
+const score1 = p1.score;
+const score2 = p2.score;
 
 // 勝敗判定
 let resultText = null;
@@ -633,6 +630,21 @@ if (p1.shock >= 3) {
 if (p2.shock >= 3) {
   resultText = `💀 敗北：${p2.name}（⚡3回）／ 勝者：${p1.name}`;
 }
+// ③ 10ターン終了判定
+const turns1 = (p1.turns || []).length;
+const turns2 = (p2.turns || []).length;
+
+// 両者10ターン消化したら終了
+if (turns1 >= 10 && turns2 >= 10) {
+  if (score1 > score2) {
+    resultText = `🏁 10ターン終了：勝者 ${p1.name}（${score1}点）`;
+  } else if (score2 > score1) {
+    resultText = `🏁 10ターン終了：勝者 ${p2.name}（${score2}点）`;
+  } else {
+    resultText = `🏁 10ターン終了：引き分け（${score1}点）`;
+  }
+}
+
 
 // 結果が出たら終了
 if (resultText) {
