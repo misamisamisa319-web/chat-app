@@ -320,16 +320,21 @@ socket.on("pastMessages", logs => {
   messages.innerHTML = "";
   logs.forEach(renderMsg);
 });
-
 socket.on("message", d => {
-  if (d.private && d.to !== myId && d.name !== username) return;
+  // 内緒は送信者 or 受信者だけ
+  if (d.private) {
+    if (d.to !== myId && d.name !== username) return;
+  }
+
   if (soundLevel !== "off" && d.name && d.name !== username) {
     notifySound.volume = SOUND_LEVELS[soundLevel];
     notifySound.currentTime = 0;
     notifySound.play().catch(()=>{});
   }
+
   renderMsg(d);
 });
+
 
 socket.on("userList", list => {
   userList.innerHTML = "";
