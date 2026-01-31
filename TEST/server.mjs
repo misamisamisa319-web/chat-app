@@ -480,7 +480,8 @@ socket.on("denkiShock", () => {
     victim.score = 0;
     victim.shock += 1;
     victim.turns = victim.turns || [];
-    victim.turns.push("shock");
+    victim.turns.push("shock0");
+
 
     text = `⚡ 電流！${victim.name} は0点`;
     color = "red";

@@ -440,41 +440,52 @@ if (players.length < 2) {
   const pA = players[0];
   const pB = players[1];
 
-  if (pA && rowA) {
-    rowA.children[0].textContent = pA.name;
+ if (pA && rowA) {
+  rowA.children[0].textContent = pA.name;
 
-    let totalA = 0;
-    for (let i = 1; i <= 10; i++) {
-      const v = pA.turns?.[i - 1];
-      if (v === "shock") {
-        rowA.children[i].textContent = "⚡";
-      } else if (typeof v === "number") {
-        rowA.children[i].textContent = v;
-        totalA += v;
-      } else {
-        rowA.children[i].textContent = "-";
-      }
+  let totalA = 0;
+  let shockedA = false;
+
+  for (let i = 1; i <= 10; i++) {
+    const v = pA.turns?.[i - 1];
+
+    if (v === "shock0") {
+      rowA.children[i].textContent = "⚡";
+      shockedA = true;
+    } else if (typeof v === "number") {
+      rowA.children[i].textContent = v;
+      if (!shockedA) totalA += v;
+    } else {
+      rowA.children[i].textContent = "-";
     }
-    rowA.children[11].textContent = totalA;
   }
 
-  if (pB && rowB) {
-    rowB.children[0].textContent = pB.name;
+  rowA.children[11].textContent = shockedA ? 0 : totalA;
+}
 
-    let totalB = 0;
-    for (let i = 1; i <= 10; i++) {
-      const v = pB.turns?.[i - 1];
-      if (v === "shock") {
-        rowB.children[i].textContent = "⚡";
-      } else if (typeof v === "number") {
-        rowB.children[i].textContent = v;
-        totalB += v;
-      } else {
-        rowB.children[i].textContent = "-";
-      }
+ if (pB && rowB) {
+  rowB.children[0].textContent = pB.name;
+
+  let totalB = 0;
+  let shockedB = false;
+
+  for (let i = 1; i <= 10; i++) {
+    const v = pB.turns?.[i - 1];
+
+    if (v === "shock0") {
+      rowB.children[i].textContent = "⚡";
+      shockedB = true;
+    } else if (typeof v === "number") {
+      rowB.children[i].textContent = v;
+      if (!shockedB) totalB += v;
+    } else {
+      rowB.children[i].textContent = "-";
     }
-    rowB.children[11].textContent = totalB;
   }
+
+  rowB.children[11].textContent = shockedB ? 0 : totalB;
+}
+
 
 
 // ===== 椅子の色・有効化 =====
