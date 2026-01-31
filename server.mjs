@@ -629,6 +629,7 @@ return;
 }
 
   // ===== ラウンド終了処理 =====
+denki.turn = denki.turn === 0 ? 1 : 0;
 denki.phase = "set";
 
 denki.trapSeat = null;
@@ -743,8 +744,7 @@ const u = users.find(x => x.id === socket.id);
   socket.on("leave",()=>socket.disconnect(true));
   socket.on("disconnect",()=>{
     users = users.filter(u=>u.id!==socket.id);
-    denki.players = denki.players.filter(p=>p.id!==socket.id);
-     denki.started = false;
+  
     io.emit("lobbyUpdate", getLobbyInfo());
   });
 });
