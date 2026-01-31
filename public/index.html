@@ -411,17 +411,14 @@ if (players.length < 2) {
   return;
 }
 
-// ===== ボタン初期化（毎回リセット）=====
-
-
-denkiSetBtn.disabled = true;
-denkiShockBtn.disabled = true;
-// denkiSitBtn.disabled は後段で決める
-
 
  
 
   // ===== ステータス文言 =====
+  // 仕掛けるボタン制御（自分の番・set）
+  if (denkiState.phase === "set" && me.isTurn) {
+  denkiSetBtn.disabled = false;
+  }
   if (denkiState.phase === "set" && me.isTurn) {
     denkiStatus.textContent = "あなたの番：椅子を仕掛ける";
   } else if (denkiState.phase === "sit" && !me.isTurn) {
