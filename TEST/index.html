@@ -482,6 +482,14 @@ buttons.forEach(b => {
   b.style.background = "";
   b.disabled = true;
 
+  // ★ 使用済みイスは消す
+  if (denkiState.usedSeats && denkiState.usedSeats.includes(num)) {
+    b.style.display = "none";
+    return;
+  } else {
+    b.style.display = "inline-block";
+  }
+
   // set：仕掛ける側だけ押せる
   if (denkiState.phase === "set" && me.isTurn) {
     b.disabled = false;
@@ -495,27 +503,16 @@ buttons.forEach(b => {
     b.disabled = false;
   }
 
-  // sit：仮で座った椅子を表示
+  // sit：仮で座った椅子
   if (denkiState.phase === "sit" && denkiState.sitPreview === num) {
-  b.style.background = "#ccccff";
-}
+    b.style.background = "#ccccff";
+  }
 
-
-  // shock：座った椅子表示
+  // shock：座った椅子
   if (denkiState.phase === "shock" && denkiState.sitSeat === num) {
     b.style.background = "#ccccff";
   }
 });
-
-
-// 仕掛けるフェーズ（自分の番）
-if (denkiState.phase === "set" && me.isTurn) {
-  denkiSetBtn.style.display = "inline-block";
-
-  if (selectedSeat !== null) {
-    denkiSetBtn.disabled = false;
-  }
-}
 
 
 // 座るボタン制御

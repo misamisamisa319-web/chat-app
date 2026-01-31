@@ -310,6 +310,7 @@ let denki = {
   sitSeat: null, 
   sitPreview: null, // ★ 仮座り用（追加）
 };
+
 function denkiState(){
   return {
     phase: denki.phase,
@@ -318,17 +319,21 @@ function denkiState(){
     trapSeat: denki.phase === "shock" ? denki.trapSeat : null,
 
     sitSeat: denki.sitSeat,
-    sitPreview: denki.sitPreview, // ★ 追加
+    sitPreview: denki.sitPreview,
 
-   players: denki.players.map((p,i)=>( {
-  id: p.id,
-  name: p.name,
-  score: p.score,
-  shock: p.shock,
-  turns: p.turns || [],   // ★ これを追加
-  isTurn: denki.turn === i
-}))
+    // ★ 追加：使用済みイス一覧
+    usedSeats: denki.players.flatMap(p =>
+      (p.turns || []).filter(v => v !== "shock")
+    ),
 
+    players: denki.players.map((p,i)=>( {
+      id: p.id,
+      name: p.name,
+      score: p.score,
+      shock: p.shock,
+      turns: p.turns || [],
+      isTurn: denki.turn === i
+    }))
   };
 }
 
