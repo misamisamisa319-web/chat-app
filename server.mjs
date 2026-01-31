@@ -454,22 +454,48 @@ socket.on("denkiSitConfirm", () => {
     socket.room = room;
     socket.join(room);
 
-    users.push({ id:socket.id, name, color, room, lastActive:Date.now() });
+  const existingUser = users.find(u => u.name === name && u.room === room);
+
+if (existingUser) {
+  // 再接続
+  existingUser.id = socket.id;
+  existingUser.lastActive = Date.now();
+} else {
+  // 新規
+  users.push({
+    id: socket.id,
+    name,
+    color,
+    room,
+    lastActive: Date.now()
+  });
+}
+
 
     io.to(room).emit("userList", users.filter(u=>u.room===room));
     socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
     io.emit("lobbyUpdate", getLobbyInfo());
 
-   if (room === DENKI_ROOM) {
-  // 既にいなければ追加
-  if (!denki.players.find(p => p.id === socket.id) && denki.players.length < 2) {
+  if (room === DENKI_ROOM) {
+  // ★ 名前で既存プレイヤーを探す（再接続対策）
+  const existing = denki.players.find(p => p.name === name);
+
+  if (existing) {
+    // 再接続：socket.id だけ更新
+    existing.id = socket.id;
+  } else if (denki.players.length < 2) {
+    // 新規参加
     denki.players.push({
       id: socket.id,
       name,
       score: 0,
-      shock: 0
+      shock: 0,
+      turns: []
     });
   }
+
+  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+}
 
  
 // ★★ 2人目の対戦者が入った瞬間だけ勝負開始 ★★
@@ -496,7 +522,7 @@ if (denki.players.length === 2 && !denki.started) {
 
 
       
-  });
+  );
 
   socket.on("denkiSet", seat => {
   if (socket.room !== DENKI_ROOM) return;
