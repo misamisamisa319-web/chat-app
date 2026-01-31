@@ -320,16 +320,21 @@ socket.on("pastMessages", logs => {
   messages.innerHTML = "";
   logs.forEach(renderMsg);
 });
-
 socket.on("message", d => {
-  if (d.private && d.to !== myId && d.name !== username) return;
+  // 内緒は送信者 or 受信者だけ
+  if (d.private) {
+    if (d.to !== myId && d.name !== username) return;
+  }
+
   if (soundLevel !== "off" && d.name && d.name !== username) {
     notifySound.volume = SOUND_LEVELS[soundLevel];
     notifySound.currentTime = 0;
     notifySound.play().catch(()=>{});
   }
+
   renderMsg(d);
 });
+
 
 socket.on("userList", list => {
   userList.innerHTML = "";
@@ -372,10 +377,11 @@ function onDenkiSelect(seat) {
     return;
   }
 
-  // 座る側
-  if (denkiState.phase === "sit" && !me.isTurn) {
-    socket.emit("denkiSit", seat);
-  }
+  // 座るフェーズは無条件で送る（判定はサーバー側）
+if (denkiState.phase === "sit") {
+  socket.emit("denkiSit", seat);
+}
+
 }
 
 function updateDenkiUI() {
@@ -386,14 +392,22 @@ function updateDenkiUI() {
 
   const players = denkiState.players;
   const me = players.find(p => p.id === myId);
-// ===== 観戦者 =====
-if (!me) {
+  if (!me) return;
+  // ★ ボタンは最初から常に表示
+denkiSetBtn.style.display = "inline-block";
+denkiSitBtn.style.display = "inline-block";
+denkiShockBtn.style.display = "inline-block";
+
+// ★ まず全部押せなくする
+denkiSetBtn.disabled = true;
+denkiSitBtn.disabled = true;
+denkiShockBtn.disabled = true;
+
+
+// ===== 観戦者（2人未満のときだけ）=====
+if (players.length < 2) {
   denkiStatus.textContent = "観戦中";
 
-  // ボタン全部非表示
-  denkiSetBtn.style.display = "none";
-  denkiShockBtn.style.display = "none";
-  denkiSitBtn.style.display = "none";
 
   denkiSetBtn.disabled = true;
   denkiShockBtn.disabled = true;
@@ -401,18 +415,15 @@ if (!me) {
 
   return;
 }
-// ===== ボタン初期化（毎回リセット）=====
-denkiSetBtn.style.display = "none";
-denkiShockBtn.style.display = "none";
-denkiSitBtn.style.display = "none";
 
-denkiSetBtn.disabled = true;
-denkiShockBtn.disabled = true;
-denkiSitBtn.disabled = true;
 
  
 
   // ===== ステータス文言 =====
+  // 仕掛けるボタン制御（自分の番・set）
+  if (denkiState.phase === "set" && me.isTurn) {
+  denkiSetBtn.disabled = false;
+  }
   if (denkiState.phase === "set" && me.isTurn) {
     denkiStatus.textContent = "あなたの番：椅子を仕掛ける";
   } else if (denkiState.phase === "sit" && !me.isTurn) {
@@ -434,44 +445,55 @@ denkiSitBtn.disabled = true;
   const pA = players[0];
   const pB = players[1];
 
-  if (pA && rowA) {
-    rowA.children[0].textContent = pA.name;
+ if (pA && rowA) {
+  rowA.children[0].textContent = pA.name;
 
-    let totalA = 0;
-    for (let i = 1; i <= 10; i++) {
-      const v = pA.turns?.[i - 1];
-      if (v === "shock") {
-        rowA.children[i].textContent = "⚡";
-      } else if (typeof v === "number") {
-        rowA.children[i].textContent = v;
-        totalA += v;
-      } else {
-        rowA.children[i].textContent = "-";
-      }
+  let totalA = 0;
+  let shockedA = false;
+
+  for (let i = 1; i <= 10; i++) {
+    const v = pA.turns?.[i - 1];
+
+    if (v === "shock0") {
+      rowA.children[i].textContent = "⚡";
+      shockedA = true;
+    } else if (typeof v === "number") {
+      rowA.children[i].textContent = v;
+      if (!shockedA) totalA += v;
+    } else {
+      rowA.children[i].textContent = "-";
     }
-    rowA.children[11].textContent = totalA;
   }
 
-  if (pB && rowB) {
-    rowB.children[0].textContent = pB.name;
+  rowA.children[11].textContent = shockedA ? 0 : totalA;
+}
 
-    let totalB = 0;
-    for (let i = 1; i <= 10; i++) {
-      const v = pB.turns?.[i - 1];
-      if (v === "shock") {
-        rowB.children[i].textContent = "⚡";
-      } else if (typeof v === "number") {
-        rowB.children[i].textContent = v;
-        totalB += v;
-      } else {
-        rowB.children[i].textContent = "-";
-      }
+ if (pB && rowB) {
+  rowB.children[0].textContent = pB.name;
+
+  let totalB = 0;
+  let shockedB = false;
+
+  for (let i = 1; i <= 10; i++) {
+    const v = pB.turns?.[i - 1];
+
+    if (v === "shock0") {
+      rowB.children[i].textContent = "⚡";
+      shockedB = true;
+    } else if (typeof v === "number") {
+      rowB.children[i].textContent = v;
+      if (!shockedB) totalB += v;
+    } else {
+      rowB.children[i].textContent = "-";
     }
-    rowB.children[11].textContent = totalB;
   }
 
+  rowB.children[11].textContent = shockedB ? 0 : totalB;
+}
 
- // ===== 椅子の色 =====
+
+
+// ===== 椅子の色・有効化 =====
 const buttons = denkiBoard.querySelectorAll("button");
 buttons.forEach(b => {
   const num = Number(b.textContent);
@@ -480,7 +502,15 @@ buttons.forEach(b => {
   b.style.background = "";
   b.disabled = true;
 
-  // 仕掛ける側
+  // ★ 使用済みイスは消す
+  if (denkiState.usedSeats && denkiState.usedSeats.includes(num)) {
+    b.style.display = "none";
+    return;
+  } else {
+    b.style.display = "inline-block";
+  }
+
+  // set：仕掛ける側だけ押せる
   if (denkiState.phase === "set" && me.isTurn) {
     b.disabled = false;
     if (selectedSeat === num) {
@@ -488,43 +518,40 @@ buttons.forEach(b => {
     }
   }
 
-  // 座るフェーズ（★役割チェックしない）
+  // sit：参加者なら必ず押せる
   if (denkiState.phase === "sit") {
     b.disabled = false;
   }
 
-  // 仕掛けられた椅子
-  if (denkiState.phase !== "set" && denkiState.trapSeat === num) {
-    b.style.background = "#ffcccc";
+  // sit：仮で座った椅子
+  if (denkiState.phase === "sit" && denkiState.sitPreview === num) {
+    b.style.background = "#ccccff";
   }
 
-  // 座った椅子
+  // shock：座った椅子
   if (denkiState.phase === "shock" && denkiState.sitSeat === num) {
     b.style.background = "#ccccff";
   }
 });
 
 
-// 仕掛けるフェーズ（自分の番）
-if (denkiState.phase === "set" && me.isTurn) {
-  denkiSetBtn.style.display = "inline-block";
-
-  if (selectedSeat !== null) {
-    denkiSetBtn.disabled = false;
-  }
-}
-
-// 座るフェーズ（自分の番）
-if (denkiState.phase === "sit" && !me.isTurn) {
-  denkiSitBtn.style.display = "inline-block";
+// 座るボタン制御
+if (
+  denkiState.phase === "sit" &&
+  !me.isTurn &&
+  denkiState.sitPreview !== null
+) {
   denkiSitBtn.disabled = false;
+} else {
+  denkiSitBtn.disabled = true;
 }
 
 // 電流フェーズ（自分の番）
 if (denkiState.phase === "shock" && me.isTurn) {
-  denkiShockBtn.style.display = "inline-block";
   denkiShockBtn.disabled = false;
 }
+
+
 
 }
 
