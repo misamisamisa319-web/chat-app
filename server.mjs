@@ -309,6 +309,8 @@ let denki = {
   trapSeat: null,
   sitSeat: null, 
   sitPreview: null, // ★ 仮座り用（追加）
+  ended: false,        // ← 追加①：試合終了中か
+  rematchVotes: {},   // ← 追加②：再戦押した人
 };
 
 function denkiState(){
@@ -352,6 +354,51 @@ function resetDenki(){
 ================================ */
 io.on("connection", socket => {
   socket.emit("lobbyUpdate", getLobbyInfo());
+
+  // ===== 再戦ボタン =====
+socket.on("denkiRematch", () => {
+  if (socket.room !== DENKI_ROOM) return;
+  if (!denki.ended) return;
+
+  // 対戦者のみ
+  const player = denki.players.find(p => p.id === socket.id);
+  if (!player) return;
+
+  // 再戦押下記録
+  denki.rematchVotes[socket.id] = true;
+
+  // 2人そろったら再戦開始
+  if (Object.keys(denki.rematchVotes).length === 2) {
+    denki.ended = false;
+    denki.rematchVotes = {};
+
+    denki.players.forEach(p => {
+      p.score = 0;
+      p.shock = 0;
+      p.turns = [];
+    });
+
+    denki.turn = 0;
+    denki.phase = "set";
+    denki.trapSeat = null;
+    denki.sitSeat = null;
+    denki.sitPreview = null;
+
+    const msg = {
+      name: "system",
+      text: "🔁 再戦開始！",
+      room: DENKI_ROOM,
+      time: getTimeString()
+    };
+
+    messagesLog.push(msg);
+    saveLogs();
+    io.to(DENKI_ROOM).emit("message", msg);
+  }
+
+  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+});
+
 
     /* ===== 文字色更新 ===== */
   socket.on("updateColor", ({ color }) => {
@@ -574,31 +621,22 @@ if (resultText) {
   saveLogs();
   io.to(DENKI_ROOM).emit("message", resultMsg);
 
-  // ゲームリセット
-  denki.players.forEach(p => {
-    p.score = 0;
-    p.shock = 0;
-    p.turns = [];
-  });
+ denki.ended = true;
+io.to(DENKI_ROOM).emit("denkiState", denkiState());
+return;
 
-  denki.turn = 0;
-  denki.phase = "set";
-  denki.trapSeat = null;
-  denki.sitSeat = null;
-  denki.sitPreview = null;
-
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
-  return;
 }
 
-  // ===== ラウンド終了処理（必ず1回）=====
-  denki.turn = denki.turn === 0 ? 1 : 0;
-  denki.phase = "set";
-  denki.trapSeat = null;
-  denki.sitSeat = null;
-  denki.sitPreview = null;
+  // ===== ラウンド終了処理 =====
+denki.phase = "end";
 
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+denki.trapSeat = null;
+denki.sitSeat = null;
+denki.sitPreview = null;
+
+io.to(DENKI_ROOM).emit("denkiState", denkiState());
+return;
+
 });
 
 

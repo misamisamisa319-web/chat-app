@@ -162,6 +162,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 <button id="denkiSetBtn">仕掛ける</button>
 <button id="denkiShockBtn">⚡ 電流流す</button>
 <button id="denkiSitBtn">座る</button>
+<button id="denkiRematchBtn" style="display:none;">再戦する</button>
 
 
 
@@ -236,6 +237,7 @@ denkiSetBtn.disabled = true;
 denkiShockBtn.disabled = true;
 const denkiSitBtn = document.getElementById("denkiSitBtn");
 denkiSitBtn.disabled = true;
+const denkiRematchBtn = document.getElementById("denkiRematchBtn");
 
 
 
@@ -426,8 +428,6 @@ if (players.length < 2) {
 }
 
 
- 
-
   // ===== ステータス文言 =====
   // 仕掛けるボタン制御（自分の番・set）
   if (denkiState.phase === "set" && me.isTurn) {
@@ -558,6 +558,12 @@ if (
 // 電流フェーズ（自分の番）
 if (denkiState.phase === "shock" && me.isTurn) {
   denkiShockBtn.disabled = false;
+}
+// ===== 再戦ボタン表示（仮）=====
+if (denkiState.phase === "end") {
+  denkiRematchBtn.style.display = "inline-block";
+} else {
+  denkiRematchBtn.style.display = "none";
 }
 
 

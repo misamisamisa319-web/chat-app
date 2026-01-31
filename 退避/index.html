@@ -458,46 +458,46 @@ if (players.length < 2) {
   rowA.children[0].textContent = pA.name;
 
   let totalA = 0;
-  let shockedA = false;
 
-  for (let i = 1; i <= 10; i++) {
-    const v = pA.turns?.[i - 1];
+for (let i = 1; i <= 10; i++) {
+  const v = pA.turns?.[i - 1];
 
-    if (v === "shock0") {
-      rowA.children[i].textContent = "⚡";
-      shockedA = true;
-    } else if (typeof v === "number") {
-      rowA.children[i].textContent = v;
-      if (!shockedA) totalA += v;
-    } else {
-      rowA.children[i].textContent = "-";
-    }
+  if (v === "shock") {
+    rowA.children[i].textContent = "⚡";
+    totalA = 0; // ★ 電気を食らった瞬間にリセット
+  } else if (typeof v === "number") {
+    rowA.children[i].textContent = v;
+    totalA += v; // ★ 次のターンからは加算される
+  } else {
+    rowA.children[i].textContent = "-";
   }
+}
 
-  rowA.children[11].textContent = shockedA ? 0 : totalA;
+rowA.children[11].textContent = totalA;
+
 }
 
  if (pB && rowB) {
   rowB.children[0].textContent = pB.name;
 
   let totalB = 0;
-  let shockedB = false;
 
-  for (let i = 1; i <= 10; i++) {
-    const v = pB.turns?.[i - 1];
+for (let i = 1; i <= 10; i++) {
+  const v = pB.turns?.[i - 1];
 
-    if (v === "shock0") {
-      rowB.children[i].textContent = "⚡";
-      shockedB = true;
-    } else if (typeof v === "number") {
-      rowB.children[i].textContent = v;
-      if (!shockedB) totalB += v;
-    } else {
-      rowB.children[i].textContent = "-";
-    }
+  if (v === "shock") {
+    rowB.children[i].textContent = "⚡";
+    totalB = 0; // ★ 電気を食らった瞬間に合計リセット
+  } else if (typeof v === "number") {
+    rowB.children[i].textContent = v;
+    totalB += v; // ★ 次のターンからは普通に加算
+  } else {
+    rowB.children[i].textContent = "-";
   }
+}
 
-  rowB.children[11].textContent = shockedB ? 0 : totalB;
+rowB.children[11].textContent = totalB;
+
 }
 
 

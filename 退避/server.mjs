@@ -424,21 +424,24 @@ socket.on("denkiSitConfirm", () => {
     });
   }
 
-  // ★★ 追加：2人そろった瞬間に勝負開始 ★★
-  if (denki.players.length === 2 && !denki.started) {
-    denki.started = true;
+ 
+// ★★ 2人目の対戦者が入った瞬間だけ勝負開始 ★★
+if (denki.players.length === 2 && !denki.started) {
+  denki.started = true;
 
-    const startMsg = {
-      name: "system",
-      text: `⚡ 勝負開始！ ${denki.players[0].name} vs ${denki.players[1].name}`,
-      room: DENKI_ROOM,
-      time: getTimeString()
-    };
+  const startMsg = {
+    name: "system",
+    text: `⚡ 勝負開始！ ${denki.players[0].name} vs ${denki.players[1].name}`,
+    room: DENKI_ROOM,
+    time: getTimeString()
+  };
 
-    messagesLog.push(startMsg);
-    saveLogs();
-    io.to(DENKI_ROOM).emit("message", startMsg);
-  }
+  messagesLog.push(startMsg);
+  saveLogs();
+  io.to(DENKI_ROOM).emit("message", startMsg);
+}
+
+
 
   // 状態送信
   io.to(DENKI_ROOM).emit("denkiState", denkiState());
@@ -492,24 +495,27 @@ socket.on("denkiShock", () => {
   let text;
   let color;
 
-  // ===== 判定 =====
-  if (denki.sitSeat === denki.trapSeat) {
-    victim.score = 0;
-    victim.shock += 1;
-    victim.turns = victim.turns || [];
-    victim.turns.push("shock0");
+// ===== 判定 =====
+const trap = denki.trapSeat;
+const sit = denki.sitSeat;
 
+if (sit === trap) {
+  victim.score = 0;
+  victim.shock += 1;
+  victim.turns = victim.turns || [];
+  victim.turns.push("shock");
 
-    text = `⚡ 電流！${victim.name} は0点`;
-    color = "red";
-  } else {
-    victim.turns = victim.turns || [];
-    victim.turns.push(denki.sitSeat);
+  text = `⚡ 電流！${victim.name} は0点（仕掛け：${trap} / 座った：${sit}）`;
+  color = "red";
+} else {
+  victim.turns = victim.turns || [];
+  victim.turns.push(sit);
 
-    victim.score += denki.sitSeat;
-    text = `😌 セーフ！${victim.name} は${denki.sitSeat}点`;
-    color = "green";
-  }
+  victim.score += sit;
+  text = `👼 セーフ！${victim.name} は${sit}点（仕掛け：${trap} / 座った：${sit}）`;
+  color = "green";
+}
+
 
   // ===== チャット表示 =====
   const msg = {
@@ -524,36 +530,66 @@ socket.on("denkiShock", () => {
   saveLogs();
   io.to(DENKI_ROOM).emit("message", msg);
 
-  // ===== 10ターン終了チェック =====
-  if (victim.turns.length >= 10) {
-    const p1 = denki.players[0];
-    const p2 = denki.players[1];
+  // ===== 勝利条件チェック =====
 
-    const score1 = p1.turns.reduce((a, b) => a + (b === "shock" ? 0 : b), 0);
-    const score2 = p2.turns.reduce((a, b) => a + (b === "shock" ? 0 : b), 0);
+// 合計点（shock は 0）
+const calcScore = p =>
+  (p.turns || []).reduce((a, b) => a + (typeof b === "number" ? b : 0), 0);
 
-    let resultText = "引き分け！";
-    if (score1 > score2) resultText = `🏆 勝者：${p1.name}（${score1}点）`;
-    if (score2 > score1) resultText = `🏆 勝者：${p2.name}（${score2}点）`;
+const p1 = denki.players[0];
+const p2 = denki.players[1];
 
-    const resultMsg = {
-      name: "system",
-      text: resultText,
-      room: DENKI_ROOM,
-      time: getTimeString()
-    };
+const score1 = calcScore(p1);
+const score2 = calcScore(p2);
 
-    messagesLog.push(resultMsg);
-    saveLogs();
-    io.to(DENKI_ROOM).emit("message", resultMsg);
+// 勝敗判定
+let resultText = null;
 
-    // 次ゲーム用リセット
-    denki.players.forEach(p => {
-      p.score = 0;
-      p.shock = 0;
-      p.turns = [];
-    });
-  }
+// ① 点数40点到達
+if (score1 >= 40) {
+  resultText = `🏆 勝者：${p1.name}（${score1}点）`;
+}
+if (score2 >= 40) {
+  resultText = `🏆 勝者：${p2.name}（${score2}点）`;
+}
+
+// ② 電気3回で敗北
+if (p1.shock >= 3) {
+  resultText = `💀 敗北：${p1.name}（⚡3回）／ 勝者：${p2.name}`;
+}
+if (p2.shock >= 3) {
+  resultText = `💀 敗北：${p2.name}（⚡3回）／ 勝者：${p1.name}`;
+}
+
+// 結果が出たら終了
+if (resultText) {
+  const resultMsg = {
+    name: "system",
+    text: resultText,
+    room: DENKI_ROOM,
+    time: getTimeString()
+  };
+
+  messagesLog.push(resultMsg);
+  saveLogs();
+  io.to(DENKI_ROOM).emit("message", resultMsg);
+
+  // ゲームリセット
+  denki.players.forEach(p => {
+    p.score = 0;
+    p.shock = 0;
+    p.turns = [];
+  });
+
+  denki.turn = 0;
+  denki.phase = "set";
+  denki.trapSeat = null;
+  denki.sitSeat = null;
+  denki.sitPreview = null;
+
+  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+  return;
+}
 
   // ===== ラウンド終了処理（必ず1回）=====
   denki.turn = denki.turn === 0 ? 1 : 0;
