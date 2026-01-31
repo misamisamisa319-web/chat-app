@@ -413,7 +413,7 @@ socket.on("denkiSitConfirm", () => {
     socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
     io.emit("lobbyUpdate", getLobbyInfo());
 
-    if (room === DENKI_ROOM) {
+   if (room === DENKI_ROOM) {
   // 既にいなければ追加
   if (!denki.players.find(p => p.id === socket.id) && denki.players.length < 2) {
     denki.players.push({
@@ -424,9 +424,26 @@ socket.on("denkiSitConfirm", () => {
     });
   }
 
-  // ★ ここが重要：必ず送る
+  // ★★ 追加：2人そろった瞬間に勝負開始 ★★
+  if (denki.players.length === 2 && !denki.started) {
+    denki.started = true;
+
+    const startMsg = {
+      name: "system",
+      text: `⚡ 勝負開始！ ${denki.players[0].name} vs ${denki.players[1].name}`,
+      room: DENKI_ROOM,
+      time: getTimeString()
+    };
+
+    messagesLog.push(startMsg);
+    saveLogs();
+    io.to(DENKI_ROOM).emit("message", startMsg);
+  }
+
+  // 状態送信
   io.to(DENKI_ROOM).emit("denkiState", denkiState());
 }
+
 
       
   });
@@ -652,6 +669,7 @@ const u = users.find(x => x.id === socket.id);
   socket.on("disconnect",()=>{
     users = users.filter(u=>u.id!==socket.id);
     denki.players = denki.players.filter(p=>p.id!==socket.id);
+     denki.started = false;
     io.emit("lobbyUpdate", getLobbyInfo());
   });
 });

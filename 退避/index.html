@@ -37,7 +37,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 #settings { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; padding: 5px; background: #f9f9f9; border-bottom: 1px solid #ccc; }
 #settings input, #settings button, #settings select { padding: 5px; font-size: 14px; }
 
-#messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; }
+#messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; padding-bottom: 180px; /* ← これを追加 */ }
 #messages li { margin-bottom: 5px; }
 .private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
 
@@ -45,12 +45,21 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 /* ===== 電気椅子UI ===== */
 #denkiWrap {
-  margin: 8px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  margin: 0;
   padding: 10px;
   background: #e8f5fb;
-  border-radius: 8px;
+  border-radius: 8px 8px 0 0;
+
   display: none;
+  z-index: 50;
 }
+
+
 #denkiHeader {
   font-weight: bold;
   margin-bottom: 6px;
