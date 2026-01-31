@@ -424,21 +424,24 @@ socket.on("denkiSitConfirm", () => {
     });
   }
 
-  // ★★ 追加：2人そろった瞬間に勝負開始 ★★
-  if (denki.players.length === 2 && !denki.started) {
-    denki.started = true;
+ 
+// ★★ 2人目の対戦者が入った瞬間だけ勝負開始 ★★
+if (denki.players.length === 2 && !denki.started) {
+  denki.started = true;
 
-    const startMsg = {
-      name: "system",
-      text: `⚡ 勝負開始！ ${denki.players[0].name} vs ${denki.players[1].name}`,
-      room: DENKI_ROOM,
-      time: getTimeString()
-    };
+  const startMsg = {
+    name: "system",
+    text: `⚡ 勝負開始！ ${denki.players[0].name} vs ${denki.players[1].name}`,
+    room: DENKI_ROOM,
+    time: getTimeString()
+  };
 
-    messagesLog.push(startMsg);
-    saveLogs();
-    io.to(DENKI_ROOM).emit("message", startMsg);
-  }
+  messagesLog.push(startMsg);
+  saveLogs();
+  io.to(DENKI_ROOM).emit("message", startMsg);
+}
+
+
 
   // 状態送信
   io.to(DENKI_ROOM).emit("denkiState", denkiState());
