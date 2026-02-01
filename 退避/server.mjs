@@ -13,7 +13,7 @@ let users = [];
 let messagesLog = [];
 
 /* ===== ログ保存 ===== */
-const LOG_FILE = "./logs.json";
+const LOG_FILE = "/data/logs.json";
 if (fs.existsSync(LOG_FILE)) {
   try { messagesLog = JSON.parse(fs.readFileSync(LOG_FILE, "utf8")); }
   catch { messagesLog = []; }
@@ -67,6 +67,7 @@ function getLobbyInfo() {
 
 /* ===== 個室鍵 ===== */
 const roomKeys = {
+  special: "12345678",
   privateA: "1234a",
   privateB: "1234b",
   privateC: "1234c",
