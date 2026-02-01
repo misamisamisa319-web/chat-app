@@ -67,6 +67,7 @@ function getLobbyInfo() {
 
 /* ===== 個室鍵 ===== */
 const roomKeys = {
+  special: "12345678",
   privateA: "1234a",
   privateB: "1234b",
   privateC: "1234c",

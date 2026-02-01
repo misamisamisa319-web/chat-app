@@ -309,11 +309,14 @@ let denki = {
   trapSeat: null,
   sitSeat: null, 
   sitPreview: null, // ★ 仮座り用（追加）
+  ended: false,        // ← 追加①：試合終了中か
+  rematchVotes: {},   // ← 追加②：再戦押した人
 };
 
 function denkiState(){
   return {
     phase: denki.phase,
+    ended: denki.ended,
 
     // shock になるまで仕掛け位置は非表示
     trapSeat: denki.phase === "shock" ? denki.trapSeat : null,
@@ -352,6 +355,51 @@ function resetDenki(){
 ================================ */
 io.on("connection", socket => {
   socket.emit("lobbyUpdate", getLobbyInfo());
+
+  // ===== 再戦ボタン =====
+socket.on("denkiRematch", () => {
+  if (socket.room !== DENKI_ROOM) return;
+  if (!denki.ended) return;
+
+  // 対戦者のみ
+  const player = denki.players.find(p => p.id === socket.id);
+  if (!player) return;
+
+  // 再戦押下記録
+  denki.rematchVotes[socket.id] = true;
+
+  // 2人そろったら再戦開始
+  if (Object.keys(denki.rematchVotes).length === 2) {
+    denki.ended = false;
+    denki.rematchVotes = {};
+
+    denki.players.forEach(p => {
+      p.score = 0;
+      p.shock = 0;
+      p.turns = [];
+    });
+
+    denki.turn = 0;
+    denki.phase = "set";
+    denki.trapSeat = null;
+    denki.sitSeat = null;
+    denki.sitPreview = null;
+
+    const msg = {
+      name: "system",
+      text: "🔁 再戦開始！",
+      room: DENKI_ROOM,
+      time: getTimeString()
+    };
+
+    messagesLog.push(msg);
+    saveLogs();
+    io.to(DENKI_ROOM).emit("message", msg);
+  }
+
+  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+});
+
 
     /* ===== 文字色更新 ===== */
   socket.on("updateColor", ({ color }) => {
@@ -407,22 +455,48 @@ socket.on("denkiSitConfirm", () => {
     socket.room = room;
     socket.join(room);
 
-    users.push({ id:socket.id, name, color, room, lastActive:Date.now() });
+  const existingUser = users.find(u => u.name === name && u.room === room);
+
+if (existingUser) {
+  // 再接続
+  existingUser.id = socket.id;
+  existingUser.lastActive = Date.now();
+} else {
+  // 新規
+  users.push({
+    id: socket.id,
+    name,
+    color,
+    room,
+    lastActive: Date.now()
+  });
+}
+
 
     io.to(room).emit("userList", users.filter(u=>u.room===room));
     socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
     io.emit("lobbyUpdate", getLobbyInfo());
 
-   if (room === DENKI_ROOM) {
-  // 既にいなければ追加
-  if (!denki.players.find(p => p.id === socket.id) && denki.players.length < 2) {
+  if (room === DENKI_ROOM) {
+  // ★ 名前で既存プレイヤーを探す（再接続対策）
+  const existing = denki.players.find(p => p.name === name);
+
+  if (existing) {
+    // 再接続：socket.id だけ更新
+    existing.id = socket.id;
+  } else if (denki.players.length < 2) {
+    // 新規参加
     denki.players.push({
       id: socket.id,
       name,
       score: 0,
-      shock: 0
+      shock: 0,
+      turns: []
     });
   }
+
+  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+}
 
  
 // ★★ 2人目の対戦者が入った瞬間だけ勝負開始 ★★
@@ -449,7 +523,7 @@ if (denki.players.length === 2 && !denki.started) {
 
 
       
-  });
+  );
 
   socket.on("denkiSet", seat => {
   if (socket.room !== DENKI_ROOM) return;
@@ -533,14 +607,11 @@ if (sit === trap) {
   // ===== 勝利条件チェック =====
 
 // 合計点（shock は 0）
-const calcScore = p =>
-  (p.turns || []).reduce((a, b) => a + (typeof b === "number" ? b : 0), 0);
-
 const p1 = denki.players[0];
 const p2 = denki.players[1];
 
-const score1 = calcScore(p1);
-const score2 = calcScore(p2);
+const score1 = p1.score;
+const score2 = p2.score;
 
 // 勝敗判定
 let resultText = null;
@@ -560,6 +631,21 @@ if (p1.shock >= 3) {
 if (p2.shock >= 3) {
   resultText = `💀 敗北：${p2.name}（⚡3回）／ 勝者：${p1.name}`;
 }
+// ③ 10ターン終了判定
+const turns1 = (p1.turns || []).length;
+const turns2 = (p2.turns || []).length;
+
+// 両者10ターン消化したら終了
+if (turns1 >= 10 && turns2 >= 10) {
+  if (score1 > score2) {
+    resultText = `🏁 10ターン終了：勝者 ${p1.name}（${score1}点）`;
+  } else if (score2 > score1) {
+    resultText = `🏁 10ターン終了：勝者 ${p2.name}（${score2}点）`;
+  } else {
+    resultText = `🏁 10ターン終了：引き分け（${score1}点）`;
+  }
+}
+
 
 // 結果が出たら終了
 if (resultText) {
@@ -574,31 +660,24 @@ if (resultText) {
   saveLogs();
   io.to(DENKI_ROOM).emit("message", resultMsg);
 
-  // ゲームリセット
-  denki.players.forEach(p => {
-    p.score = 0;
-    p.shock = 0;
-    p.turns = [];
-  });
+ denki.ended = true;
+ denki.phase = "end";
+io.to(DENKI_ROOM).emit("denkiState", denkiState());
+return;
 
-  denki.turn = 0;
-  denki.phase = "set";
-  denki.trapSeat = null;
-  denki.sitSeat = null;
-  denki.sitPreview = null;
-
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
-  return;
 }
 
-  // ===== ラウンド終了処理（必ず1回）=====
-  denki.turn = denki.turn === 0 ? 1 : 0;
-  denki.phase = "set";
-  denki.trapSeat = null;
-  denki.sitSeat = null;
-  denki.sitPreview = null;
+  // ===== ラウンド終了処理 =====
+denki.turn = denki.turn === 0 ? 1 : 0;
+denki.phase = "set";
 
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+denki.trapSeat = null;
+denki.sitSeat = null;
+denki.sitPreview = null;
+
+io.to(DENKI_ROOM).emit("denkiState", denkiState());
+return;
+
 });
 
 
@@ -704,8 +783,7 @@ const u = users.find(x => x.id === socket.id);
   socket.on("leave",()=>socket.disconnect(true));
   socket.on("disconnect",()=>{
     users = users.filter(u=>u.id!==socket.id);
-    denki.players = denki.players.filter(p=>p.id!==socket.id);
-     denki.started = false;
+  
     io.emit("lobbyUpdate", getLobbyInfo());
   });
 });
