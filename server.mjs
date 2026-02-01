@@ -8,6 +8,8 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
+
 
 let users = [];
 let messagesLog = [];
@@ -27,7 +29,22 @@ app.get("/admin", (req, res) => {
   if (req.query.key !== process.env.ADMIN_KEY) {
     return res.status(403).send("Forbidden");
   }
-  const rows = messagesLog.map(m => `
+
+  const userRows = users.map(u => `
+    <tr>
+      <td>${u.name}</td>
+      <td>${u.room}</td>
+      <td>
+        <form method="POST" action="/admin/kick">
+          <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+          <input type="hidden" name="userId" value="${u.id}">
+          <button type="submit">キック</button>
+        </form>
+      </td>
+    </tr>
+  `).join("");
+
+  const logRows = messagesLog.map(m => `
     <tr>
       <td>${m.time || ""}</td>
       <td>${m.room}</td>
@@ -36,23 +53,58 @@ app.get("/admin", (req, res) => {
       <td>${m.text}</td>
     </tr>
   `).join("");
+
   res.send(`
-    <!doctype html><html lang="ja"><head><meta charset="utf-8">
-    <title>管理者ログ</title>
-    <style>
-      body{font-family:sans-serif;padding:20px}
-      table{border-collapse:collapse;width:100%}
-      th,td{border:1px solid #ccc;padding:6px}
-      th{background:#f0f0f0}
-    </style></head><body>
-      <h2>管理者ログ</h2>
+    <!doctype html>
+    <html lang="ja">
+    <head>
+      <meta charset="utf-8">
+      <title>管理室</title>
+      <style>
+        body { font-family: sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 6px; }
+        th { background: #f0f0f0; }
+      </style>
+    </head>
+    <body>
+      <h2>管理室</h2>
+
+      <h3>接続中ユーザー</h3>
+      <table>
+        <tr><th>名前</th><th>部屋</th><th>操作</th></tr>
+        ${userRows}
+      </table>
+
+      <h3>ログ</h3>
       <table>
         <tr><th>時刻</th><th>部屋</th><th>名前</th><th>種別</th><th>内容</th></tr>
-        ${rows}
+        ${logRows}
       </table>
-    </body></html>
+    </body>
+    </html>
   `);
 });
+
+app.post("/admin/kick", (req, res) => {
+  if (req.body.key !== process.env.ADMIN_KEY) {
+    return res.status(403).send("Forbidden");
+  }
+
+  const target = io.sockets.sockets.get(req.body.userId);
+  if (target) {
+    target.emit("message", {
+      name: "system",
+      text: "管理者によりキックされました",
+      room: target.room,
+      time: getTimeString()
+    });
+    target.disconnect(true);
+  }
+
+  res.redirect("/admin?key=" + process.env.ADMIN_KEY);
+});
+
 
 /* ===== ロビー情報 ===== */
 function getLobbyInfo() {
