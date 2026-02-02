@@ -900,22 +900,26 @@ const u = users.find(x => x.id === socket.id);
 
   socket.on("leave",()=>socket.disconnect(true));
   socket.on("disconnect", () => {
-  const room = socket.room;
+  // ★ 先にこの socket のユーザー情報を取る
+  const user = users.find(u => u.id === socket.id);
+  const room = user?.room;
 
   // ユーザー削除
   users = users.filter(u => u.id !== socket.id);
 
-  // その部屋の残り人数
-  const remain = users.filter(u => u.room === room).length;
-
-  // ★ 0人になったらその部屋のログを消す
-  if (remain === 0 && room) {
-    messagesLog = messagesLog.filter(m => m.room !== room);
-    saveLogs();
+  // ★ その部屋に誰も残っていなければログ削除
+  if (room) {
+    const remain = users.some(u => u.room === room);
+    if (!remain) {
+      messagesLog = messagesLog.filter(m => m.room !== room);
+      saveLogs();
+    }
   }
 
   io.emit("lobbyUpdate", getLobbyInfo());
 });
+
+
 
 
 const PORT = process.env.PORT || 3000;
