@@ -421,19 +421,16 @@ function getRemainingSeats() {
 io.on("connection", socket => {
   socket.emit("lobbyUpdate", getLobbyInfo());
 
-  // ===== 再戦ボタン =====
+ // ===== 再戦ボタン =====
 socket.on("denkiRematch", () => {
   if (socket.room !== DENKI_ROOM) return;
   if (!denki.ended) return;
 
-  // 対戦者のみ
   const player = denki.players.find(p => p.id === socket.id);
   if (!player) return;
 
-  // 再戦押下記録
   denki.rematchVotes[socket.id] = true;
 
-  // 2人そろったら再戦開始
   if (Object.keys(denki.rematchVotes).length === 2) {
     denki.ended = false;
     denki.rematchVotes = {};
@@ -457,9 +454,10 @@ socket.on("denkiRematch", () => {
       time: getTimeString()
     };
 
-io.to(DENKI_ROOM).emit("message", msg);
-
+    io.to(DENKI_ROOM).emit("message", msg);
+  }
 });
+
 
 
     /* ===== 文字色更新 ===== */
@@ -585,12 +583,8 @@ if (denki.players.length === 2 && !denki.started) {
 
   // 状態送信
   io.to(DENKI_ROOM).emit("denkiState", denkiState());
-}
 
-
-      
-  );
-
+});
   socket.on("denkiSet", seat => {
   if (socket.room !== DENKI_ROOM) return;
   if (denki.phase !== "set") return;
@@ -911,17 +905,15 @@ socket.on("disconnect", () => {
     const remain = users.some(u => u.room === room);
     if (!remain) {
       messagesLog = messagesLog.filter(m => m.room !== room);
-
     }
   }
 
   io.emit("lobbyUpdate", getLobbyInfo());
 });
 
-
+}); // ← ★これを追加★
 
 
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, ()=>console.log(`Server running on ${PORT}`));
-
+server.listen(PORT, () => console.log(`Server running on ${PORT}`));
