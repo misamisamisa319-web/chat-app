@@ -535,10 +535,11 @@ if (existingUser) {
 
 
     io.to(room).emit("userList", users.filter(u=>u.room===room));
-   socket.emit(
+  socket.emit(
   "pastMessages",
   messagesLog.filter(m => m.room === room && !m.private)
 );
+
 
     io.emit("lobbyUpdate", getLobbyInfo());
 
@@ -851,19 +852,21 @@ if (data.to) {
   const msg = {
     name: socket.username,
     text,
-    room: socket.room,
+    room: null,          // ★ ここだけ変更
     time: getTimeString(),
     private: true,
     to: data.to,
     toName: targetUser?.name || "不明"
   };
 
- pushLog(msg);
+  // private は保存しない設計なので pushLog はあっても無視される
+  pushLog(msg);
 
   socket.emit("message", msg);
   io.to(data.to).emit("message", msg);
   return;
 }
+
 
 
 const u = users.find(x => x.id === socket.id);
