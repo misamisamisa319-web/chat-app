@@ -413,21 +413,25 @@ function getRemainingSeats() {
   return 12 - used.size;
 }
 
-
-
 /* ===============================
    Socket.IO
 ================================ */
 io.on("connection", socket => {
+
   socket.emit("lobbyUpdate", getLobbyInfo());
 
- // ===== 再戦ボタン =====
-socket.on("denkiRematch", () => {
-  if (socket.room !== DENKI_ROOM) return;
-  if (!denki.ended) return;
+  // ===== 再戦ボタン =====
+  socket.on("denkiRematch", () => {
+    if (socket.room !== DENKI_ROOM) return;
+    if (!denki.ended) return;
 
-  const player = denki.players.find(p => p.id === socket.id);
-  if (!player) return;
+    const player = denki.players.find(p => p.id === socket.id);
+    if (!player) return;
+  });
+
+
+
+
 
   denki.rematchVotes[socket.id] = true;
 
@@ -583,8 +587,6 @@ if (denki.players.length === 2 && !denki.started) {
 
   // 状態送信
   io.to(DENKI_ROOM).emit("denkiState", denkiState());
-
-});
   socket.on("denkiSet", seat => {
   if (socket.room !== DENKI_ROOM) return;
   if (denki.phase !== "set") return;
@@ -911,9 +913,8 @@ socket.on("disconnect", () => {
   io.emit("lobbyUpdate", getLobbyInfo());
 });
 
-}); // ← ★これを追加★
-
-
+}); // ← io.on("connection", socket => { の閉じカッコ（これ1個だけ）
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on ${PORT}`));
+
