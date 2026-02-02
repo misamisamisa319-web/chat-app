@@ -541,7 +541,11 @@ if (existingUser) {
 
 
     io.to(room).emit("userList", users.filter(u=>u.room===room));
-    socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
+   socket.emit(
+  "pastMessages",
+  messagesLog.filter(m => m.room === room && !m.private)
+);
+
     io.emit("lobbyUpdate", getLobbyInfo());
 
   if (room === DENKI_ROOM) {
