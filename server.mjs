@@ -13,23 +13,14 @@ app.use(express.urlencoded({ extended: true }));
 
 let users = [];
 let messagesLog = [];
-
-/* ===== ログ保存 ===== */
-const LOG_FILE = "/data/logs.json";
-if (fs.existsSync(LOG_FILE)) {
-  try { messagesLog = JSON.parse(fs.readFileSync(LOG_FILE, "utf8")); }
-  catch { messagesLog = []; }
-}
-function saveLogs() {
-  fs.writeFileSync(LOG_FILE, JSON.stringify(messagesLog, null, 2));
-}
 function pushLog(msg) {
+  if (msg.name === "system") return;
+  if (msg.private) return;
+
   messagesLog.push(msg);
-  if (messagesLog.length > 50) {
-    messagesLog = messagesLog.slice(-50);
-  }
-  saveLogs();
 }
+
+
 
 /* ===== 管理者ログ ===== */
 app.get("/admin", (req, res) => {
@@ -465,14 +456,6 @@ socket.on("denkiRematch", () => {
       room: DENKI_ROOM,
       time: getTimeString()
     };
-messagesLog.push(msg);
-
-// ★ 50件制限
-if (messagesLog.length > 50) {
-  messagesLog = messagesLog.slice(-50);
-}
-
-saveLogs();
 
 io.to(DENKI_ROOM).emit("message", msg);
 
@@ -898,7 +881,23 @@ const u = users.find(x => x.id === socket.id);
     io.to(socket.room).emit("message",msg);
   });
 
-  socket.on("leave",()=>socket.disconnect(true));
+  socket.on("leave", () => {
+  const user = users.find(u => u.id === socket.id);
+  const room = user?.room;
+
+  users = users.filter(u => u.id !== socket.id);
+
+  if (room) {
+    const remain = users.some(u => u.room === room);
+    if (!remain) {
+      messagesLog = messagesLog.filter(m => m.room !== room);
+      saveLogs();
+    }
+  }
+
+  socket.disconnect(true);
+});
+
   socket.on("disconnect", () => {
   // ★ 先にこの socket のユーザー情報を取る
   const user = users.find(u => u.id === socket.id);
