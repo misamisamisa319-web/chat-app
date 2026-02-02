@@ -541,6 +541,7 @@ if (existingUser) {
 );
 
 
+
     io.emit("lobbyUpdate", getLobbyInfo());
 
   if (room === DENKI_ROOM) {
@@ -577,7 +578,6 @@ if (denki.players.length === 2 && !denki.started) {
   };
 
   messagesLog.push(startMsg);
-  saveLogs();
   io.to(DENKI_ROOM).emit("message", startMsg);
 }
 
@@ -703,7 +703,7 @@ if (remainingSeats <= 1) {
   };
 
   messagesLog.push(resultMsg);
-  saveLogs();
+  
   io.to(DENKI_ROOM).emit("message", resultMsg);
 
   denki.ended = true;
@@ -756,7 +756,6 @@ if (resultText) {
   };
 
   messagesLog.push(resultMsg);
-  saveLogs();
   io.to(DENKI_ROOM).emit("message", resultMsg);
 
  denki.ended = true;
@@ -894,32 +893,30 @@ const u = users.find(x => x.id === socket.id);
     const remain = users.some(u => u.room === room);
     if (!remain) {
       messagesLog = messagesLog.filter(m => m.room !== room);
-      saveLogs();
+  
     }
   }
 
   socket.disconnect(true);
 });
 
-  socket.on("disconnect", () => {
-  // ★ 先にこの socket のユーザー情報を取る
+socket.on("disconnect", () => {
   const user = users.find(u => u.id === socket.id);
   const room = user?.room;
 
-  // ユーザー削除
   users = users.filter(u => u.id !== socket.id);
 
-  // ★ その部屋に誰も残っていなければログ削除
   if (room) {
     const remain = users.some(u => u.room === room);
     if (!remain) {
       messagesLog = messagesLog.filter(m => m.room !== room);
-      saveLogs();
+
     }
   }
 
   io.emit("lobbyUpdate", getLobbyInfo());
 });
+
 
 
 
