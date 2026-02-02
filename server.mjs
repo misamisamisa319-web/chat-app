@@ -23,6 +23,13 @@ if (fs.existsSync(LOG_FILE)) {
 function saveLogs() {
   fs.writeFileSync(LOG_FILE, JSON.stringify(messagesLog, null, 2));
 }
+function pushLog(msg) {
+  messagesLog.push(msg);
+  if (messagesLog.length > 50) {
+    messagesLog = messagesLog.slice(-50);
+  }
+  saveLogs();
+}
 
 /* ===== 管理者ログ ===== */
 app.get("/admin", (req, res) => {
@@ -458,13 +465,17 @@ socket.on("denkiRematch", () => {
       room: DENKI_ROOM,
       time: getTimeString()
     };
+messagesLog.push(msg);
 
-    messagesLog.push(msg);
-    saveLogs();
-    io.to(DENKI_ROOM).emit("message", msg);
-  }
+// ★ 50件制限
+if (messagesLog.length > 50) {
+  messagesLog = messagesLog.slice(-50);
+}
 
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+saveLogs();
+
+io.to(DENKI_ROOM).emit("message", msg);
+
 });
 
 
@@ -671,8 +682,8 @@ if (sit === trap) {
     time: getTimeString()
   };
 
-  messagesLog.push(msg);
-  saveLogs();
+ pushLog(msg);
+
   io.to(DENKI_ROOM).emit("message", msg);
 
  
@@ -800,7 +811,8 @@ return;
         room:socket.room,
         time:getTimeString()
       };
-      messagesLog.push(msg); saveLogs();
+    pushLog(msg);
+
       io.to(socket.room).emit("message",msg);
       return;
     }
@@ -813,8 +825,9 @@ return;
     room: socket.room,
     time: getTimeString()
   };
-  messagesLog.push(msg);
-  saveLogs();
+  
+  pushLog(msg);
+
   io.to(socket.room).emit("message", msg);
   return;
 }
@@ -827,8 +840,8 @@ if(text==="男子罰"){
     room: socket.room,
     time: getTimeString()
   };
-  messagesLog.push(msg);
-  saveLogs();
+ pushLog(msg);
+
   io.to(socket.room).emit("message", msg);
   return;
 }
@@ -841,8 +854,8 @@ if(text==="苦痛罰" && socket.room==="special"){
     room: socket.room,
     time: getTimeString()
   };
-  messagesLog.push(msg);
-  saveLogs();
+ pushLog(msg);
+
   io.to(socket.room).emit("message", msg);
   return;
 }
@@ -862,8 +875,8 @@ if (data.to) {
     toName: targetUser?.name || "不明"
   };
 
-  messagesLog.push(msg);
-  saveLogs();
+ pushLog(msg);
+
   socket.emit("message", msg);
   io.to(data.to).emit("message", msg);
   return;
@@ -880,17 +893,30 @@ const u = users.find(x => x.id === socket.id);
   time: getTimeString()
 };
 
-    messagesLog.push(msg); saveLogs();
+   pushLog(msg);
+
     io.to(socket.room).emit("message",msg);
   });
 
   socket.on("leave",()=>socket.disconnect(true));
-  socket.on("disconnect",()=>{
-    users = users.filter(u=>u.id!==socket.id);
-  
-    io.emit("lobbyUpdate", getLobbyInfo());
-  });
+  socket.on("disconnect", () => {
+  const room = socket.room;
+
+  // ユーザー削除
+  users = users.filter(u => u.id !== socket.id);
+
+  // その部屋の残り人数
+  const remain = users.filter(u => u.room === room).length;
+
+  // ★ 0人になったらその部屋のログを消す
+  if (remain === 0 && room) {
+    messagesLog = messagesLog.filter(m => m.room !== room);
+    saveLogs();
+  }
+
+  io.emit("lobbyUpdate", getLobbyInfo());
 });
+
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, ()=>console.log(`Server running on ${PORT}`));
