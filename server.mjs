@@ -889,13 +889,14 @@ const u = users.find(x => x.id === socket.id);
 
   users = users.filter(u => u.id !== socket.id);
 
-  if (room) {
-    const remain = users.some(u => u.room === room);
-    if (!remain) {
-      messagesLog = messagesLog.filter(m => m.room !== room);
-  
-    }
+if (room) {
+  const roomSize = io.sockets.adapter.rooms.get(room)?.size || 0;
+
+  if (roomSize === 0) {
+    messagesLog = messagesLog.filter(m => m.room !== room);
   }
+}
+
 
   socket.disconnect(true);
 });
