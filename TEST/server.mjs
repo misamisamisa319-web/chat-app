@@ -13,14 +13,16 @@ app.use(express.urlencoded({ extended: true }));
 
 let users = [];
 let messagesLog = [];
-function pushLog(msg) {
-  if (msg.name === "system") return;
-  if (msg.private) return;
 
-  messagesLog.push(msg);
+/* ===== ログ保存 ===== */
+const LOG_FILE = "/data/logs.json";
+if (fs.existsSync(LOG_FILE)) {
+  try { messagesLog = JSON.parse(fs.readFileSync(LOG_FILE, "utf8")); }
+  catch { messagesLog = []; }
 }
-
-
+function saveLogs() {
+  fs.writeFileSync(LOG_FILE, JSON.stringify(messagesLog, null, 2));
+}
 
 /* ===== 管理者ログ ===== */
 app.get("/admin", (req, res) => {
@@ -399,42 +401,27 @@ function resetDenki(){
   denki.trapSeat = null;
   denki.sitSeat = null;
 }
-function getRemainingSeats() {
-  const used = new Set();
 
-  denki.players.forEach(p => {
-    (p.turns || []).forEach(v => {
-      if (typeof v === "number") {
-        used.add(v);
-      }
-    });
-  });
-
-  return 12 - used.size;
-}
 
 /* ===============================
    Socket.IO
 ================================ */
 io.on("connection", socket => {
-
   socket.emit("lobbyUpdate", getLobbyInfo());
 
   // ===== 再戦ボタン =====
-  socket.on("denkiRematch", () => {
-    if (socket.room !== DENKI_ROOM) return;
-    if (!denki.ended) return;
+socket.on("denkiRematch", () => {
+  if (socket.room !== DENKI_ROOM) return;
+  if (!denki.ended) return;
 
-    const player = denki.players.find(p => p.id === socket.id);
-    if (!player) return;
-  });
+  // 対戦者のみ
+  const player = denki.players.find(p => p.id === socket.id);
+  if (!player) return;
 
-
-
-
-
+  // 再戦押下記録
   denki.rematchVotes[socket.id] = true;
 
+  // 2人そろったら再戦開始
   if (Object.keys(denki.rematchVotes).length === 2) {
     denki.ended = false;
     denki.rematchVotes = {};
@@ -458,10 +445,13 @@ io.on("connection", socket => {
       time: getTimeString()
     };
 
+    messagesLog.push(msg);
+    saveLogs();
     io.to(DENKI_ROOM).emit("message", msg);
   }
-});
 
+  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+});
 
 
     /* ===== 文字色更新 ===== */
@@ -537,13 +527,7 @@ if (existingUser) {
 
 
     io.to(room).emit("userList", users.filter(u=>u.room===room));
-  socket.emit(
-  "pastMessages",
-  messagesLog.filter(m => m.room === room && !m.private)
-);
-
-
-
+    socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
     io.emit("lobbyUpdate", getLobbyInfo());
 
   if (room === DENKI_ROOM) {
@@ -580,6 +564,7 @@ if (denki.players.length === 2 && !denki.started) {
   };
 
   messagesLog.push(startMsg);
+  saveLogs();
   io.to(DENKI_ROOM).emit("message", startMsg);
 }
 
@@ -587,6 +572,12 @@ if (denki.players.length === 2 && !denki.started) {
 
   // 状態送信
   io.to(DENKI_ROOM).emit("denkiState", denkiState());
+}
+
+
+      
+  );
+
   socket.on("denkiSet", seat => {
   if (socket.room !== DENKI_ROOM) return;
   if (denki.phase !== "set") return;
@@ -662,51 +653,18 @@ if (sit === trap) {
     time: getTimeString()
   };
 
- pushLog(msg);
-
+  messagesLog.push(msg);
+  saveLogs();
   io.to(DENKI_ROOM).emit("message", msg);
 
- 
-// ===== 勝利条件チェック =====
+  // ===== 勝利条件チェック =====
 
-// 合計点
+// 合計点（shock は 0）
 const p1 = denki.players[0];
 const p2 = denki.players[1];
 
 const score1 = p1.score;
 const score2 = p2.score;
-
-// ===== イス残り1個判定（最優先）=====
-const remainingSeats = getRemainingSeats();
-
-if (remainingSeats <= 1) {
-
-  let resultText;
-
-  if (score1 > score2) {
-    resultText = `🪑 最後のイスで終了：勝者 ${p1.name}（${score1}点）`;
-  } else if (score2 > score1) {
-    resultText = `🪑 最後のイスで終了：勝者 ${p2.name}（${score2}点）`;
-  } else {
-    resultText = `🪑 最後のイスで終了：引き分け（${score1}点）`;
-  }
-
-  const resultMsg = {
-    name: "system",
-    text: resultText,
-    room: DENKI_ROOM,
-    time: getTimeString()
-  };
-
-  messagesLog.push(resultMsg);
-  
-  io.to(DENKI_ROOM).emit("message", resultMsg);
-
-  denki.ended = true;
-  denki.phase = "end";
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
-  return;
-}
 
 // 勝敗判定
 let resultText = null;
@@ -752,6 +710,7 @@ if (resultText) {
   };
 
   messagesLog.push(resultMsg);
+  saveLogs();
   io.to(DENKI_ROOM).emit("message", resultMsg);
 
  denki.ended = true;
@@ -790,8 +749,7 @@ return;
         room:socket.room,
         time:getTimeString()
       };
-    pushLog(msg);
-
+      messagesLog.push(msg); saveLogs();
       io.to(socket.room).emit("message",msg);
       return;
     }
@@ -804,9 +762,8 @@ return;
     room: socket.room,
     time: getTimeString()
   };
-  
-  pushLog(msg);
-
+  messagesLog.push(msg);
+  saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
 }
@@ -819,8 +776,8 @@ if(text==="男子罰"){
     room: socket.room,
     time: getTimeString()
   };
- pushLog(msg);
-
+  messagesLog.push(msg);
+  saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
 }
@@ -833,8 +790,8 @@ if(text==="苦痛罰" && socket.room==="special"){
     room: socket.room,
     time: getTimeString()
   };
- pushLog(msg);
-
+  messagesLog.push(msg);
+  saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
 }
@@ -847,21 +804,19 @@ if (data.to) {
   const msg = {
     name: socket.username,
     text,
-    room: null,          // ★ ここだけ変更
+    room: socket.room,
     time: getTimeString(),
     private: true,
     to: data.to,
     toName: targetUser?.name || "不明"
   };
 
-  // private は保存しない設計なので pushLog はあっても無視される
-  pushLog(msg);
-
+  messagesLog.push(msg);
+  saveLogs();
   socket.emit("message", msg);
   io.to(data.to).emit("message", msg);
   return;
 }
-
 
 
 const u = users.find(x => x.id === socket.id);
@@ -874,47 +829,17 @@ const u = users.find(x => x.id === socket.id);
   time: getTimeString()
 };
 
-   pushLog(msg);
-
+    messagesLog.push(msg); saveLogs();
     io.to(socket.room).emit("message",msg);
   });
 
-  socket.on("leave", () => {
-  const user = users.find(u => u.id === socket.id);
-  const room = user?.room;
-
-  users = users.filter(u => u.id !== socket.id);
-
-if (room) {
-  const roomSize = io.sockets.adapter.rooms.get(room)?.size || 0;
-
-  if (roomSize === 0) {
-    messagesLog = messagesLog.filter(m => m.room !== room);
-  }
-}
-
-
-  socket.disconnect(true);
+  socket.on("leave",()=>socket.disconnect(true));
+  socket.on("disconnect",()=>{
+    users = users.filter(u=>u.id!==socket.id);
+  
+    io.emit("lobbyUpdate", getLobbyInfo());
+  });
 });
-
-socket.on("disconnect", () => {
-  const user = users.find(u => u.id === socket.id);
-  const room = user?.room;
-
-  users = users.filter(u => u.id !== socket.id);
-
-  if (room) {
-    const remain = users.some(u => u.room === room);
-    if (!remain) {
-      messagesLog = messagesLog.filter(m => m.room !== room);
-    }
-  }
-
-  io.emit("lobbyUpdate", getLobbyInfo());
-});
-
-}); // ← io.on("connection", socket => { の閉じカッコ（これ1個だけ）
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on ${PORT}`));
-
+server.listen(PORT, ()=>console.log(`Server running on ${PORT}`));
