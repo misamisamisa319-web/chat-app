@@ -205,6 +205,41 @@ const boyPunishItems = [
 "男子罰30.【地獄】勝利者の奴隷に3日なる。",
 ];
 
+// 一人罰
+const hitoriPunishItems = [
+  "一人罰1",
+  "一人罰2",
+  "一人罰3",
+  "一人罰4",
+  "一人罰5",
+  "一人罰6",
+  "一人罰7",
+  "一人罰8",
+  "一人罰9",
+  "一人罰10",
+  "一人罰11",
+  "一人罰12",
+  "一人罰13",
+  "一人罰14",
+  "一人罰15",
+  "一人罰16",
+  "一人罰17",
+  "一人罰18",
+  "一人罰19",
+  "一人罰20",
+  "一人罰21",
+  "一人罰22",
+  "一人罰23",
+  "一人罰24",
+  "一人罰25",
+  "一人罰26",
+  "一人罰27",
+  "一人罰28",
+  "一人罰29",
+  "一人罰30"
+];
+
+
 const specialGirlPunishItems = [
 "女子罰1.勝者の指定する方法で1d5+3分間の全力オナニー（ルブルにて1d5のサイコロを振り「○分間全力オナニーをします」と発言し、今の心境も書き残してくること）",
 "女子罰2.全裸になり脚を開き、人差し指と中指でクリトリスを軽く挟み込んで擦る。3分以内に100往復こする。",
@@ -302,9 +337,17 @@ function initPunishRoom(room){
     punishStockByRoom[room] = {
       girl: shuffle([...punishItems]),
       boy: shuffle([...boyPunishItems]),
+      hitori: shuffle([...hitoriPunishItems]),
       pain: shuffle([...specialPainPunishItems])
     };
   }
+}
+
+function getHitoriPunish(room){
+  initPunishRoom(room);
+  if (!punishStockByRoom[room].hitori.length)
+    punishStockByRoom[room].hitori = shuffle([...hitoriPunishItems]);
+  return punishStockByRoom[room].hitori.shift();
 }
 function getGirlPunish(room){
   initPunishRoom(room);
@@ -790,6 +833,19 @@ return;
       io.to(socket.room).emit("message",msg);
       return;
     }
+if (text === "一人罰") {
+  const msg = {
+    name: socket.username,
+    text: getHitoriPunish(socket.room),
+    color: "gray",
+    room: socket.room,
+    time: getTimeString()
+  };
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
 
     if(text==="女子罰"){
   const msg={

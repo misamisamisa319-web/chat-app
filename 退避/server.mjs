@@ -644,7 +644,7 @@ if (sit === trap) {
 }
 
 
-  // ===== チャット表示 =====
+   // ===== チャット表示 =====
   const msg = {
     name: "system",
     text: text,
@@ -657,7 +657,44 @@ if (sit === trap) {
   saveLogs();
   io.to(DENKI_ROOM).emit("message", msg);
 
+  // ===== 残り1イス判定（追加）=====
+  const TOTAL_SEATS = 12; // フロントと一致
+  const usedSeats = denki.players.flatMap(p =>
+    (p.turns || []).filter(v => v !== "shock")
+  );
+
+  if (usedSeats.length >= TOTAL_SEATS - 1) {
+    const p1 = denki.players[0];
+    const p2 = denki.players[1];
+
+    let resultText;
+    if (p1.score > p2.score) {
+      resultText = `🏁 イス残り1：勝者 ${p1.name}（${p1.score}点）`;
+    } else if (p2.score > p1.score) {
+      resultText = `🏁 イス残り1：勝者 ${p2.name}（${p2.score}点）`;
+    } else {
+      resultText = `🏁 イス残り1：引き分け（${p1.score}点）`;
+    }
+
+    const resultMsg = {
+      name: "system",
+      text: resultText,
+      room: DENKI_ROOM,
+      time: getTimeString()
+    };
+
+    messagesLog.push(resultMsg);
+    saveLogs();
+    io.to(DENKI_ROOM).emit("message", resultMsg);
+
+    denki.ended = true;
+    denki.phase = "end";
+    io.to(DENKI_ROOM).emit("denkiState", denkiState());
+    return;
+  }
+
   // ===== 勝利条件チェック =====
+
 
 // 合計点（shock は 0）
 const p1 = denki.players[0];
