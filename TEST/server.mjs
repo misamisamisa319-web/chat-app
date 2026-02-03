@@ -829,14 +829,37 @@ const u = users.find(x => x.id === socket.id);
   time: getTimeString()
 };
 
-    messagesLog.push(msg); saveLogs();
+       messagesLog.push(msg); saveLogs();
     io.to(socket.room).emit("message",msg);
   });
 
   socket.on("leave",()=>socket.disconnect(true));
   socket.on("disconnect",()=>{
-    users = users.filter(u=>u.id!==socket.id);
-  
+    const leftRoom = socket.room;
+
+    users = users.filter(u => u.id !== socket.id);
+
+    // ★ 最後の1人が抜けた部屋だけログ等を消す
+    if (leftRoom && !users.some(u => u.room === leftRoom)) {
+      messagesLog = messagesLog.filter(m => m.room !== leftRoom);
+      saveLogs();
+      delete punishStockByRoom[leftRoom];
+
+      if (leftRoom === DENKI_ROOM) {
+        denki = {
+          players: [],
+          turn: 0,
+          phase: "set",
+          trapSeat: null,
+          sitSeat: null,
+          sitPreview: null,
+          ended: false,
+          rematchVotes: {},
+          started: false
+        };
+      }
+    }
+
     io.emit("lobbyUpdate", getLobbyInfo());
   });
 });
