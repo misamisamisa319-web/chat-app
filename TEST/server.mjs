@@ -834,12 +834,13 @@ const u = users.find(x => x.id === socket.id);
   });
 
   socket.on("leave",()=>socket.disconnect(true));
-   socket.on("disconnect",()=>{
-    const leftRoom = socket.room;
+socket.on("disconnect",()=>{
+  const leftRoom = socket.room;
 
-    users = users.filter(u => u.id !== socket.id);
+  users = users.filter(u => u.id !== socket.id);
 
-    // ★ Socket.IO的に「本当に0人」になったら消す
+  // ★ Socket.IO が部屋から抜け切った後に判定
+  setTimeout(() => {
     if (leftRoom && !io.sockets.adapter.rooms.get(leftRoom)) {
       messagesLog = messagesLog.filter(m => m.room !== leftRoom);
       saveLogs();
@@ -861,8 +862,9 @@ const u = users.find(x => x.id === socket.id);
     }
 
     io.emit("lobbyUpdate", getLobbyInfo());
-  });
+  }, 0);
 });
+
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, ()=>console.log(`Server running on ${PORT}`));
