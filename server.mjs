@@ -834,13 +834,13 @@ const u = users.find(x => x.id === socket.id);
   });
 
   socket.on("leave",()=>socket.disconnect(true));
-  socket.on("disconnect",()=>{
+   socket.on("disconnect",()=>{
     const leftRoom = socket.room;
 
     users = users.filter(u => u.id !== socket.id);
 
-    // ★ 最後の1人が抜けた部屋だけログ等を消す
-    if (leftRoom && !users.some(u => u.room === leftRoom)) {
+    // ★ Socket.IO的に「本当に0人」になったら消す
+    if (leftRoom && !io.sockets.adapter.rooms.get(leftRoom)) {
       messagesLog = messagesLog.filter(m => m.room !== leftRoom);
       saveLogs();
       delete punishStockByRoom[leftRoom];
