@@ -833,38 +833,39 @@ const u = users.find(x => x.id === socket.id);
     io.to(socket.room).emit("message",msg);
   });
 
-  socket.on("leave",()=>socket.disconnect(true));
-socket.on("disconnect",()=>{
-  const leftRoom = socket.room;
+   socket.on("leave",()=>socket.disconnect(true));
+  socket.on("disconnect",()=>{
+    const leftRoom = socket.room;
 
-  users = users.filter(u => u.id !== socket.id);
+    users = users.filter(u => u.id !== socket.id);
 
-  // ★ Socket.IO が部屋から抜け切った後に判定
-  setTimeout(() => {
-    if (leftRoom && !io.sockets.adapter.rooms.get(leftRoom)) {
-      messagesLog = messagesLog.filter(m => m.room !== leftRoom);
-      saveLogs();
-      delete punishStockByRoom[leftRoom];
+    setTimeout(() => {
+      if (leftRoom && !io.sockets.adapter.rooms.get(leftRoom)) {
+        messagesLog = messagesLog.filter(m => m.room !== leftRoom);
+        saveLogs();
+        delete punishStockByRoom[leftRoom];
 
-      if (leftRoom === DENKI_ROOM) {
-        denki = {
-          players: [],
-          turn: 0,
-          phase: "set",
-          trapSeat: null,
-          sitSeat: null,
-          sitPreview: null,
-          ended: false,
-          rematchVotes: {},
-          started: false
-        };
+        if (leftRoom === DENKI_ROOM) {
+          denki = {
+            players: [],
+            turn: 0,
+            phase: "set",
+            trapSeat: null,
+            sitSeat: null,
+            sitPreview: null,
+            ended: false,
+            rematchVotes: {},
+            started: false
+          };
+        }
       }
-    }
 
-    io.emit("lobbyUpdate", getLobbyInfo());
-  }, 0);
+      io.emit("lobbyUpdate", getLobbyInfo());
+    }, 0);
+  });
 });
 
-
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, ()=>console.log(`Server running on ${PORT}`));
+server.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
+});
