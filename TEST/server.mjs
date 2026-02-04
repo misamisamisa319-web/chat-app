@@ -23,7 +23,16 @@ if (fs.existsSync(LOG_FILE)) {
 function saveLogs() {
   fs.writeFileSync(LOG_FILE, JSON.stringify(messagesLog, null, 2));
 }
-
+function normalizeLog(msg){
+  return {
+    name: msg.name || "unknown",
+    room: msg.room || "unknown",
+    text: msg.text || "",
+    time: msg.time || getTimeString(),
+    private: msg.private || false,
+    ...msg
+  };
+}
 /* ===== 管理者ログ ===== */
 app.get("/admin", (req, res) => {
   if (req.query.key !== process.env.ADMIN_KEY) {
@@ -569,7 +578,8 @@ socket.on("denkiRematch", () => {
       time: getTimeString()
     };
 
-    messagesLog.push(msg);
+    messagesLog.push(normalizeLog(msg));
+
     saveLogs();
     io.to(DENKI_ROOM).emit("message", msg);
   }
@@ -680,16 +690,17 @@ if (existingUser) {
 if (denki.players.length === 2 && !denki.started) {
   denki.started = true;
 
-  const startMsg = {
-    name: "system",
-    text: `⚡ 勝負開始！ ${denki.players[0].name} vs ${denki.players[1].name}`,
-    room: DENKI_ROOM,
-    time: getTimeString()
-  };
+ const startMsg = {
+  name: "system",
+  text: `⚡ 勝負開始！ ${denki.players[0].name} vs ${denki.players[1].name}`,
+  room: DENKI_ROOM,
+  time: getTimeString()
+};
 
-  messagesLog.push(startMsg);
-  saveLogs();
-  io.to(DENKI_ROOM).emit("message", startMsg);
+messagesLog.push(normalizeLog(startMsg));
+saveLogs();
+io.to(DENKI_ROOM).emit("message", startMsg);
+
 }
 
 
@@ -777,7 +788,7 @@ if (sit === trap) {
     time: getTimeString()
   };
 
-  messagesLog.push(msg);
+ messagesLog.push(normalizeLog(msg));
   saveLogs();
   io.to(DENKI_ROOM).emit("message", msg);
 
@@ -910,7 +921,9 @@ return;
         room:socket.room,
         time:getTimeString()
       };
-      messagesLog.push(msg); saveLogs();
+      messagesLog.push(normalizeLog(msg));
+
+      saveLogs();
       io.to(socket.room).emit("message",msg);
       return;
     }
@@ -922,7 +935,8 @@ if (text === "一人罰") {
     room: socket.room,
     time: getTimeString()
   };
-  messagesLog.push(msg);
+  messagesLog.push(normalizeLog(msg));
+
   saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
@@ -935,7 +949,8 @@ if (text === "命令女") {
     room: socket.room,
     time: getTimeString()
   };
-  messagesLog.push(msg);
+  messagesLog.push(normalizeLog(msg));
+
   saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
@@ -949,7 +964,8 @@ if (text === "命令男") {
     room: socket.room,
     time: getTimeString()
   };
-  messagesLog.push(msg);
+  messagesLog.push(normalizeLog(msg));
+
   saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
@@ -963,7 +979,8 @@ if (text === "命令男") {
     room: socket.room,
     time: getTimeString()
   };
-  messagesLog.push(msg);
+  messagesLog.push(normalizeLog(msg));
+
   saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
@@ -977,7 +994,8 @@ if(text==="男子罰"){
     room: socket.room,
     time: getTimeString()
   };
-  messagesLog.push(msg);
+  messagesLog.push(normalizeLog(msg));
+
   saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
@@ -991,7 +1009,8 @@ if(text==="苦痛罰"){
     room: socket.room,
     time: getTimeString()
   };
-  messagesLog.push(msg);
+  messagesLog.push(normalizeLog(msg));
+
   saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
@@ -1013,7 +1032,8 @@ if (data.to) {
     toName: targetUser?.name || "不明"
   };
 
-  messagesLog.push(msg);
+  messagesLog.push(normalizeLog(msg));
+
   saveLogs();
   socket.emit("message", msg);
   io.to(data.to).emit("message", msg);
@@ -1030,8 +1050,9 @@ const u = users.find(x => x.id === socket.id);
   room: socket.room,
   time: getTimeString()
 };
+messagesLog.push(normalizeLog(msg));
 
-       messagesLog.push(msg); saveLogs();
+        saveLogs();
     io.to(socket.room).emit("message",msg);
   });
 
