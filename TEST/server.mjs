@@ -239,6 +239,74 @@ const hitoriPunishItems = [
   "一人罰30"
 ];
 
+// オナ女
+const onaGirlPunishItems = [
+  "オナ女1",
+  "オナ女2",
+  "オナ女3",
+  "オナ女4",
+  "オナ女5",
+  "オナ女6",
+  "オナ女7",
+  "オナ女8",
+  "オナ女9",
+  "オナ女10",
+  "オナ女11",
+  "オナ女12",
+  "オナ女13",
+  "オナ女14",
+  "オナ女15",
+  "オナ女16",
+  "オナ女17",
+  "オナ女18",
+  "オナ女19",
+  "オナ女20",
+  "オナ女21",
+  "オナ女22",
+  "オナ女23",
+  "オナ女24",
+  "オナ女25",
+  "オナ女26",
+  "オナ女27",
+  "オナ女28",
+  "オナ女29",
+  "オナ女30"
+];
+
+// オナ男
+const onaBoyPunishItems = [
+  "オナ男1",
+  "オナ男2",
+  "オナ男3",
+  "オナ男4",
+  "オナ男5",
+  "オナ男6",
+  "オナ男7",
+  "オナ男8",
+  "オナ男9",
+  "オナ男10",
+  "オナ男11",
+  "オナ男12",
+  "オナ男13",
+  "オナ男14",
+  "オナ男15",
+  "オナ男16",
+  "オナ男17",
+  "オナ男18",
+  "オナ男19",
+  "オナ男20",
+  "オナ男21",
+  "オナ男22",
+  "オナ男23",
+  "オナ男24",
+  "オナ男25",
+  "オナ男26",
+  "オナ男27",
+  "オナ男28",
+  "オナ男29",
+  "オナ男30"
+];
+
 
 const specialGirlPunishItems = [
 "女子罰1.勝者の指定する方法で1d5+3分間の全力オナニー（ルブルにて1d5のサイコロを振り「○分間全力オナニーをします」と発言し、今の心境も書き残してくること）",
@@ -338,11 +406,24 @@ function initPunishRoom(room){
       girl: shuffle([...punishItems]),
       boy: shuffle([...boyPunishItems]),
       hitori: shuffle([...hitoriPunishItems]),
-      pain: shuffle([...specialPainPunishItems])
+      onaGirl: shuffle([...onaGirlPunishItems]),
+      onaBoy: shuffle([...onaBoyPunishItems]),
+      pain: shuffle([...specialPainPunishItems]),
     };
   }
 }
-
+function getOnaGirlPunish(room){
+  initPunishRoom(room);
+  if (!punishStockByRoom[room].onaGirl.length)
+    punishStockByRoom[room].onaGirl = shuffle([...onaGirlPunishItems]);
+  return punishStockByRoom[room].onaGirl.shift();
+}
+function getOnaBoyPunish(room){
+  initPunishRoom(room);
+  if (!punishStockByRoom[room].onaBoy.length)
+    punishStockByRoom[room].onaBoy = shuffle([...onaBoyPunishItems]);
+  return punishStockByRoom[room].onaBoy.shift();
+}
 function getHitoriPunish(room){
   initPunishRoom(room);
   if (!punishStockByRoom[room].hitori.length)
@@ -838,6 +919,33 @@ if (text === "一人罰") {
     name: socket.username,
     text: getHitoriPunish(socket.room),
     color: "gray",
+    room: socket.room,
+    time: getTimeString()
+  };
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
+if (text === "オナ女") {
+  const msg = {
+    name: socket.username,
+    text: getOnaGirlPunish(socket.room),
+    color: "pink",
+    room: socket.room,
+    time: getTimeString()
+  };
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
+
+if (text === "オナ男") {
+  const msg = {
+    name: socket.username,
+    text: getOnaBoyPunish(socket.room),
+    color: "navy",
     room: socket.room,
     time: getTimeString()
   };
