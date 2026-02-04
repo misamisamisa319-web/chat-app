@@ -931,7 +931,7 @@ if (text === "オナ女") {
   const msg = {
     name: socket.username,
     text: getOnaGirlPunish(socket.room),
-    color: "pink",
+    color: "deeppink",
     room: socket.room,
     time: getTimeString()
   };
