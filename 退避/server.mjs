@@ -205,6 +205,109 @@ const boyPunishItems = [
 "男子罰30.【地獄】勝利者の奴隷に3日なる。",
 ];
 
+// 一人罰
+const hitoriPunishItems = [
+  "一人罰1",
+  "一人罰2",
+  "一人罰3",
+  "一人罰4",
+  "一人罰5",
+  "一人罰6",
+  "一人罰7",
+  "一人罰8",
+  "一人罰9",
+  "一人罰10",
+  "一人罰11",
+  "一人罰12",
+  "一人罰13",
+  "一人罰14",
+  "一人罰15",
+  "一人罰16",
+  "一人罰17",
+  "一人罰18",
+  "一人罰19",
+  "一人罰20",
+  "一人罰21",
+  "一人罰22",
+  "一人罰23",
+  "一人罰24",
+  "一人罰25",
+  "一人罰26",
+  "一人罰27",
+  "一人罰28",
+  "一人罰29",
+  "一人罰30"
+];
+
+// オナ女
+const onaGirlPunishItems = [
+  "オナ女1",
+  "オナ女2",
+  "オナ女3",
+  "オナ女4",
+  "オナ女5",
+  "オナ女6",
+  "オナ女7",
+  "オナ女8",
+  "オナ女9",
+  "オナ女10",
+  "オナ女11",
+  "オナ女12",
+  "オナ女13",
+  "オナ女14",
+  "オナ女15",
+  "オナ女16",
+  "オナ女17",
+  "オナ女18",
+  "オナ女19",
+  "オナ女20",
+  "オナ女21",
+  "オナ女22",
+  "オナ女23",
+  "オナ女24",
+  "オナ女25",
+  "オナ女26",
+  "オナ女27",
+  "オナ女28",
+  "オナ女29",
+  "オナ女30"
+];
+
+// オナ男
+const onaBoyPunishItems = [
+  "オナ男1",
+  "オナ男2",
+  "オナ男3",
+  "オナ男4",
+  "オナ男5",
+  "オナ男6",
+  "オナ男7",
+  "オナ男8",
+  "オナ男9",
+  "オナ男10",
+  "オナ男11",
+  "オナ男12",
+  "オナ男13",
+  "オナ男14",
+  "オナ男15",
+  "オナ男16",
+  "オナ男17",
+  "オナ男18",
+  "オナ男19",
+  "オナ男20",
+  "オナ男21",
+  "オナ男22",
+  "オナ男23",
+  "オナ男24",
+  "オナ男25",
+  "オナ男26",
+  "オナ男27",
+  "オナ男28",
+  "オナ男29",
+  "オナ男30"
+];
+
+
 const specialGirlPunishItems = [
 "女子罰1.勝者の指定する方法で1d5+3分間の全力オナニー（ルブルにて1d5のサイコロを振り「○分間全力オナニーをします」と発言し、今の心境も書き残してくること）",
 "女子罰2.全裸になり脚を開き、人差し指と中指でクリトリスを軽く挟み込んで擦る。3分以内に100往復こする。",
@@ -302,9 +405,30 @@ function initPunishRoom(room){
     punishStockByRoom[room] = {
       girl: shuffle([...punishItems]),
       boy: shuffle([...boyPunishItems]),
-      pain: shuffle([...specialPainPunishItems])
+      hitori: shuffle([...hitoriPunishItems]),
+      onaGirl: shuffle([...onaGirlPunishItems]),
+      onaBoy: shuffle([...onaBoyPunishItems]),
+      pain: shuffle([...specialPainPunishItems]),
     };
   }
+}
+function getOnaGirlPunish(room){
+  initPunishRoom(room);
+  if (!punishStockByRoom[room].onaGirl.length)
+    punishStockByRoom[room].onaGirl = shuffle([...onaGirlPunishItems]);
+  return punishStockByRoom[room].onaGirl.shift();
+}
+function getOnaBoyPunish(room){
+  initPunishRoom(room);
+  if (!punishStockByRoom[room].onaBoy.length)
+    punishStockByRoom[room].onaBoy = shuffle([...onaBoyPunishItems]);
+  return punishStockByRoom[room].onaBoy.shift();
+}
+function getHitoriPunish(room){
+  initPunishRoom(room);
+  if (!punishStockByRoom[room].hitori.length)
+    punishStockByRoom[room].hitori = shuffle([...hitoriPunishItems]);
+  return punishStockByRoom[room].hitori.shift();
 }
 function getGirlPunish(room){
   initPunishRoom(room);
@@ -790,6 +914,46 @@ return;
       io.to(socket.room).emit("message",msg);
       return;
     }
+if (text === "一人罰") {
+  const msg = {
+    name: socket.username,
+    text: getHitoriPunish(socket.room),
+    color: "gray",
+    room: socket.room,
+    time: getTimeString()
+  };
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
+if (text === "オナ女") {
+  const msg = {
+    name: socket.username,
+    text: getOnaGirlPunish(socket.room),
+    color: "pink",
+    room: socket.room,
+    time: getTimeString()
+  };
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
+
+if (text === "オナ男") {
+  const msg = {
+    name: socket.username,
+    text: getOnaBoyPunish(socket.room),
+    color: "navy",
+    room: socket.room,
+    time: getTimeString()
+  };
+  messagesLog.push(msg);
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
 
     if(text==="女子罰"){
   const msg={
