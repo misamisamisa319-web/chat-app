@@ -38,29 +38,30 @@ function getDateTimeString() {
 }
 function normalizeLog(msg){
   return {
-    name: msg.name || "unknown",
-    room: msg.room || "unknown",
+    name: msg.name || "system",
+    room: msg.room || "room1",
     text: msg.text || "",
-    time: msg.time || getDateTimeString(),
+    time: msg.time || getTimeString(),
     private: msg.private || false,
     ...msg
   };
 }
+
 /* ===== 管理者ログ ===== */
 app.get("/admin", (req, res) => {
-  function addDate(timeStr) {
+function addDate(timeStr) {
   if (!timeStr) return "";
 
   const d = new Date(
     new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
   );
 
-  const Y = d.getFullYear();
   const M = String(d.getMonth() + 1).padStart(2, "0");
   const D = String(d.getDate()).padStart(2, "0");
 
-  return `${Y}/${M}/${D} ${timeStr}`;
+  return `${M}/${D} ${timeStr}`;
 }
+
 
   if (req.query.key !== process.env.ADMIN_KEY) {
     return res.status(403).send("Forbidden");
@@ -80,7 +81,7 @@ app.get("/admin", (req, res) => {
     </tr>
   `).join("");
 
-  const logRows = messagesLog.map(m => `
+  const logRows = [...messagesLog].reverse().map(m => `
     <tr>
       <td>${addDate(m.time)}</td>
       <td>${m.room}</td>
