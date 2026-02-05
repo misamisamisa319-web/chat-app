@@ -23,18 +23,45 @@ if (fs.existsSync(LOG_FILE)) {
 function saveLogs() {
   fs.writeFileSync(LOG_FILE, JSON.stringify(messagesLog, null, 2));
 }
+function getDateTimeString() {
+  const d = new Date(
+    new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+  );
+
+  const Y = d.getFullYear();
+  const M = String(d.getMonth() + 1).padStart(2, "0");
+  const D = String(d.getDate()).padStart(2, "0");
+  const h = String(d.getHours()).padStart(2, "0");
+  const m = String(d.getMinutes()).padStart(2, "0");
+
+  return `${Y}/${M}/${D} ${h}:${m}`;
+}
 function normalizeLog(msg){
   return {
     name: msg.name || "unknown",
     room: msg.room || "unknown",
     text: msg.text || "",
-    time: msg.time || getTimeString(),
+    time: msg.time || getDateTimeString(),
     private: msg.private || false,
     ...msg
   };
 }
 /* ===== 管理者ログ ===== */
 app.get("/admin", (req, res) => {
+  function addDate(timeStr) {
+  if (!timeStr) return "";
+
+  const d = new Date(
+    new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+  );
+
+  const Y = d.getFullYear();
+  const M = String(d.getMonth() + 1).padStart(2, "0");
+  const D = String(d.getDate()).padStart(2, "0");
+
+  return `${Y}/${M}/${D} ${timeStr}`;
+}
+
   if (req.query.key !== process.env.ADMIN_KEY) {
     return res.status(403).send("Forbidden");
   }
@@ -55,7 +82,7 @@ app.get("/admin", (req, res) => {
 
   const logRows = messagesLog.map(m => `
     <tr>
-      <td>${m.time || ""}</td>
+      <td>${addDate(m.time)}</td>
       <td>${m.room}</td>
       <td>${m.name}</td>
       <td>${m.private ? "内緒" : "通常"}</td>
