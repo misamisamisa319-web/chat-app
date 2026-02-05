@@ -31,8 +31,22 @@ body {
 #controls { display: flex; gap: 5px; padding: 5px; position: sticky; top: 0; background: #fff; z-index: 10; }
 input, button, select { padding: 10px; font-size: 16px; }
 
-#userList { display: flex; flex-wrap: wrap; gap: 10px; background: #f0f0f0; padding: 5px; list-style: none; max-height: 100px; overflow-x: auto; }
-#userList li { padding: 3px 8px; border-radius: 5px; }
+#userList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #f0f0f0;
+  padding: 5px;
+  list-style: none;
+  align-items: center;
+}
+
+#userList li {
+  padding: 3px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
 
 #settings { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; padding: 5px; background: #f9f9f9; border-bottom: 1px solid #ccc; }
 #settings input, #settings button, #settings select { padding: 5px; font-size: 14px; }
@@ -168,21 +182,36 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 
   </div>
+<!-- ===== 罰ボタン ===== -->
+<div id="punishWrap" style="
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:6px 0;
+">
+  <button onclick="sendPunish('女子罰')">女子罰</button>
+  <button onclick="sendPunish('男子罰')">男子罰</button>
+  <button onclick="sendPunish('命令女')">女自慰</button>
+  <button onclick="sendPunish('命令男')">男自慰</button>
+  <button onclick="sendPunish('苦痛罰')">苦痛罰</button>
+</div>
+ <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+  <strong>参加者:</strong>
+  <ul id="userList"></ul>
+</div>
 
-  <div>
-    <strong>参加者:</strong>
-    <ul id="userList"></ul>
-  </div>
+
+
 
   <div id="settings">
-    <label>文字色: <input type="color" id="colorSelect" value="#000000"></label>
-    <label>内緒相手:
+    <label>色: <input type="color" id="colorSelect" value="#000000"></label>
+    <label>内緒:
       <select id="privateTarget">
         <option value="">なし</option>
       </select>
     </label>
     <label>
-      通知音:
+      音:
       <select id="soundSelect">
         <option value="off">OFF</option>
         <option value="small">小</option>
@@ -624,6 +653,10 @@ leaveBtn.onclick = () => {
   localStorage.removeItem("chatKey");
   location.href = "/lobby.html";
 };
+function sendPunish(cmd){
+  socket.emit("message",{ text: cmd });
+}
+
 </script>
 
 </body>
