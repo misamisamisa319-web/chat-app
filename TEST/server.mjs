@@ -80,7 +80,7 @@ app.get("/admin", (req, res) => {
     </tr>
   `).join("");
 
-  const logRows = messagesLog.map(m => `
+  const logRows = [...messagesLog].reverse().map(m => `
     <tr>
       <td>${addDate(m.time)}</td>
       <td>${m.room}</td>
