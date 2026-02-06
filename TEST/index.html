@@ -30,7 +30,10 @@ body {
 
 #controls { display: flex; gap: 5px; padding: 5px; position: sticky; top: 0; background: #fff; z-index: 10; }
 input, button, select { padding: 10px; font-size: 16px; }
-
+#punishWrap button {
+  padding: 4px 8px;
+  font-size: 12px;
+}
 #userList {
   display: flex;
   flex-wrap: wrap;
@@ -347,7 +350,7 @@ const roomNames = {
 const roomLabel = document.getElementById("roomLabel");
 
 if (roomLabel && room) {
-  roomLabel.textContent = `入室先：${roomNames[room] || room}`;
+  roomLabel.textContent = `${roomNames[room] || room}`;
 }
 
 const key = localStorage.getItem("chatKey");
