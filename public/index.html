@@ -106,11 +106,15 @@ input, button, select { padding: 10px; font-size: 16px; }
 </div>
 
 <div id="chat">
-  <div id="controls">
-    <input id="input" placeholder="メッセージ">
-    <button id="sendBtn">送信</button>
-    <button id="updateBtn">更新</button>
-  </div>
+ <div id="controls">
+  <input id="input" placeholder="メッセージ">
+  <button id="sendBtn">送信</button>
+
+  <span id="roomLabel"
+    style="padding:10px; font-weight:bold;">
+  </span>
+</div>
+
 
   <!-- ⚡ 電気椅子（denki ルームのみ表示） -->
   <div id="denkiWrap">
@@ -182,10 +186,16 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 
   </div>
+<!-- ===== 参加者 ===== -->
+<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+  <strong>参加者:</strong>
+  <ul id="userList"></ul>
+</div>
+
 <!-- ===== 罰ボタン ===== -->
 <div id="punishWrap" style="
   display:flex;
-  gap:8px;
+  gap:7px;
   flex-wrap:wrap;
   padding:6px 0;
 ">
@@ -195,10 +205,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   <button onclick="sendPunish('命令男')">男オナ</button>
   <button onclick="sendPunish('苦痛罰')">女痛罰</button>
 </div>
- <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-  <strong>参加者:</strong>
-  <ul id="userList"></ul>
-</div>
+
 
 
 
@@ -238,7 +245,6 @@ const roomInfo = document.getElementById("roomInfo");
 const messages = document.getElementById("messages");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
-const updateBtn = document.getElementById("updateBtn");
 const leaveBtn = document.getElementById("leaveBtn");
 const userList = document.getElementById("userList");
 const colorSelect = document.getElementById("colorSelect");
@@ -320,10 +326,32 @@ window.addEventListener("load", () => {
     chat.style.display = "flex";
   }
 });
-
 /* ===== ロビーからの情報 ===== */
 const room = localStorage.getItem("chatRoom");
-const key  = localStorage.getItem("chatKey");
+
+const roomNames = {
+  room1: "ルーム1",
+  room2: "ルーム2",
+  room3: "ルーム3",
+  room4: "ルーム4",
+  denki: "電気椅子1",
+  denki1: "電気椅子2",
+  denki2: "電気椅子3",
+  special: "スペシャル",
+  privateA: "個室A",
+  privateB: "個室B",
+  privateC: "個室C",
+  privateD: "個室D"
+};
+
+const roomLabel = document.getElementById("roomLabel");
+
+if (roomLabel && room) {
+  roomLabel.textContent = `入室先：${roomNames[room] || room}`;
+}
+
+const key = localStorage.getItem("chatKey");
+
 
 if (!room && !joined) {
   alert("ロビーから入室してください");
@@ -351,9 +379,15 @@ function renderMsg(d) {
     text.textContent = `${d.name}: ${d.text}`;
   }
 
-  li.appendChild(text);
-  li.style.color = d.color || "#000";
-  messages.prepend(li);
+ li.appendChild(text);
+li.style.color = d.color || "#000";
+
+if (d.bold) {
+  text.style.fontWeight = "bold";
+}
+
+messages.prepend(li);
+
 }
 
 /* ===== 受信 ===== */
@@ -445,6 +479,16 @@ function updateDenkiUI() {
 
   // ===== 観戦モード判定 =====
   const isSpectator = !me;
+  // ===== 観戦UI調整 =====
+if (isSpectator) {
+
+  denkiSetBtn.style.display = "none";
+  denkiSitBtn.style.display = "none";
+  denkiShockBtn.style.display = "none";
+
+  denkiStatus.textContent = "👀 観戦中";
+}
+
 
   if (players.length < 2 || isSpectator) {
     denkiStatus.textContent = "観戦中";

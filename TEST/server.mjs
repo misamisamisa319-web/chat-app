@@ -850,6 +850,16 @@ if (usedSeats.length >= TOTAL_SEATS - 1) {
 
   game.ended = true;
   game.phase = "end";
+  setTimeout(() => {
+  game.players = [];
+  game.started = false;
+
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
+}, 3000);
+
 
   io.to(socket.room).emit(
     "denkiState",
@@ -919,6 +929,16 @@ if (resultText) {
 
   game.ended = true;
   game.phase = "end";
+  setTimeout(() => {
+  game.players = [];
+  game.started = false;
+
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
+}, 3000);
+
 
   io.to(socket.room).emit(
     "denkiState",
@@ -965,60 +985,16 @@ return;
       io.to(socket.room).emit("message",msg);
       return;
     }
-if (text === "絶頂許可") {
-  const msg = {
-    name: socket.username,
-    text: getHitoriPunish(socket.room),
-    color: "gray",
-    room: socket.room,
-    time: getTimeString()
-  };
-  messagesLog.push(normalizeLog(msg));
-
-  saveLogs();
-  io.to(socket.room).emit("message", msg);
-  return;
-}
-if (text === "命令女") {
-  const msg = {
-    name: socket.username,
-    text: getOnaGirlPunish(socket.room),
-    color: "deeppink",
-    room: socket.room,
-    time: getTimeString()
-  };
-  messagesLog.push(normalizeLog(msg));
-
-  saveLogs();
-  io.to(socket.room).emit("message", msg);
-  return;
-}
-
-if (text === "命令男") {
-  const msg = {
-    name: socket.username,
-    text: getOnaBoyPunish(socket.room),
-    color: "navy",
-    room: socket.room,
-    time: getTimeString()
-  };
-  messagesLog.push(normalizeLog(msg));
-
-  saveLogs();
-  io.to(socket.room).emit("message", msg);
-  return;
-}
-
-    if(text==="女子罰"){
+if(text==="女子罰"){
   const msg={
-    name: socket.username,   // ★ ここ変更
+    name: socket.username,
     text: getGirlPunish(socket.room),
     color: "red",
+    bold: true,
     room: socket.room,
     time: getTimeString()
   };
   messagesLog.push(normalizeLog(msg));
-
   saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
@@ -1026,14 +1002,44 @@ if (text === "命令男") {
 
 if(text==="男子罰"){
   const msg={
-    name: socket.username,   // ★
+    name: socket.username,
     text: getBoyPunish(socket.room),
     color: "blue",
+    bold: true,
     room: socket.room,
     time: getTimeString()
   };
   messagesLog.push(normalizeLog(msg));
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
 
+if(text==="命令女"){
+  const msg={
+    name: socket.username,
+    text: getOnaGirlPunish(socket.room),
+    color: "deeppink",
+    bold: true,
+    room: socket.room,
+    time: getTimeString()
+  };
+  messagesLog.push(normalizeLog(msg));
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
+
+if(text==="命令男"){
+  const msg={
+    name: socket.username,
+    text: getOnaBoyPunish(socket.room),
+    color: "navy",
+    bold: true,
+    room: socket.room,
+    time: getTimeString()
+  };
+  messagesLog.push(normalizeLog(msg));
   saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
@@ -1044,15 +1050,31 @@ if(text==="苦痛罰"){
     name: socket.username,
     text: getPainPunish(socket.room),
     color: "purple",
+    bold: true,
     room: socket.room,
     time: getTimeString()
   };
   messagesLog.push(normalizeLog(msg));
-
   saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
 }
+
+if (text === "絶頂許可") {
+  const msg = {
+    name: socket.username,
+    text: getHitoriPunish(socket.room),
+    color: "gray",
+    bold: true,
+    room: socket.room,
+    time: getTimeString()
+  };
+  messagesLog.push(normalizeLog(msg));
+  saveLogs();
+  io.to(socket.room).emit("message", msg);
+  return;
+}
+
 
 
  
