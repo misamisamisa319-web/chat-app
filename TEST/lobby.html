@@ -38,8 +38,11 @@
   background: #ffdddd;
 }
 .room.room2 {
-  background: #dde8ff;
-}
+  background: #dde8ff;}
+.room.room3 { background:#ddffdd; }
+
+.room.room4 { background:#ffe4cc; }
+
 .room.denki {
   background: #fff4cc;
 }
@@ -124,10 +127,28 @@ input[type="password"] {
   </div>
   <button onclick="enterRoom('room2')">入室</button>
 </div>
+<div class="room room3">
+  <div class="room-title">ルーム3</div>
+  <div class="room-info">
+    人数（<span id="count-room3">0</span>人）
+    <span id="names-room3">なし</span>
+  </div>
+  <button onclick="enterRoom('room3')">入室</button>
+</div>
+
+<div class="room room4">
+  <div class="room-title">ルーム4</div>
+  <div class="room-info">
+    人数（<span id="count-room4">0</span>人）
+    <span id="names-room4">なし</span>
+  </div>
+  <button onclick="enterRoom('room4')">入室</button>
+</div>
+
 
 <!-- ===== denki（既存） ===== -->
 <div class="room denki">
-  <div class="room-title">電気椅子</div>
+  <div class="room-title">電気椅子1</div>
   <div class="room-info">
     人数（<span id="count-denki">0</span>人）
     <span id="names-denki">なし</span>
@@ -137,7 +158,7 @@ input[type="password"] {
 
 <!-- ===== denki1（追加） ===== -->
 <div class="room denki">
-  <div class="room-title">電気椅子①</div>
+  <div class="room-title">電気椅子2</div>
   <div class="room-info">
     人数（<span id="count-denki1">0</span>人）
     <span id="names-denki1">なし</span>
@@ -147,7 +168,7 @@ input[type="password"] {
 
 <!-- ===== denki2（追加） ===== -->
 <div class="room denki">
-  <div class="room-title">電気椅子②</div>
+  <div class="room-title">電気椅子3</div>
   <div class="room-info">
     人数（<span id="count-denki2">0</span>人）
     <span id="names-denki2">なし</span>
@@ -215,6 +236,8 @@ socket.on("lobbyUpdate", rooms => {
   const allRooms = [
     "room1",
     "room2",
+    "room3",
+    "room4",
     "denki",
     "denki1",
     "denki2",

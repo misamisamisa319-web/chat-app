@@ -38,14 +38,15 @@ function getDateTimeString() {
 }
 function normalizeLog(msg){
   return {
+    ...msg,
     name: msg.name || "system",
     room: msg.room || "room1",
     text: msg.text || "",
     time: msg.time || getTimeString(),
-    private: msg.private || false,
-    ...msg
+    private: msg.private || false
   };
 }
+
 
 /* ===== 管理者ログ ===== */
 app.get("/admin", (req, res) => {
@@ -652,7 +653,14 @@ if (existingUser) {
 
 
     io.to(room).emit("userList", users.filter(u=>u.room===room));
-    socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
+    socket.emit(
+  "pastMessages",
+  messagesLog.filter(m =>
+    m.room === room &&
+    (!m.private || m.to === socket.id || m.from === socket.id)
+  )
+);
+
     io.emit("lobbyUpdate", getLobbyInfo());
 
   /* ===== 電気椅子参加 ===== */
