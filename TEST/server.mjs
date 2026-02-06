@@ -15,7 +15,8 @@ let users = [];
 let messagesLog = [];
 
 /* ===== ログ保存 ===== */
-const LOG_FILE = "/data/logs.json";
+const LOG_FILE = "./logs.json";
+
 if (fs.existsSync(LOG_FILE)) {
   try { messagesLog = JSON.parse(fs.readFileSync(LOG_FILE, "utf8")); }
   catch { messagesLog = []; }
@@ -42,10 +43,11 @@ function normalizeLog(msg){
     name: msg.name || "system",
     room: msg.room || "room1",
     text: msg.text || "",
-    time: msg.time || getTimeString(),
+    time: msg.time || "",
     private: msg.private || false
   };
 }
+
 
 
 /* ===== 管理者ログ ===== */
