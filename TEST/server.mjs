@@ -444,9 +444,31 @@ setInterval(()=>{
   });
 }, 60000);
 
+
 /* ===============================
-   ⚡ 電気椅子（追加分だけ）
+   ⚡ 電気椅子 3部屋管理（追加）
 ================================ */
+
+function createDenki(){
+  return {
+    players: [],
+    turn: 0,
+    phase: "set",
+    trapSeat: null,
+    sitSeat: null,
+    sitPreview: null,
+    ended: false,
+    rematchVotes: {},
+    started: false
+  };
+}
+
+let denkiRooms = {
+  denki:  createDenki(),
+  denki1: createDenki(),
+  denki2: createDenki()
+};
+
 const DENKI_ROOM = "denki";
 let denki = {
   players: [],
@@ -504,48 +526,50 @@ io.on("connection", socket => {
 
   // ===== 再戦ボタン =====
 socket.on("denkiRematch", () => {
-  if (socket.room !== DENKI_ROOM) return;
-  if (!denki.ended) return;
 
-  // 対戦者のみ
-  const player = denki.players.find(p => p.id === socket.id);
+  if (!["denki","denki1","denki2"].includes(socket.room)) return;
+
+  const game = denkiRooms[socket.room];
+
+  if (!game.ended) return;
+
+  const player = game.players.find(p => p.id === socket.id);
   if (!player) return;
 
-  // 再戦押下記録
-  denki.rematchVotes[socket.id] = true;
+  game.rematchVotes[socket.id] = true;
 
-  // 2人そろったら再戦開始
-  if (Object.keys(denki.rematchVotes).length === 2) {
-    denki.ended = false;
-    denki.rematchVotes = {};
+  if (Object.keys(game.rematchVotes).length === 2) {
 
-    denki.players.forEach(p => {
+    game.ended = false;
+    game.rematchVotes = {};
+
+    game.players.forEach(p => {
       p.score = 0;
       p.shock = 0;
       p.turns = [];
     });
 
-    denki.turn = 0;
-    denki.phase = "set";
-    denki.trapSeat = null;
-    denki.sitSeat = null;
-    denki.sitPreview = null;
+    game.turn = 0;
+    game.phase = "set";
+    game.trapSeat = null;
+    game.sitSeat = null;
+    game.sitPreview = null;
 
     const msg = {
       name: "system",
       text: "🔁 再戦開始！",
-      room: DENKI_ROOM,
+      room: socket.room,
       time: getTimeString()
     };
 
     messagesLog.push(normalizeLog(msg));
-
     saveLogs();
-    io.to(DENKI_ROOM).emit("message", msg);
+    io.to(socket.room).emit("message", msg);
   }
 
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+  io.to(socket.room).emit("denkiState", denkiStateRoom(socket.room));
 });
+
 
 
     /* ===== 文字色更新 ===== */
@@ -562,22 +586,29 @@ socket.on("denkiRematch", () => {
   });
 
 socket.on("denkiSitConfirm", () => {
-  if (socket.room !== DENKI_ROOM) return;
-  if (denki.phase !== "sit") return;
 
-  // 座る側＝turnじゃない方
-  const victimIndex = denki.turn === 0 ? 1 : 0;
-  const victim = denki.players[victimIndex];
+  if (!["denki","denki1","denki2"].includes(socket.room)) return;
+
+  const game = denkiRooms[socket.room];
+
+  if (game.phase !== "sit") return;
+
+  const victimIndex = game.turn === 0 ? 1 : 0;
+  const victim = game.players[victimIndex];
   if (!victim || victim.id !== socket.id) return;
 
-  if (denki.sitPreview == null) return;
+  if (game.sitPreview == null) return;
 
-  denki.sitSeat = denki.sitPreview;
-  denki.sitPreview = null;
-  denki.phase = "shock";
+  game.sitSeat = game.sitPreview;
+  game.sitPreview = null;
+  game.phase = "shock";
 
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
 });
+
 
 
 
@@ -624,16 +655,19 @@ if (existingUser) {
     socket.emit("pastMessages", messagesLog.filter(m=>m.room===room));
     io.emit("lobbyUpdate", getLobbyInfo());
 
-  if (room === DENKI_ROOM) {
+  /* ===== 電気椅子参加 ===== */
+if (["denki","denki1","denki2"].includes(room)) {
+
+  const game = denkiRooms[room];
+
   // ★ 名前で既存プレイヤーを探す（再接続対策）
-  const existing = denki.players.find(p => p.name === name);
+  const existing = game.players.find(p => p.name === name);
 
   if (existing) {
-    // 再接続：socket.id だけ更新
     existing.id = socket.id;
-  } else if (denki.players.length < 2) {
-    // 新規参加
-    denki.players.push({
+  } 
+  else if (game.players.length < 2) {
+    game.players.push({
       id: socket.id,
       name,
       score: 0,
@@ -642,86 +676,127 @@ if (existingUser) {
     });
   }
 
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+  io.to(room).emit("denkiState", denkiStateRoom(room));
 }
+function denkiStateRoom(room){
+  const game = denkiRooms[room];
+
+  return {
+    phase: game.phase,
+    ended: game.ended,
+
+    trapSeat: game.phase === "shock" ? game.trapSeat : null,
+
+    sitSeat: game.sitSeat,
+    sitPreview: game.sitPreview,
+
+    usedSeats: game.players.flatMap(p =>
+      (p.turns || []).filter(v => v !== "shock")
+    ),
+
+    players: game.players.map((p,i)=>({
+      id: p.id,
+      name: p.name,
+      score: p.score,
+      shock: p.shock,
+      turns: p.turns || [],
+      isTurn: game.turn === i
+    }))
+  };
+}
+
 
  
-// ★★ 2人目の対戦者が入った瞬間だけ勝負開始 ★★
-if (denki.players.length === 2 && !denki.started) {
-  denki.started = true;
+/// ★★ 2人目の対戦者が入った瞬間だけ勝負開始 ★★
+if (["denki","denki1","denki2"].includes(room)) {
 
- const startMsg = {
-  name: "system",
-  text: `⚡ 勝負開始！ ${denki.players[0].name} vs ${denki.players[1].name}`,
-  room: DENKI_ROOM,
-  time: getTimeString()
-};
+  const game = denkiRooms[room];
 
-messagesLog.push(normalizeLog(startMsg));
-saveLogs();
-io.to(DENKI_ROOM).emit("message", startMsg);
+  if (game.players.length === 2 && !game.started) {
 
+    game.started = true;
+
+    const startMsg = {
+      name: "system",
+      text: `⚡ 勝負開始！ ${game.players[0].name} vs ${game.players[1].name}`,
+      room: room,
+      time: getTimeString()
+    };
+
+    messagesLog.push(normalizeLog(startMsg));
+    saveLogs();
+    io.to(room).emit("message", startMsg);
+  }
 }
+});
 
 
+ socket.on("denkiSet", seat => {
 
-  // 状態送信
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
-}
+  if (!["denki","denki1","denki2"].includes(socket.room)) return;
 
+  const game = denkiRooms[socket.room];
 
-      
-  );
+  if (game.phase !== "set") return;
 
-  socket.on("denkiSet", seat => {
-  if (socket.room !== DENKI_ROOM) return;
-  if (denki.phase !== "set") return;
-
-  const me = denki.players[denki.turn];
+  const me = game.players[game.turn];
   if (!me || me.id !== socket.id) return;
 
-  // ★ 仮仕掛けとして保存
- denki.trapPreview = seat;
- denki.trapSeat = seat;
+  game.trapSeat = seat;
+  game.phase = "sit";
 
-  // フェーズだけ進める
-  denki.phase = "sit";
- io.to(DENKI_ROOM).emit("denkiState", denkiState());
-  });
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
+});
 
 socket.on("denkiSit", seat => {
-  if (socket.room !== DENKI_ROOM) return;
-  if (denki.phase !== "sit") return;
 
-  // ★ 座る側 = turn じゃない方
-  const victimIndex = denki.turn === 0 ? 1 : 0;
-  const victim = denki.players[victimIndex];
+  if (!["denki","denki1","denki2"].includes(socket.room)) return;
+
+  const game = denkiRooms[socket.room];
+
+  if (game.phase !== "sit") return;
+
+  // 座る側 = turnじゃない方
+  const victimIndex = game.turn === 0 ? 1 : 0;
+  const victim = game.players[victimIndex];
   if (!victim || victim.id !== socket.id) return;
 
-  denki.sitPreview = seat;
+  game.sitPreview = seat;
 
-  io.to(DENKI_ROOM).emit("denkiState", denkiState());
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
 });
 
 socket.on("denkiShock", () => {
-  if (socket.room !== DENKI_ROOM) return;
-  if (denki.phase !== "shock") return;
 
-  const attacker = denki.players[denki.turn];
+  if (!["denki","denki1","denki2"].includes(socket.room)) return;
+
+  const game = denkiRooms[socket.room];
+
+  if (game.phase !== "shock") return;
+
+  const attacker = game.players[game.turn];
   if (!attacker || attacker.id !== socket.id) return;
 
-  const victimIndex = denki.turn === 0 ? 1 : 0;
-  const victim = denki.players[victimIndex];
+  const victimIndex = game.turn === 0 ? 1 : 0;
+  const victim = game.players[victimIndex];
   if (!victim) return;
+
 
   let text;
   let color;
 
 // ===== 判定 =====
-const trap = denki.trapSeat;
-const sit = denki.sitSeat;
+const trap = game.trapSeat;
+const sit  = game.sitSeat;
 
 if (sit === trap) {
+
   victim.score = 0;
   victim.shock += 1;
   victim.turns = victim.turns || [];
@@ -729,79 +804,89 @@ if (sit === trap) {
 
   text = `⚡ 電流！${victim.name} は0点（仕掛け：${trap} / 座った：${sit}）`;
   color = "red";
+
 } else {
+
   victim.turns = victim.turns || [];
   victim.turns.push(sit);
 
   victim.score += sit;
+
   text = `👼 セーフ！${victim.name} は${sit}点（仕掛け：${trap} / 座った：${sit}）`;
   color = "green";
 }
 
 
-   // ===== チャット表示 =====
-  const msg = {
+// ===== チャット表示 =====
+const msg = {
+  name: "system",
+  text: text,
+  color: color,
+  room: socket.room,
+  time: getTimeString()
+};
+
+messagesLog.push(normalizeLog(msg));
+saveLogs();
+io.to(socket.room).emit("message", msg);
+
+// ===== 残り1イス判定 =====
+const TOTAL_SEATS = 12;
+
+const usedSeats = game.players.flatMap(p =>
+  (p.turns || []).filter(v => v !== "shock")
+);
+if (usedSeats.length >= TOTAL_SEATS - 1) {
+
+  const p1 = game.players[0];
+  const p2 = game.players[1];
+
+  let resultText;
+
+  if (p1.score > p2.score) {
+    resultText = `🏁 イス残り1：勝者 ${p1.name}（${p1.score}点）`;
+  }
+  else if (p2.score > p1.score) {
+    resultText = `🏁 イス残り1：勝者 ${p2.name}（${p2.score}点）`;
+  }
+  else {
+    resultText = `🏁 イス残り1：引き分け（${p1.score}点）`;
+  }
+
+  const resultMsg = {
     name: "system",
-    text: text,
-    color: color,
-    room: DENKI_ROOM,
+    text: resultText,
+    room: socket.room,
     time: getTimeString()
   };
 
- messagesLog.push(normalizeLog(msg));
+  messagesLog.push(normalizeLog(resultMsg));
   saveLogs();
-  io.to(DENKI_ROOM).emit("message", msg);
+  io.to(socket.room).emit("message", resultMsg);
 
-  // ===== 残り1イス判定（追加）=====
-  const TOTAL_SEATS = 12; // フロントと一致
-  const usedSeats = denki.players.flatMap(p =>
-    (p.turns || []).filter(v => v !== "shock")
+  game.ended = true;
+  game.phase = "end";
+
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
   );
 
-  if (usedSeats.length >= TOTAL_SEATS - 1) {
-    const p1 = denki.players[0];
-    const p2 = denki.players[1];
+  return;
+}
 
-    let resultText;
-    if (p1.score > p2.score) {
-      resultText = `🏁 イス残り1：勝者 ${p1.name}（${p1.score}点）`;
-    } else if (p2.score > p1.score) {
-      resultText = `🏁 イス残り1：勝者 ${p2.name}（${p2.score}点）`;
-    } else {
-      resultText = `🏁 イス残り1：引き分け（${p1.score}点）`;
-    }
+ // ===== 勝利条件チェック =====
 
-    const resultMsg = {
-      name: "system",
-      text: resultText,
-      room: DENKI_ROOM,
-      time: getTimeString()
-    };
-
-    messagesLog.push(resultMsg);
-    saveLogs();
-    io.to(DENKI_ROOM).emit("message", resultMsg);
-
-    denki.ended = true;
-    denki.phase = "end";
-    io.to(DENKI_ROOM).emit("denkiState", denkiState());
-    return;
-  }
-
-  // ===== 勝利条件チェック =====
-
-
-// 合計点（shock は 0）
-const p1 = denki.players[0];
-const p2 = denki.players[1];
+// 合計点
+const p1 = game.players[0];
+const p2 = game.players[1];
 
 const score1 = p1.score;
 const score2 = p2.score;
 
-// 勝敗判定
 let resultText = null;
 
-// ① 点数40点到達
+// ===== ① 40点到達 =====
 if (score1 >= 40) {
   resultText = `🏆 勝者：${p1.name}（${score1}点）`;
 }
@@ -809,62 +894,71 @@ if (score2 >= 40) {
   resultText = `🏆 勝者：${p2.name}（${score2}点）`;
 }
 
-// ② 電気3回で敗北
+// ===== ② 電気3回 =====
 if (p1.shock >= 3) {
   resultText = `💀 敗北：${p1.name}（⚡3回）／ 勝者：${p2.name}`;
 }
 if (p2.shock >= 3) {
   resultText = `💀 敗北：${p2.name}（⚡3回）／ 勝者：${p1.name}`;
 }
-// ③ 10ターン終了判定
+
+// ===== ③ 10ターン終了 =====
 const turns1 = (p1.turns || []).length;
 const turns2 = (p2.turns || []).length;
 
-// 両者10ターン消化したら終了
 if (turns1 >= 10 && turns2 >= 10) {
+
   if (score1 > score2) {
     resultText = `🏁 10ターン終了：勝者 ${p1.name}（${score1}点）`;
-  } else if (score2 > score1) {
+  }
+  else if (score2 > score1) {
     resultText = `🏁 10ターン終了：勝者 ${p2.name}（${score2}点）`;
-  } else {
+  }
+  else {
     resultText = `🏁 10ターン終了：引き分け（${score1}点）`;
   }
 }
 
-
-// 結果が出たら終了
+// ===== 終了処理 =====
 if (resultText) {
+
   const resultMsg = {
     name: "system",
     text: resultText,
-    room: DENKI_ROOM,
+    room: socket.room,
     time: getTimeString()
   };
 
-  messagesLog.push(resultMsg);
+  messagesLog.push(normalizeLog(resultMsg));
   saveLogs();
-  io.to(DENKI_ROOM).emit("message", resultMsg);
+  io.to(socket.room).emit("message", resultMsg);
 
- denki.ended = true;
- denki.phase = "end";
-io.to(DENKI_ROOM).emit("denkiState", denkiState());
-return;
+  game.ended = true;
+  game.phase = "end";
 
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
+
+  return;
 }
+// ===== ラウンド終了処理 =====
+game.turn = game.turn === 0 ? 1 : 0;
 
-  // ===== ラウンド終了処理 =====
-denki.turn = denki.turn === 0 ? 1 : 0;
-denki.phase = "set";
+game.phase = "set";
 
-denki.trapSeat = null;
-denki.sitSeat = null;
-denki.sitPreview = null;
+game.trapSeat   = null;
+game.sitSeat    = null;
+game.sitPreview = null;
 
-io.to(DENKI_ROOM).emit("denkiState", denkiState());
+io.to(socket.room).emit(
+  "denkiState",
+  denkiStateRoom(socket.room)
+);
+
 return;
-
-});
-
+ });
 
   socket.on("message", data=>{
     updateActive(socket);
@@ -1022,29 +1116,20 @@ messagesLog.push(normalizeLog(msg));
 
     users = users.filter(u => u.id !== socket.id);
 
-    setTimeout(() => {
-      if (leftRoom && !io.sockets.adapter.rooms.get(leftRoom)) {
-        messagesLog = messagesLog.filter(m => m.room !== leftRoom);
-        saveLogs();
-        delete punishStockByRoom[leftRoom];
+   setTimeout(() => {
+  if (leftRoom && !io.sockets.adapter.rooms.get(leftRoom)) {
+    messagesLog = messagesLog.filter(m => m.room !== leftRoom);
+    saveLogs();
+    delete punishStockByRoom[leftRoom];
 
-        if (leftRoom === DENKI_ROOM) {
-          denki = {
-            players: [],
-            turn: 0,
-            phase: "set",
-            trapSeat: null,
-            sitSeat: null,
-            sitPreview: null,
-            ended: false,
-            rematchVotes: {},
-            started: false
-          };
-        }
-      }
+    if (["denki","denki1","denki2"].includes(leftRoom)) {
+      denkiRooms[leftRoom] = createDenki();
+    }
+  }
 
-      io.emit("lobbyUpdate", getLobbyInfo());
-    }, 0);
+  io.emit("lobbyUpdate", getLobbyInfo());
+}, 0);
+
   });
 });
 
