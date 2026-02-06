@@ -30,10 +30,15 @@ body {
 
 #controls { display: flex; gap: 5px; padding: 5px; position: sticky; top: 0; background: #fff; z-index: 10; }
 input, button, select { padding: 10px; font-size: 16px; }
-#punishWrap button {
-  padding: 4px 8px;
-  font-size: 12px;
+#punishWrap {
+  gap: 12px;   /* ボタン同士の間隔 */
 }
+#punishWrap button {
+  padding: 4px 8px;  /* ボタンの中の余白 */
+  font-size: 12px;   /* 文字サイズ */
+}
+
+
 #userList {
   display: flex;
   flex-wrap: wrap;
