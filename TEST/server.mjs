@@ -579,6 +579,18 @@ function denkiStateRoom(room){
 io.on("connection", socket => {
   socket.emit("lobbyUpdate", getLobbyInfo());
 
+    socket.on("denkiStateRequest", () => {
+
+    if (!["denki","denki1","denki2"].includes(socket.room)) return;
+
+    io.to(socket.id).emit(
+      "denkiState",
+      denkiStateRoom(socket.room)
+    );
+
+  });
+
+
   // ===== 再戦ボタン =====
 socket.on("denkiRematch", () => {
 

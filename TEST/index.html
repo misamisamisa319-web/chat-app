@@ -405,7 +405,12 @@ messages.prepend(li);
 }
 
 /* ===== 受信 ===== */
-socket.on("connect", () => { myId = socket.id; });
+socket.on("connect", () => {
+  myId = socket.id;
+
+  socket.emit("denkiStateRequest");
+});
+
 
 socket.on("pastMessages", logs => {
   messages.innerHTML = "";
