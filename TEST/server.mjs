@@ -730,23 +730,23 @@ if (existingUser) {
   )
 );
 
-    io.emit("lobbyUpdate", getLobbyInfo());
 
-  /* ===== 電気椅子参加 ===== */
+io.emit("lobbyUpdate", getLobbyInfo());
+
+});
+
+/* ===== 電気椅子参加 ===== */
 socket.on("denkiJoin", () => {
 
   if (!["denki","denki1","denki2"].includes(socket.room)) return;
 
   const game = denkiRooms[socket.room];
 
-  // ===== 再接続対策 =====
   const existing = game.players.find(
     p => p.name === socket.username
   );
 
   if (existing) {
-
-    // ID差し替え復帰
     existing.id = socket.id;
 
     io.to(socket.room).emit(
@@ -757,7 +757,6 @@ socket.on("denkiJoin", () => {
     return;
   }
 
-  // ===== 新規参加 =====
   if (game.players.length >= 2) return;
 
   const user = users.find(u => u.id === socket.id);
@@ -776,7 +775,6 @@ socket.on("denkiJoin", () => {
     denkiStateRoom(socket.room)
   );
 
-  // ===== 2人揃ったら開始 =====
   if (game.players.length === 2 && !game.started) {
 
     game.started = true;
