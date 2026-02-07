@@ -14,6 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 let users = [];
 let messagesLog = [];
 let bans = {}; // { name: expireTime }
+const LOG_LIFETIME = 3 * 24 * 60 * 60 * 1000; // 3日
 
 
 /* ===== ログ保存 ===== */
@@ -46,7 +47,8 @@ function normalizeLog(msg){
     room: msg.room || "room1",
     text: msg.text || "",
     time: msg.time || "",
-    private: msg.private || false
+    private: msg.private || false,
+    savedAt: Date.now()
   };
 }
 
@@ -456,6 +458,18 @@ setInterval(()=>{
     }
   });
 }, 60000);
+/* ===== ログ期限削除 ===== */
+setInterval(() => {
+
+  const now = Date.now();
+
+  messagesLog = messagesLog.filter(
+    m => now - (m.savedAt || now) < LOG_LIFETIME
+  );
+
+  saveLogs();
+
+}, 60 * 60 * 1000); // 1時間ごと確認
 
 
 /* ===============================
@@ -1179,8 +1193,6 @@ messagesLog.push(normalizeLog(msg));
 
    setTimeout(() => {
   if (leftRoom && !io.sockets.adapter.rooms.get(leftRoom)) {
-    messagesLog = messagesLog.filter(m => m.room !== leftRoom);
-    saveLogs();
     delete punishStockByRoom[leftRoom];
 
     if (["denki","denki1","denki2"].includes(leftRoom)) {
