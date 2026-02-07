@@ -15,7 +15,8 @@ let users = [];
 let messagesLog = [];
 
 /* ===== ログ保存 ===== */
-const LOG_FILE = "/data/logs.json";
+const LOG_FILE = "./logs.json";
+
 if (fs.existsSync(LOG_FILE)) {
   try { messagesLog = JSON.parse(fs.readFileSync(LOG_FILE, "utf8")); }
   catch { messagesLog = []; }
@@ -42,10 +43,11 @@ function normalizeLog(msg){
     name: msg.name || "system",
     room: msg.room || "room1",
     text: msg.text || "",
-    time: msg.time || getTimeString(),
+    time: msg.time || "",
     private: msg.private || false
   };
 }
+
 
 
 /* ===== 管理者ログ ===== */
@@ -206,7 +208,7 @@ const punishItems = [
 "女子罰27.実況しながら寸止めオナニー（保留可）",
 "女子罰28.実況しながらイクまでオナニー(保留可)",
 "女子罰29.【地獄】カーテンを全開の窓際に立ち、勝利者の指定した方法で一回寸止めオナニーする。",
-"女子罰30.【地獄】勝利者の奴隷に3日なる。",
+"女子罰30.【地獄】玄関のドアを少し開けて勝利者の指定した方法で一回寸止めオナニーする。",
 ];
 
 // 男子罰30個
@@ -498,6 +500,33 @@ function resetDenki(){
 /* ===============================
    Socket.IO
 ================================ */
+function denkiStateRoom(room){
+  const game = denkiRooms[room];
+
+  return {
+    phase: game.phase,
+    ended: game.ended,
+    trapSeat: game.phase === "shock" ? game.trapSeat : null,
+    sitSeat: game.sitSeat,
+    sitPreview: game.sitPreview,
+    usedSeats: game.players.flatMap(p =>
+      (p.turns || []).filter(v => v !== "shock")
+    ),
+    players: game.players.map((p,i)=>({
+      id: p.id,
+      name: p.name,
+      score: p.score,
+      shock: p.shock,
+      turns: p.turns || [],
+      isTurn: game.turn === i
+    }))
+  };
+}
+
+/* ===============================
+   Socket.IO
+================================ */
+
 io.on("connection", socket => {
   socket.emit("lobbyUpdate", getLobbyInfo());
 
@@ -628,6 +657,7 @@ if (existingUser) {
 }
 
 
+
     io.to(room).emit("userList", users.filter(u=>u.room===room));
     socket.emit(
   "pastMessages",
@@ -662,32 +692,8 @@ if (["denki","denki1","denki2"].includes(room)) {
 
   io.to(room).emit("denkiState", denkiStateRoom(room));
 }
-function denkiStateRoom(room){
-  const game = denkiRooms[room];
 
-  return {
-    phase: game.phase,
-    ended: game.ended,
 
-    trapSeat: game.phase === "shock" ? game.trapSeat : null,
-
-    sitSeat: game.sitSeat,
-    sitPreview: game.sitPreview,
-
-    usedSeats: game.players.flatMap(p =>
-      (p.turns || []).filter(v => v !== "shock")
-    ),
-
-    players: game.players.map((p,i)=>({
-      id: p.id,
-      name: p.name,
-      score: p.score,
-      shock: p.shock,
-      turns: p.turns || [],
-      isTurn: game.turn === i
-    }))
-  };
-}
 
 
  
@@ -711,8 +717,9 @@ if (["denki","denki1","denki2"].includes(room)) {
     saveLogs();
     io.to(room).emit("message", startMsg);
   }
-}
-});
+  }
+
+}); 
 
 
  socket.on("denkiSet", seat => {

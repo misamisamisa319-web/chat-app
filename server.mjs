@@ -55,15 +55,16 @@ app.get("/admin", (req, res) => {
 function addDate(timeStr) {
   if (!timeStr) return "";
 
-  const d = new Date(
-    new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
-  );
+  // timeStr = "YYYY/MM/DD hh:mm" 形式前提
+  if (timeStr.includes("/")) {
+    const [date, time] = timeStr.split(" ");
+    const [, M, D] = date.split("/");
+    return `${M}/${D} ${time}`;
+  }
 
-  const M = String(d.getMonth() + 1).padStart(2, "0");
-  const D = String(d.getDate()).padStart(2, "0");
-
-  return `${M}/${D} ${timeStr}`;
+  return timeStr;
 }
+
 
 
   if (req.query.key !== process.env.ADMIN_KEY) {
@@ -131,14 +132,24 @@ app.post("/admin/kick", (req, res) => {
     return res.status(403).send("Forbidden");
   }
 
-  const target = io.sockets.sockets.get(req.body.userId);
-  if (target) {
-    target.emit("message", {
+  const socketId = req.body.userId;
+  const target = io.sockets.sockets.get(socketId);
+  const user = users.find(u => u.id === socketId);
+
+  if (target && user) {
+
+    const msg = {
       name: "system",
       text: "管理者によりキックされました",
-      room: target.room,
+      room: user.room,
       time: getTimeString()
-    });
+    };
+
+    messagesLog.push(normalizeLog(msg));
+    saveLogs();
+
+    io.to(user.room).emit("message", msg);
+
     target.disconnect(true);
   }
 
@@ -560,6 +571,8 @@ socket.on("denkiRematch", () => {
     game.trapSeat = null;
     game.sitSeat = null;
     game.sitPreview = null;
+    game.started = false;
+
 
     const msg = {
       name: "system",
