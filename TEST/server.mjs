@@ -18,7 +18,7 @@ const LOG_LIFETIME = 3 * 24 * 60 * 60 * 1000; // 3日
 
 
 /* ===== ログ保存 ===== */
-const LOG_FILE = "./logs.json";
+const LOG_FILE = "/data/logs.json";
 
 if (fs.existsSync(LOG_FILE)) {
   try { messagesLog = JSON.parse(fs.readFileSync(LOG_FILE, "utf8")); }
@@ -80,17 +80,18 @@ function addDate(timeStr) {
       <td>${u.name}</td>
       <td>${u.room}</td>
       <td>
-        <form method="POST" action="/admin/kick">
-          <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
-          <input type="hidden" name="userId" value="${u.id}">
-          <button type="submit">キック</button>
-          <form method="POST" action="/admin/ban" style="display:inline;">
+       <form method="POST" action="/admin/kick" style="display:inline;">
+  <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+  <input type="hidden" name="userId" value="${u.id}">
+  <button type="submit">キック</button>
+</form>
+
+<form method="POST" action="/admin/ban" style="display:inline;">
   <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
   <input type="hidden" name="userName" value="${u.name}">
   <button type="submit">30分BAN</button>
 </form>
 
-        </form>
       </td>
     </tr>
   `).join("");
