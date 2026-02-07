@@ -13,6 +13,8 @@ app.use(express.urlencoded({ extended: true }));
 
 let users = [];
 let messagesLog = [];
+let bans = {}; // { name: expireTime }
+
 
 /* ===== ログ保存 ===== */
 const LOG_FILE = "./logs.json";
@@ -80,6 +82,12 @@ function addDate(timeStr) {
           <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
           <input type="hidden" name="userId" value="${u.id}">
           <button type="submit">キック</button>
+          <form method="POST" action="/admin/ban" style="display:inline;">
+  <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+  <input type="hidden" name="userName" value="${u.name}">
+  <button type="submit">30分BAN</button>
+</form>
+
         </form>
       </td>
     </tr>
@@ -126,35 +134,50 @@ function addDate(timeStr) {
     </html>
   `);
 });
-
 app.post("/admin/kick", (req, res) => {
+
   if (req.body.key !== process.env.ADMIN_KEY) {
     return res.status(403).send("Forbidden");
   }
 
-  const socketId = req.body.userId;
-  const target = io.sockets.sockets.get(socketId);
-  const user = users.find(u => u.id === socketId);
-
-  if (target && user) {
-
-    const msg = {
+  const target = io.sockets.sockets.get(req.body.userId);
+  if (target) {
+    target.emit("message", {
       name: "system",
       text: "管理者によりキックされました",
-      room: user.room,
+      room: target.room,
       time: getTimeString()
-    };
-
-    messagesLog.push(normalizeLog(msg));
-    saveLogs();
-
-    io.to(user.room).emit("message", msg);
-
+    });
     target.disconnect(true);
   }
 
   res.redirect("/admin?key=" + process.env.ADMIN_KEY);
 });
+
+app.post("/admin/ban", (req, res) => {
+
+  if (req.body.key !== process.env.ADMIN_KEY) {
+    return res.status(403).send("Forbidden");
+  }
+
+  const name = req.body.userName;
+
+  bans[name] = Date.now() + (30 * 60 * 1000);
+
+  const targetUser = users.find(u => u.name === name);
+  if (targetUser) {
+    const targetSocket =
+      io.sockets.sockets.get(targetUser.id);
+    if (targetSocket) {
+      targetSocket.disconnect(true);
+    }
+  }
+
+  res.redirect("/admin?key=" + process.env.ADMIN_KEY);
+});
+
+
+
 
 
 /* ===== ロビー情報 ===== */
@@ -648,6 +671,18 @@ socket.on("denkiSitConfirm", () => {
   });
 
   socket.on("join", ({ name, color="black", room="room1" }) => {
+      // ===== BANチェック =====
+  if (bans[name] && bans[name] > Date.now()) {
+    socket.emit("message", {
+      name: "system",
+      text: "BAN中のため入室できません",
+      room,
+      time: getTimeString()
+    });
+    socket.disconnect(true);
+    return;
+  }
+
     socket.username = name;
     socket.room = room;
     socket.join(room);
