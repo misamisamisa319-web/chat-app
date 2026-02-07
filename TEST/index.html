@@ -318,7 +318,6 @@ for (let i = 1; i <= 12; i++) {
   b.onclick = () => onDenkiSelect(i);
   denkiBoard.appendChild(b);
 }
-
 window.addEventListener("load", () => {
   const savedName  = localStorage.getItem("chatName");
   const savedRoom  = localStorage.getItem("chatRoom");
@@ -335,11 +334,15 @@ window.addEventListener("load", () => {
       room: savedRoom
     });
 
+    // 電気椅子UI 即表示（リロード対策）
+    socket.emit("denkiStateRequest");
+
     joined = true;
     login.style.display = "none";
     chat.style.display = "flex";
   }
 });
+
 /* ===== ロビーからの情報 ===== */
 const room = localStorage.getItem("chatRoom");
 
@@ -406,11 +409,13 @@ messages.prepend(li);
 
 /* ===== 受信 ===== */
 socket.on("connect", () => {
+
   myId = socket.id;
 
+  // 電気椅子 状態取得
   socket.emit("denkiStateRequest");
-});
 
+});
 
 socket.on("pastMessages", logs => {
   messages.innerHTML = "";
@@ -673,6 +678,9 @@ joinBtn.onclick = () => {
     room,
     key
   });
+
+  // 電気椅子UI 即表示
+  socket.emit("denkiStateRequest");
 
   joined = true;
   login.style.display = "none";
