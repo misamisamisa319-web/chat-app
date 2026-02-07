@@ -733,38 +733,50 @@ if (existingUser) {
     io.emit("lobbyUpdate", getLobbyInfo());
 
   /* ===== 電気椅子参加 ===== */
-if (["denki","denki1","denki2"].includes(room)) {
+socket.on("denkiJoin", () => {
 
-  const game = denkiRooms[room];
+  if (!["denki","denki1","denki2"].includes(socket.room)) return;
 
-  // ★ 名前で既存プレイヤーを探す（再接続対策）
-  const existing = game.players.find(p => p.name === name);
+  const game = denkiRooms[socket.room];
+
+  // ===== 再接続対策 =====
+  const existing = game.players.find(
+    p => p.name === socket.username
+  );
 
   if (existing) {
+
+    // ID差し替え復帰
     existing.id = socket.id;
-  } 
-  else if (game.players.length < 2) {
-    game.players.push({
-      id: socket.id,
-      name,
-      score: 0,
-      shock: 0,
-      turns: []
-    });
+
+    io.to(socket.room).emit(
+      "denkiState",
+      denkiStateRoom(socket.room)
+    );
+
+    return;
   }
 
-  io.to(room).emit("denkiState", denkiStateRoom(room));
-}
+  // ===== 新規参加 =====
+  if (game.players.length >= 2) return;
 
+  const user = users.find(u => u.id === socket.id);
+  if (!user) return;
 
+  game.players.push({
+    id: socket.id,
+    name: user.name,
+    score: 0,
+    shock: 0,
+    turns: []
+  });
 
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
 
- 
-/// ★★ 2人目の対戦者が入った瞬間だけ勝負開始 ★★
-if (["denki","denki1","denki2"].includes(room)) {
-
-  const game = denkiRooms[room];
-
+  // ===== 2人揃ったら開始 =====
   if (game.players.length === 2 && !game.started) {
 
     game.started = true;
@@ -772,17 +784,16 @@ if (["denki","denki1","denki2"].includes(room)) {
     const startMsg = {
       name: "system",
       text: `⚡ 勝負開始！ ${game.players[0].name} vs ${game.players[1].name}`,
-      room: room,
+      room: socket.room,
       time: getTimeString()
     };
 
     messagesLog.push(normalizeLog(startMsg));
     saveLogs();
-    io.to(room).emit("message", startMsg);
-  }
+    io.to(socket.room).emit("message", startMsg);
   }
 
-}); 
+});
 
 
  socket.on("denkiSet", seat => {
