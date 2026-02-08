@@ -424,9 +424,22 @@ socket.on("connect", () => {
 });
 
 socket.on("pastMessages", logs => {
+
   messages.innerHTML = "";
   logs.forEach(renderMsg);
+
+  // ===== 絶頂解放ログ判定 =====
+  const unlocked = logs.some(m =>
+    m.text?.includes("絶頂許可が解放されました")
+  );
+
+  if (unlocked){
+    const btn = document.getElementById("zecchoBtn");
+    if (btn) btn.style.display = "inline-block";
+  }
+
 });
+
 socket.on("message", d => {
   // 内緒は送信者 or 受信者だけ
   if (d.private) {
@@ -441,17 +454,16 @@ socket.on("message", d => {
 
   renderMsg(d);
 });
-// ===== 絶頂解放受信 =====
 socket.on("zecchoUnlock", () => {
 
-  const btn =
-    document.getElementById("zecchoBtn");
+  const btn = document.getElementById("zecchoBtn");
 
   if (btn){
     btn.style.display = "inline-block";
   }
 
 });
+
 
 
 socket.on("userList", list => {

@@ -213,6 +213,12 @@ input, button, select { padding: 10px; font-size: 16px; }
   <button onclick="sendPunish('命令女')">女オナ</button>
   <button onclick="sendPunish('命令男')">男オナ</button>
   <button onclick="sendPunish('苦痛罰')">女痛罰</button>
+  <button id="zecchoBtn"
+        onclick="sendPunish('絶頂許可')"
+        style="display:none;">
+  絶頂許可
+</button>
+
 </div>
 
 
@@ -351,9 +357,9 @@ const roomNames = {
   room2: "ルーム2",
   room3: "ルーム3",
   room4: "ルーム4",
-  denki: "電気椅子1",
-  denki1: "電気椅子2",
-  denki2: "電気椅子3",
+  denki: "電気1",
+  denki1: "電気椅2",
+  denki2: "電気3",
   special: "スペシャル",
   privateA: "個室A",
   privateB: "個室B",
@@ -418,9 +424,22 @@ socket.on("connect", () => {
 });
 
 socket.on("pastMessages", logs => {
+
   messages.innerHTML = "";
   logs.forEach(renderMsg);
+
+  // ===== 絶頂解放ログ判定 =====
+  const unlocked = logs.some(m =>
+    m.text?.includes("絶頂許可が解放されました")
+  );
+
+  if (unlocked){
+    const btn = document.getElementById("zecchoBtn");
+    if (btn) btn.style.display = "inline-block";
+  }
+
 });
+
 socket.on("message", d => {
   // 内緒は送信者 or 受信者だけ
   if (d.private) {
@@ -435,6 +454,16 @@ socket.on("message", d => {
 
   renderMsg(d);
 });
+socket.on("zecchoUnlock", () => {
+
+  const btn = document.getElementById("zecchoBtn");
+
+  if (btn){
+    btn.style.display = "inline-block";
+  }
+
+});
+
 
 
 socket.on("userList", list => {
