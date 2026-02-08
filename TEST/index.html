@@ -780,25 +780,29 @@ function sendPunish(cmd){
   socket.emit("message",{ text: cmd });
 }
 /* ===== 罰トグル ===== */
-const punishToggleBtn =
-  document.getElementById("punishToggleBtn");
+window.addEventListener("load", () => {
 
-const punishWrap =
-  document.getElementById("punishWrap");
+  const punishToggleBtn =
+    document.getElementById("punishToggleBtn");
 
-let punishOpen = false;
+  const punishWrap =
+    document.getElementById("punishWrap");
 
-punishToggleBtn.onclick = () => {
+  let punishOpen = false;
 
-  punishOpen = !punishOpen;
+  punishToggleBtn.onclick = () => {
 
-  if (punishOpen){
-    punishWrap.style.display = "flex";
-  } else {
-    punishWrap.style.display = "none";
-  }
+    punishOpen = !punishOpen;
 
-};
+    if (punishOpen){
+      punishWrap.style.display = "flex";
+    } else {
+      punishWrap.style.display = "none";
+    }
+
+  };
+
+});
 
 </script>
 
