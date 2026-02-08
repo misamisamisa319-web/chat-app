@@ -384,6 +384,22 @@ const specialPainPunishItems = [
 
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 let punishStockByRoom = {};
+// ===== 罰クールタイム（部屋単位） =====
+let punishCooldownByRoom = {};
+const PUNISH_COOLDOWN = 20 * 1000; // 20秒
+
+function canUsePunish(room){
+
+  const now = Date.now();
+  const last = punishCooldownByRoom[room] || 0;
+
+  if (now - last < PUNISH_COOLDOWN){
+    return false;
+  }
+
+  punishCooldownByRoom[room] = now;
+  return true;
+}
 
 function initPunishRoom(room){
   if (!punishStockByRoom[room]) {
@@ -1077,6 +1093,17 @@ return;
       return;
     }
 if(text==="女子罰"){
+
+  if (!canUsePunish(socket.room)){
+    socket.emit("message",{
+      name:"system",
+      text:"罰は20秒に1回まで",
+      room:socket.room,
+      time:getTimeString()
+    });
+    return;
+  }
+
   const msg={
     name: socket.username,
     text: getGirlPunish(socket.room),
@@ -1085,6 +1112,7 @@ if(text==="女子罰"){
     room: socket.room,
     time: getTimeString()
   };
+
   messagesLog.push(normalizeLog(msg));
   saveLogs();
   io.to(socket.room).emit("message", msg);
@@ -1092,6 +1120,17 @@ if(text==="女子罰"){
 }
 
 if(text==="男子罰"){
+
+  if (!canUsePunish(socket.room)){
+    socket.emit("message",{
+      name:"system",
+      text:"罰は20秒に1回まで",
+      room:socket.room,
+      time:getTimeString()
+    });
+    return;
+  }
+
   const msg={
     name: socket.username,
     text: getBoyPunish(socket.room),
@@ -1100,6 +1139,7 @@ if(text==="男子罰"){
     room: socket.room,
     time: getTimeString()
   };
+
   messagesLog.push(normalizeLog(msg));
   saveLogs();
   io.to(socket.room).emit("message", msg);
@@ -1107,6 +1147,17 @@ if(text==="男子罰"){
 }
 
 if(text==="命令女"){
+
+  if (!canUsePunish(socket.room)){
+    socket.emit("message",{
+      name:"system",
+      text:"罰は20秒に1回まで",
+      room:socket.room,
+      time:getTimeString()
+    });
+    return;
+  }
+
   const msg={
     name: socket.username,
     text: getOnaGirlPunish(socket.room),
@@ -1115,13 +1166,24 @@ if(text==="命令女"){
     room: socket.room,
     time: getTimeString()
   };
+
   messagesLog.push(normalizeLog(msg));
   saveLogs();
   io.to(socket.room).emit("message", msg);
   return;
 }
-
 if(text==="命令男"){
+
+  if (!canUsePunish(socket.room)){
+    socket.emit("message",{
+      name:"system",
+      text:"罰は20秒に1回まで",
+      room:socket.room,
+      time:getTimeString()
+    });
+    return;
+  }
+
   const msg={
     name: socket.username,
     text: getOnaBoyPunish(socket.room),
@@ -1130,6 +1192,7 @@ if(text==="命令男"){
     room: socket.room,
     time: getTimeString()
   };
+
   messagesLog.push(normalizeLog(msg));
   saveLogs();
   io.to(socket.room).emit("message", msg);
@@ -1137,6 +1200,17 @@ if(text==="命令男"){
 }
 
 if(text==="苦痛罰"){
+
+  if (!canUsePunish(socket.room)){
+    socket.emit("message",{
+      name:"system",
+      text:"罰は20秒に1回まで",
+      room:socket.room,
+      time:getTimeString()
+    });
+    return;
+  }
+
   const msg={
     name: socket.username,
     text: getPainPunish(socket.room),
@@ -1145,6 +1219,7 @@ if(text==="苦痛罰"){
     room: socket.room,
     time: getTimeString()
   };
+
   messagesLog.push(normalizeLog(msg));
   saveLogs();
   io.to(socket.room).emit("message", msg);
@@ -1213,23 +1288,36 @@ messagesLog.push(normalizeLog(msg));
 
     users = users.filter(u => u.id !== socket.id);
 
-  setTimeout(() => {
-  if (leftRoom && !io.sockets.adapter.rooms.get(leftRoom)) {
+setTimeout(() => {
 
-    // ===== 追加：ログ削除 =====
-    messagesLog =
-      messagesLog.filter(m => m.room !== leftRoom);
-    saveLogs();
+  if (leftRoom) {
 
-    delete punishStockByRoom[leftRoom];
+    const stillUsers =
+      users.filter(u => u.room === leftRoom);
 
-    if (["denki","denki1","denki2"].includes(leftRoom)) {
-      denkiRooms[leftRoom] = createDenki();
+    if (stillUsers.length === 0) {
+
+      // ===== ログ削除 =====
+      messagesLog =
+        messagesLog.filter(m => m.room !== leftRoom);
+      saveLogs();
+
+      // ===== 罰ストック削除 =====
+      delete punishStockByRoom[leftRoom];
+      delete punishCooldownByRoom[leftRoom];
+
+      // ===== 電気椅子リセット =====
+      if (["denki","denki1","denki2"].includes(leftRoom)) {
+        denkiRooms[leftRoom] = createDenki();
+      }
+
     }
   }
 
   io.emit("lobbyUpdate", getLobbyInfo());
+
 }, 0);
+
   });   // ← disconnect 閉じ
 });     // ← io.on("connection") 閉じ
 

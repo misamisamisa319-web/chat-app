@@ -384,6 +384,41 @@ const specialPainPunishItems = [
 
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 let punishStockByRoom = {};
+// ===== 罰累計（絶頂解放用） =====
+let punishCountByRoom = {};
+let zecchoUnlockedByRoom = {};
+
+function addPunishCount(room){
+
+  if (!punishCountByRoom[room]){
+    punishCountByRoom[room] = 0;
+  }
+
+  punishCountByRoom[room]++;
+
+}
+function isZecchoUnlocked(room){
+
+  return (punishCountByRoom[room] || 0) >= 10;
+
+}
+
+// ===== 罰クールタイム（部屋単位） =====
+let punishCooldownByRoom = {};
+const PUNISH_COOLDOWN = 20 * 1000; // 20秒
+
+function canUsePunish(room){
+
+  const now = Date.now();
+  const last = punishCooldownByRoom[room] || 0;
+
+  if (now - last < PUNISH_COOLDOWN){
+    return false;
+  }
+
+  punishCooldownByRoom[room] = now;
+  return true;
+}
 
 function initPunishRoom(room){
   if (!punishStockByRoom[room]) {
@@ -634,6 +669,8 @@ socket.on("denkiRematch", () => {
     messagesLog.push(normalizeLog(msg));
     saveLogs();
     io.to(socket.room).emit("message", msg);
+   
+
   }
 
   io.to(socket.room).emit("denkiState", denkiStateRoom(socket.room));
@@ -1077,6 +1114,17 @@ return;
       return;
     }
 if(text==="女子罰"){
+
+  if (!canUsePunish(socket.room)){
+    socket.emit("message",{
+      name:"system",
+      text:"罰は20秒に1回まで",
+      room:socket.room,
+      time:getTimeString()
+    });
+    return;
+  }
+
   const msg={
     name: socket.username,
     text: getGirlPunish(socket.room),
@@ -1085,13 +1133,49 @@ if(text==="女子罰"){
     room: socket.room,
     time: getTimeString()
   };
+
   messagesLog.push(normalizeLog(msg));
   saveLogs();
   io.to(socket.room).emit("message", msg);
+  addPunishCount(socket.room);
+// ===== 絶頂解放判定 =====
+if (
+  isZecchoUnlocked(socket.room) &&
+  !zecchoUnlockedByRoom[socket.room]
+){
+  zecchoUnlockedByRoom[socket.room] = true;
+
+  const sysMsg = {
+    name: "system",
+    text: "絶頂許可が解放されました",
+    bold: true,
+    color: "black",
+    room: socket.room,
+    time: getTimeString()
+  };
+
+  messagesLog.push(normalizeLog(sysMsg));
+  saveLogs();
+  io.to(socket.room).emit("message", sysMsg);
+  io.to(socket.room).emit("zecchoUnlock");
+
+}
+
   return;
 }
 
 if(text==="男子罰"){
+
+  if (!canUsePunish(socket.room)){
+    socket.emit("message",{
+      name:"system",
+      text:"罰は20秒に1回まで",
+      room:socket.room,
+      time:getTimeString()
+    });
+    return;
+  }
+
   const msg={
     name: socket.username,
     text: getBoyPunish(socket.room),
@@ -1100,13 +1184,50 @@ if(text==="男子罰"){
     room: socket.room,
     time: getTimeString()
   };
+
   messagesLog.push(normalizeLog(msg));
   saveLogs();
   io.to(socket.room).emit("message", msg);
+  addPunishCount(socket.room);
+// ===== 絶頂解放判定 =====
+if (
+  isZecchoUnlocked(socket.room) &&
+  !zecchoUnlockedByRoom[socket.room]
+){
+  zecchoUnlockedByRoom[socket.room] = true;
+
+  const sysMsg = {
+    name: "system",
+    text: "絶頂許可が解放されました",
+    bold: true,
+    color: "black",
+    room: socket.room,
+    time: getTimeString()
+  };
+
+  messagesLog.push(normalizeLog(sysMsg));
+  saveLogs();
+  io.to(socket.room).emit("message", sysMsg);
+  io.to(socket.room).emit("zecchoUnlock");
+
+}
+
+
   return;
 }
 
 if(text==="命令女"){
+
+  if (!canUsePunish(socket.room)){
+    socket.emit("message",{
+      name:"system",
+      text:"罰は20秒に1回まで",
+      room:socket.room,
+      time:getTimeString()
+    });
+    return;
+  }
+
   const msg={
     name: socket.username,
     text: getOnaGirlPunish(socket.room),
@@ -1115,13 +1236,49 @@ if(text==="命令女"){
     room: socket.room,
     time: getTimeString()
   };
+
   messagesLog.push(normalizeLog(msg));
   saveLogs();
   io.to(socket.room).emit("message", msg);
-  return;
+  addPunishCount(socket.room);
+// ===== 絶頂解放判定 =====
+if (
+  isZecchoUnlocked(socket.room) &&
+  !zecchoUnlockedByRoom[socket.room]
+){
+  zecchoUnlockedByRoom[socket.room] = true;
+
+  const sysMsg = {
+    name: "system",
+    text: "絶頂許可が解放されました",
+    bold: true,
+    color: "black",
+    room: socket.room,
+    time: getTimeString()
+  };
+
+  messagesLog.push(normalizeLog(sysMsg));
+  saveLogs();
+  io.to(socket.room).emit("message", sysMsg);
+  io.to(socket.room).emit("zecchoUnlock");
+
 }
 
+
+  return;
+}
 if(text==="命令男"){
+
+  if (!canUsePunish(socket.room)){
+    socket.emit("message",{
+      name:"system",
+      text:"罰は20秒に1回まで",
+      room:socket.room,
+      time:getTimeString()
+    });
+    return;
+  }
+
   const msg={
     name: socket.username,
     text: getOnaBoyPunish(socket.room),
@@ -1130,13 +1287,51 @@ if(text==="命令男"){
     room: socket.room,
     time: getTimeString()
   };
+
   messagesLog.push(normalizeLog(msg));
   saveLogs();
   io.to(socket.room).emit("message", msg);
+  addPunishCount(socket.room);
+// ===== 絶頂解放判定 =====
+if (
+  isZecchoUnlocked(socket.room) &&
+  !zecchoUnlockedByRoom[socket.room]
+){
+  zecchoUnlockedByRoom[socket.room] = true;
+
+  const sysMsg = {
+    name: "system",
+    text: "絶頂許可が解放されました",
+    bold: true,
+    color: "black",
+    room: socket.room,
+    time: getTimeString()
+  };
+
+  messagesLog.push(normalizeLog(sysMsg));
+  saveLogs();
+  io.to(socket.room).emit("message", sysMsg);
+  io.to(socket.room).emit("zecchoUnlock");
+
+}
+
+
+
   return;
 }
 
 if(text==="苦痛罰"){
+
+  if (!canUsePunish(socket.room)){
+    socket.emit("message",{
+      name:"system",
+      text:"罰は20秒に1回まで",
+      room:socket.room,
+      time:getTimeString()
+    });
+    return;
+  }
+
   const msg={
     name: socket.username,
     text: getPainPunish(socket.room),
@@ -1145,9 +1340,34 @@ if(text==="苦痛罰"){
     room: socket.room,
     time: getTimeString()
   };
+
   messagesLog.push(normalizeLog(msg));
   saveLogs();
   io.to(socket.room).emit("message", msg);
+  addPunishCount(socket.room);
+// ===== 絶頂解放判定 =====
+if (
+  isZecchoUnlocked(socket.room) &&
+  !zecchoUnlockedByRoom[socket.room]
+){
+  zecchoUnlockedByRoom[socket.room] = true;
+
+  const sysMsg = {
+    name: "system",
+    text: "絶頂許可が解放されました",
+    bold: true,
+    color: "black",
+    room: socket.room,
+    time: getTimeString()
+  };
+
+  messagesLog.push(normalizeLog(sysMsg));
+  saveLogs();
+  io.to(socket.room).emit("message", sysMsg);
+  io.to(socket.room).emit("zecchoUnlock");
+
+}
+
   return;
 }
 
@@ -1229,6 +1449,10 @@ setTimeout(() => {
 
       // ===== 罰ストック削除 =====
       delete punishStockByRoom[leftRoom];
+      delete punishCooldownByRoom[leftRoom];
+      delete punishCountByRoom[leftRoom];
+      delete zecchoUnlockedByRoom[leftRoom];
+
 
       // ===== 電気椅子リセット =====
       if (["denki","denki1","denki2"].includes(leftRoom)) {
