@@ -1213,8 +1213,14 @@ messagesLog.push(normalizeLog(msg));
 
     users = users.filter(u => u.id !== socket.id);
 
-   setTimeout(() => {
+  setTimeout(() => {
   if (leftRoom && !io.sockets.adapter.rooms.get(leftRoom)) {
+
+    // ===== 追加：ログ削除 =====
+    messagesLog =
+      messagesLog.filter(m => m.room !== leftRoom);
+    saveLogs();
+
     delete punishStockByRoom[leftRoom];
 
     if (["denki","denki1","denki2"].includes(leftRoom)) {
@@ -1224,9 +1230,9 @@ messagesLog.push(normalizeLog(msg));
 
   io.emit("lobbyUpdate", getLobbyInfo());
 }, 0);
+  });   // ← disconnect 閉じ
+});     // ← io.on("connection") 閉じ
 
-  });
-});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
