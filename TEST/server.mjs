@@ -1213,23 +1213,35 @@ messagesLog.push(normalizeLog(msg));
 
     users = users.filter(u => u.id !== socket.id);
 
-  setTimeout(() => {
-  if (leftRoom && !io.sockets.adapter.rooms.get(leftRoom)) {
+setTimeout(() => {
 
-    // ===== 追加：ログ削除 =====
-    messagesLog =
-      messagesLog.filter(m => m.room !== leftRoom);
-    saveLogs();
+  if (leftRoom) {
 
-    delete punishStockByRoom[leftRoom];
+    const stillUsers =
+      users.filter(u => u.room === leftRoom);
 
-    if (["denki","denki1","denki2"].includes(leftRoom)) {
-      denkiRooms[leftRoom] = createDenki();
+    if (stillUsers.length === 0) {
+
+      // ===== ログ削除 =====
+      messagesLog =
+        messagesLog.filter(m => m.room !== leftRoom);
+      saveLogs();
+
+      // ===== 罰ストック削除 =====
+      delete punishStockByRoom[leftRoom];
+
+      // ===== 電気椅子リセット =====
+      if (["denki","denki1","denki2"].includes(leftRoom)) {
+        denkiRooms[leftRoom] = createDenki();
+      }
+
     }
   }
 
   io.emit("lobbyUpdate", getLobbyInfo());
+
 }, 0);
+
   });   // ← disconnect 閉じ
 });     // ← io.on("connection") 閉じ
 

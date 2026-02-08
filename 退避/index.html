@@ -185,6 +185,7 @@ input, button, select { padding: 10px; font-size: 16px; }
     <div id="denkiStatus">待機中</div>
     <div id="denkiScore"></div>
     <div id="denkiBoard"></div>
+    <button id="denkiJoinBtn">参加</button>
 <button id="denkiSetBtn">仕掛ける</button>
 <button id="denkiShockBtn">⚡ 電流流す</button>
 <button id="denkiSitBtn">座る</button>
@@ -281,6 +282,11 @@ denkiShockBtn.disabled = true;
 const denkiSitBtn = document.getElementById("denkiSitBtn");
 denkiSitBtn.disabled = true;
 const denkiRematchBtn = document.getElementById("denkiRematchBtn");
+const denkiJoinBtn = document.getElementById("denkiJoinBtn");
+
+denkiJoinBtn.onclick = () => {
+  socket.emit("denkiJoin");
+};
 
 
 
@@ -312,7 +318,6 @@ for (let i = 1; i <= 12; i++) {
   b.onclick = () => onDenkiSelect(i);
   denkiBoard.appendChild(b);
 }
-
 window.addEventListener("load", () => {
   const savedName  = localStorage.getItem("chatName");
   const savedRoom  = localStorage.getItem("chatRoom");
@@ -329,11 +334,15 @@ window.addEventListener("load", () => {
       room: savedRoom
     });
 
+    // 電気椅子UI 即表示（リロード対策）
+    socket.emit("denkiStateRequest");
+
     joined = true;
     login.style.display = "none";
     chat.style.display = "flex";
   }
 });
+
 /* ===== ロビーからの情報 ===== */
 const room = localStorage.getItem("chatRoom");
 
@@ -399,7 +408,14 @@ messages.prepend(li);
 }
 
 /* ===== 受信 ===== */
-socket.on("connect", () => { myId = socket.id; });
+socket.on("connect", () => {
+
+  myId = socket.id;
+
+  // 電気椅子 状態取得
+  socket.emit("denkiStateRequest");
+
+});
 
 socket.on("pastMessages", logs => {
   messages.innerHTML = "";
@@ -586,50 +602,68 @@ if (isSpectator) {
 
 
   // ===== 椅子描画 =====
-  const buttons = denkiBoard.querySelectorAll("button");
+const buttons = denkiBoard.querySelectorAll("button");
 
-  buttons.forEach(b => {
+buttons.forEach(b => {
 
-    const num = Number(b.textContent);
+  const num = Number(b.textContent);
 
-    b.style.background = "";
-    b.disabled = true;
-    b.style.display = "inline-block";
+  b.style.background = "";
+  b.disabled = true;
+  b.style.display = "inline-block";
 
-    // 使用済み非表示
-    if (denkiState.usedSeats?.includes(num)) {
-      b.style.display = "none";
-      return;
-    }
+  // 使用済み非表示
+  if (denkiState.usedSeats?.includes(num)) {
+    b.style.display = "none";
+    return;
+  }
 
-    // 観客は操作不可
-    if (isSpectator) return;
-
-    // set
-    if (denkiState.phase === "set" && me.isTurn) {
-      b.disabled = false;
-      if (selectedSeat === num) {
-        b.style.background = "#ffe066";
-      }
-    }
-
-    // sit
-    if (denkiState.phase === "sit") {
-      b.disabled = false;
-    }
-
-    // 仮座り
-    if (denkiState.phase === "sit" && denkiState.sitPreview === num) {
+  // 観戦者は操作不可だが仮座りは見える
+  if (isSpectator) {
+    if (denkiState.sitPreview === num) {
       b.style.background = "#ccccff";
     }
+    return;
+  }
 
-    // 座り確定
-    if (denkiState.phase === "shock" && denkiState.sitSeat === num) {
-      b.style.background = "#ccccff";
+  // 仕掛けフェーズ
+  if (denkiState.phase === "set" && me.isTurn) {
+    b.disabled = false;
+
+    if (selectedSeat === num) {
+      b.style.background = "#ffe066";
     }
+  }
 
-  });
+  // 座りフェーズ
+  if (denkiState.phase === "sit") {
+    b.disabled = false;
+  }
 
+  // 仮座り表示（全員）
+  if (denkiState.sitPreview === num) {
+    b.style.background = "#ccccff";
+  }
+
+  // 確定座り表示
+  if (denkiState.phase === "shock" && denkiState.sitSeat === num) {
+    b.style.background = "#ccccff";
+  }
+
+});
+
+// ===== 参加ボタン制御 =====
+const meJoined =
+  denkiState.players.some(p => p.id === myId);
+
+const gameStarted =
+  denkiState.phase !== "set";
+
+if (meJoined || gameStarted) {
+  denkiJoinBtn.style.display = "none";
+} else {
+  denkiJoinBtn.style.display = "inline-block";
+}
 
   // ===== 再戦ボタン =====
   if (denkiState.ended) {
@@ -657,6 +691,9 @@ joinBtn.onclick = () => {
     room,
     key
   });
+
+  // 電気椅子UI 即表示
+  socket.emit("denkiStateRequest");
 
   joined = true;
   login.style.display = "none";

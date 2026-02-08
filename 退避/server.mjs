@@ -13,9 +13,12 @@ app.use(express.urlencoded({ extended: true }));
 
 let users = [];
 let messagesLog = [];
+let bans = {}; // { name: expireTime }
+const LOG_LIFETIME = 3 * 24 * 60 * 60 * 1000; // 3日
+
 
 /* ===== ログ保存 ===== */
-const LOG_FILE = "./logs.json";
+const LOG_FILE = "/data/logs.json";
 
 if (fs.existsSync(LOG_FILE)) {
   try { messagesLog = JSON.parse(fs.readFileSync(LOG_FILE, "utf8")); }
@@ -44,7 +47,8 @@ function normalizeLog(msg){
     room: msg.room || "room1",
     text: msg.text || "",
     time: msg.time || "",
-    private: msg.private || false
+    private: msg.private || false,
+    savedAt: Date.now()
   };
 }
 
@@ -76,11 +80,18 @@ function addDate(timeStr) {
       <td>${u.name}</td>
       <td>${u.room}</td>
       <td>
-        <form method="POST" action="/admin/kick">
-          <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
-          <input type="hidden" name="userId" value="${u.id}">
-          <button type="submit">キック</button>
-        </form>
+       <form method="POST" action="/admin/kick" style="display:inline;">
+  <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+  <input type="hidden" name="userId" value="${u.id}">
+  <button type="submit">キック</button>
+</form>
+
+<form method="POST" action="/admin/ban" style="display:inline;">
+  <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+  <input type="hidden" name="userName" value="${u.name}">
+  <button type="submit">30分BAN</button>
+</form>
+
       </td>
     </tr>
   `).join("");
@@ -126,35 +137,50 @@ function addDate(timeStr) {
     </html>
   `);
 });
-
 app.post("/admin/kick", (req, res) => {
+
   if (req.body.key !== process.env.ADMIN_KEY) {
     return res.status(403).send("Forbidden");
   }
 
-  const socketId = req.body.userId;
-  const target = io.sockets.sockets.get(socketId);
-  const user = users.find(u => u.id === socketId);
-
-  if (target && user) {
-
-    const msg = {
+  const target = io.sockets.sockets.get(req.body.userId);
+  if (target) {
+    target.emit("message", {
       name: "system",
       text: "管理者によりキックされました",
-      room: user.room,
+      room: target.room,
       time: getTimeString()
-    };
-
-    messagesLog.push(normalizeLog(msg));
-    saveLogs();
-
-    io.to(user.room).emit("message", msg);
-
+    });
     target.disconnect(true);
   }
 
   res.redirect("/admin?key=" + process.env.ADMIN_KEY);
 });
+
+app.post("/admin/ban", (req, res) => {
+
+  if (req.body.key !== process.env.ADMIN_KEY) {
+    return res.status(403).send("Forbidden");
+  }
+
+  const name = req.body.userName;
+
+  bans[name] = Date.now() + (30 * 60 * 1000);
+
+  const targetUser = users.find(u => u.name === name);
+  if (targetUser) {
+    const targetSocket =
+      io.sockets.sockets.get(targetUser.id);
+    if (targetSocket) {
+      targetSocket.disconnect(true);
+    }
+  }
+
+  res.redirect("/admin?key=" + process.env.ADMIN_KEY);
+});
+
+
+
 
 
 /* ===== ロビー情報 ===== */
@@ -433,6 +459,18 @@ setInterval(()=>{
     }
   });
 }, 60000);
+/* ===== ログ期限削除 ===== */
+setInterval(() => {
+
+  const now = Date.now();
+
+  messagesLog = messagesLog.filter(
+    m => now - (m.savedAt || now) < LOG_LIFETIME
+  );
+
+  saveLogs();
+
+}, 60 * 60 * 1000); // 1時間ごと確認
 
 
 /* ===============================
@@ -541,6 +579,18 @@ function denkiStateRoom(room){
 io.on("connection", socket => {
   socket.emit("lobbyUpdate", getLobbyInfo());
 
+    socket.on("denkiStateRequest", () => {
+
+    if (!["denki","denki1","denki2"].includes(socket.room)) return;
+
+    io.to(socket.id).emit(
+      "denkiState",
+      denkiStateRoom(socket.room)
+    );
+
+  });
+
+
   // ===== 再戦ボタン =====
 socket.on("denkiRematch", () => {
 
@@ -648,6 +698,18 @@ socket.on("denkiSitConfirm", () => {
   });
 
   socket.on("join", ({ name, color="black", room="room1" }) => {
+      // ===== BANチェック =====
+  if (bans[name] && bans[name] > Date.now()) {
+    socket.emit("message", {
+      name: "system",
+      text: "BAN中のため入室できません",
+      room,
+      time: getTimeString()
+    });
+    socket.disconnect(true);
+    return;
+  }
+
     socket.username = name;
     socket.room = room;
     socket.join(room);
@@ -680,40 +742,50 @@ if (existingUser) {
   )
 );
 
-    io.emit("lobbyUpdate", getLobbyInfo());
 
-  /* ===== 電気椅子参加 ===== */
-if (["denki","denki1","denki2"].includes(room)) {
+io.emit("lobbyUpdate", getLobbyInfo());
 
-  const game = denkiRooms[room];
+});
 
-  // ★ 名前で既存プレイヤーを探す（再接続対策）
-  const existing = game.players.find(p => p.name === name);
+/* ===== 電気椅子参加 ===== */
+socket.on("denkiJoin", () => {
+
+  if (!["denki","denki1","denki2"].includes(socket.room)) return;
+
+  const game = denkiRooms[socket.room];
+
+  const existing = game.players.find(
+    p => p.name === socket.username
+  );
 
   if (existing) {
     existing.id = socket.id;
-  } 
-  else if (game.players.length < 2) {
-    game.players.push({
-      id: socket.id,
-      name,
-      score: 0,
-      shock: 0,
-      turns: []
-    });
+
+    io.to(socket.room).emit(
+      "denkiState",
+      denkiStateRoom(socket.room)
+    );
+
+    return;
   }
 
-  io.to(room).emit("denkiState", denkiStateRoom(room));
-}
+  if (game.players.length >= 2) return;
 
+  const user = users.find(u => u.id === socket.id);
+  if (!user) return;
 
+  game.players.push({
+    id: socket.id,
+    name: user.name,
+    score: 0,
+    shock: 0,
+    turns: []
+  });
 
-
- 
-/// ★★ 2人目の対戦者が入った瞬間だけ勝負開始 ★★
-if (["denki","denki1","denki2"].includes(room)) {
-
-  const game = denkiRooms[room];
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
 
   if (game.players.length === 2 && !game.started) {
 
@@ -722,17 +794,16 @@ if (["denki","denki1","denki2"].includes(room)) {
     const startMsg = {
       name: "system",
       text: `⚡ 勝負開始！ ${game.players[0].name} vs ${game.players[1].name}`,
-      room: room,
+      room: socket.room,
       time: getTimeString()
     };
 
     messagesLog.push(normalizeLog(startMsg));
     saveLogs();
-    io.to(room).emit("message", startMsg);
-  }
+    io.to(socket.room).emit("message", startMsg);
   }
 
-}); 
+});
 
 
  socket.on("denkiSet", seat => {
@@ -1142,10 +1213,14 @@ messagesLog.push(normalizeLog(msg));
 
     users = users.filter(u => u.id !== socket.id);
 
-   setTimeout(() => {
+  setTimeout(() => {
   if (leftRoom && !io.sockets.adapter.rooms.get(leftRoom)) {
-    messagesLog = messagesLog.filter(m => m.room !== leftRoom);
+
+    // ===== 追加：ログ削除 =====
+    messagesLog =
+      messagesLog.filter(m => m.room !== leftRoom);
     saveLogs();
+
     delete punishStockByRoom[leftRoom];
 
     if (["denki","denki1","denki2"].includes(leftRoom)) {
@@ -1155,9 +1230,9 @@ messagesLog.push(normalizeLog(msg));
 
   io.emit("lobbyUpdate", getLobbyInfo());
 }, 0);
+  });   // ← disconnect 閉じ
+});     // ← io.on("connection") 閉じ
 
-  });
-});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
