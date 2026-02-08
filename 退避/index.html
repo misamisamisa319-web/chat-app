@@ -200,14 +200,19 @@ input, button, select { padding: 10px; font-size: 16px; }
   <strong>参加者:</strong>
   <ul id="userList"></ul>
 </div>
-
+<!-- ===== 罰トグル ===== -->
+<button id="punishToggleBtn">
+  罰メニュー
+</button>
 <!-- ===== 罰ボタン ===== -->
 <div id="punishWrap" style="
-  display:flex;
+  display:none;
   gap:7px;
   flex-wrap:wrap;
   padding:6px 0;
 ">
+
+
   <button onclick="sendPunish('女子罰')">女子罰</button>
   <button onclick="sendPunish('男子罰')">男子罰</button>
   <button onclick="sendPunish('命令女')">女オナ</button>
@@ -424,9 +429,22 @@ socket.on("connect", () => {
 });
 
 socket.on("pastMessages", logs => {
+
   messages.innerHTML = "";
   logs.forEach(renderMsg);
+
+  // ===== 絶頂解放ログ判定 =====
+  const unlocked = logs.some(m =>
+    m.text?.includes("絶頂許可が解放されました")
+  );
+
+  if (unlocked){
+    const btn = document.getElementById("zecchoBtn");
+    if (btn) btn.style.display = "inline-block";
+  }
+
 });
+
 socket.on("message", d => {
   // 内緒は送信者 or 受信者だけ
   if (d.private) {
@@ -441,17 +459,16 @@ socket.on("message", d => {
 
   renderMsg(d);
 });
-// ===== 絶頂解放受信 =====
 socket.on("zecchoUnlock", () => {
 
-  const btn =
-    document.getElementById("zecchoBtn");
+  const btn = document.getElementById("zecchoBtn");
 
   if (btn){
     btn.style.display = "inline-block";
   }
 
 });
+
 
 
 socket.on("userList", list => {
@@ -762,6 +779,26 @@ leaveBtn.onclick = () => {
 function sendPunish(cmd){
   socket.emit("message",{ text: cmd });
 }
+/* ===== 罰トグル ===== */
+const punishToggleBtn =
+  document.getElementById("punishToggleBtn");
+
+const punishWrap =
+  document.getElementById("punishWrap");
+
+let punishOpen = false;
+
+punishToggleBtn.onclick = () => {
+
+  punishOpen = !punishOpen;
+
+  if (punishOpen){
+    punishWrap.style.display = "flex";
+  } else {
+    punishWrap.style.display = "none";
+  }
+
+};
 
 </script>
 
