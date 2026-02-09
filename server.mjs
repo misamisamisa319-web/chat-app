@@ -796,21 +796,20 @@ const existingUser =
 
 if (existingUser) {
 
-  const socketExists =
-    io.sockets.sockets.get(existingUser.id);
+const sameName = users.find(u =>
+  u.name === name &&
+  u.room === room
+);
 
-  if (socketExists) {
+if (sameName) {
 
-    socket.emit("message", {
-      name: "system",
-      text: "同じ名前の人がいます",
-      room,
-      time: getTimeString()
-    });
+  socket.emit("checkResult", {
+    ok: false,
+    message: "同じ名前の人がいます"
+  });
 
-    socket.disconnect(true);
-    return;
-  }
+  return;
+}
 
   // ===== 再接続 =====
   existingUser.id = socket.id;
