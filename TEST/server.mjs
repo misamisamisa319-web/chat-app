@@ -794,14 +794,14 @@ const existingUser =
     u.room === room
   );
 
+// ===== 同名ユーザー存在 =====
 if (existingUser) {
 
-  const sameName = users.find(u =>
-    u.name === name &&
-    u.room === room
-  );
+  const oldSocket =
+    io.sockets.sockets.get(existingUser.id);
 
-  if (sameName) {
+  // ===== まだ接続中 → 弾く =====
+  if (oldSocket) {
 
     socket.emit("checkResult", {
       ok: false,
@@ -811,11 +811,13 @@ if (existingUser) {
     return;
   }
 
+  // ===== 切断済 → 再接続 =====
   existingUser.id = socket.id;
   existingUser.lastActive = Date.now();
 
 } else {
 
+  // ===== 新規 =====
   users.push({
     id: socket.id,
     name,
