@@ -770,83 +770,83 @@ socket.on("denkiSitConfirm", () => {
     }
     socket.emit("checkResult", { ok:true });
   });
+socket.on("join", ({ name, color="black", room="room1" }) => {
 
-  socket.on("join", ({ name, color="black", room="room1" }) => {
-      // ===== BANチェック =====
+  // ===== BAN =====
   if (bans[name] && bans[name] > Date.now()) {
     socket.emit("message", {
-      name: "system",
-      text: "BAN中のため入室できません",
+      name:"system",
+      text:"BAN中のため入室できません",
       room,
-      time: getTimeString()
+      time:getTimeString()
     });
     socket.disconnect(true);
     return;
   }
 
-    socket.username = name;
-    socket.room = room;
-    socket.join(room);
+  // ===== 同名チェック =====
+  const existingUser =
+    users.find(u =>
+      u.name === name &&
+      u.room === room
+    );
 
-const existingUser =
-  users.find(u =>
-    u.name === name &&
-    u.room === room
-  );
+  if (existingUser) {
 
-// ===== 同名ユーザー存在 =====
-if (existingUser) {
+    const oldSocket =
+      io.sockets.sockets.get(existingUser.id);
 
-  const oldSocket =
-    io.sockets.sockets.get(existingUser.id);
+    if (oldSocket) {
 
-  // ===== まだ接続中 → 弾く =====
-  if (oldSocket) {
+      socket.emit("checkResult", {
+        ok:false,
+        message:"同じ名前の人がいます"
+      });
 
-    socket.emit("checkResult", {
-      ok: false,
-      message: "同じ名前の人がいます"
+      return;
+    }
+
+    // 再接続
+    existingUser.id = socket.id;
+    existingUser.lastActive = Date.now();
+
+  } else {
+
+    users.push({
+      id: socket.id,
+      name,
+      color,
+      room,
+      lastActive: Date.now()
     });
 
-    return;
   }
 
-  // ===== 切断済 → 再接続 =====
-  existingUser.id = socket.id;
-  existingUser.lastActive = Date.now();
+  // ===== ここで初めて入室 =====
+  socket.username = name;
+  socket.room = room;
+  socket.join(room);
 
-} else {
+  io.to(room).emit(
+    "userList",
+    users.filter(u=>u.room===room)
+  );
 
-  // ===== 新規 =====
-  users.push({
-    id: socket.id,
-    name,
-    color,
-    room,
-    lastActive: Date.now()
-  });
+  socket.emit(
+    "pastMessages",
+    roomLogs.filter(m =>
+      m.room === room &&
+      (!m.private || m.to === socket.id || m.from === socket.id)
+    )
+  );
 
-}
-
-
-
-
-
-
-    io.to(room).emit("userList", users.filter(u=>u.room===room));
-socket.emit(
-  "pastMessages",
-  roomLogs.filter(m =>
-    m.room === room &&
-    (!m.private || m.to === socket.id || m.from === socket.id)
-  )
-);
-
-
-
-io.emit("lobbyUpdate", getLobbyInfo());
+  io.emit("lobbyUpdate", getLobbyInfo());
 
 });
+
+
+
+
 
 /* ===== 電気椅子参加 ===== */
 socket.on("denkiJoin", () => {
