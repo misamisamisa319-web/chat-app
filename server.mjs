@@ -798,12 +798,16 @@ socket.on("join", ({ name, color="black", room="room1" }) => {
 
     if (oldSocket) {
 
-      socket.emit("checkResult", {
-        ok:false,
-        message:"同じ名前の人がいます"
-      });
+      socket.emit("message", {
+  name:"system",
+  text:"同じ名前の人がいます",
+  room,
+  time:getTimeString()
+});
 
-      return;
+socket.disconnect(true);
+return;
+
     }
 
     // 再接続
