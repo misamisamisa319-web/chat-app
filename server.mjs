@@ -796,28 +796,26 @@ const existingUser =
 
 if (existingUser) {
 
-const sameName = users.find(u =>
-  u.name === name &&
-  u.room === room
-);
+  const sameName = users.find(u =>
+    u.name === name &&
+    u.room === room
+  );
 
-if (sameName) {
+  if (sameName) {
 
-  socket.emit("checkResult", {
-    ok: false,
-    message: "同じ名前の人がいます"
-  });
+    socket.emit("checkResult", {
+      ok: false,
+      message: "同じ名前の人がいます"
+    });
 
-  return;
-}
+    return;
+  }
 
-  // ===== 再接続 =====
   existingUser.id = socket.id;
   existingUser.lastActive = Date.now();
 
 } else {
 
-  // ===== 新規 =====
   users.push({
     id: socket.id,
     name,
@@ -827,6 +825,8 @@ if (sameName) {
   });
 
 }
+
+
 
 
 
