@@ -9,24 +9,46 @@ const io = new Server(server);
 
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
-
-
 let users = [];
+
+// ===== ログ分離（追加） =====
+let roomLogs = [];
+let adminLogs = [];
+
+// 既存互換（まだ使う）
 let messagesLog = [];
+
 let bans = {}; // { name: expireTime }
 const LOG_LIFETIME = 3 * 24 * 60 * 60 * 1000; // 3日
-
 
 /* ===== ログ保存 ===== */
 const LOG_FILE = "/data/logs.json";
 
 if (fs.existsSync(LOG_FILE)) {
-  try { messagesLog = JSON.parse(fs.readFileSync(LOG_FILE, "utf8")); }
-  catch { messagesLog = []; }
+  try {
+
+    const data =
+      JSON.parse(fs.readFileSync(LOG_FILE, "utf8"));
+
+    messagesLog = data;
+    adminLogs  = data;
+
+  }
+  catch {
+    messagesLog = [];
+    adminLogs  = [];
+  }
 }
+
 function saveLogs() {
-  fs.writeFileSync(LOG_FILE, JSON.stringify(messagesLog, null, 2));
+
+  fs.writeFileSync(
+    LOG_FILE,
+    JSON.stringify(adminLogs, null, 2)
+  );
+
 }
+
 function getDateTimeString() {
   const d = new Date(
     new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
@@ -96,15 +118,27 @@ function addDate(timeStr) {
     </tr>
   `).join("");
 
-  const logRows = [...messagesLog].reverse().map(m => `
+ const logRows = [...adminLogs].reverse().map(m => {
+
+  let nameDisplay = m.name;
+
+  if (m.private) {
+    nameDisplay =
+      `${m.name} ▶ ${m.toName || "不明"}`;
+  }
+
+  return `
     <tr>
       <td>${addDate(m.time)}</td>
       <td>${m.room}</td>
-      <td>${m.name}</td>
+      <td>${nameDisplay}</td>
       <td>${m.private ? "内緒" : "通常"}</td>
       <td>${m.text}</td>
     </tr>
-  `).join("");
+  `;
+
+}).join("");
+
 
   res.send(`
     <!doctype html>
@@ -665,11 +699,14 @@ socket.on("denkiRematch", () => {
       room: socket.room,
       time: getTimeString()
     };
+const log = normalizeLog(msg);
 
-    messagesLog.push(normalizeLog(msg));
-    saveLogs();
-    io.to(socket.room).emit("message", msg);
-   
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", msg);
 
   }
 
@@ -751,14 +788,37 @@ socket.on("denkiSitConfirm", () => {
     socket.room = room;
     socket.join(room);
 
-  const existingUser = users.find(u => u.name === name && u.room === room);
+const existingUser =
+  users.find(u =>
+    u.name === name &&
+    u.room === room
+  );
 
 if (existingUser) {
-  // 再接続
+
+  const socketExists =
+    io.sockets.sockets.get(existingUser.id);
+
+  if (socketExists) {
+
+    socket.emit("message", {
+      name: "system",
+      text: "同じ名前の人がいます",
+      room,
+      time: getTimeString()
+    });
+
+    socket.disconnect(true);
+    return;
+  }
+
+  // ===== 再接続 =====
   existingUser.id = socket.id;
   existingUser.lastActive = Date.now();
+
 } else {
-  // 新規
+
+  // ===== 新規 =====
   users.push({
     id: socket.id,
     name,
@@ -766,18 +826,21 @@ if (existingUser) {
     room,
     lastActive: Date.now()
   });
+
 }
 
 
 
+
     io.to(room).emit("userList", users.filter(u=>u.room===room));
-    socket.emit(
+socket.emit(
   "pastMessages",
-  messagesLog.filter(m =>
+  roomLogs.filter(m =>
     m.room === room &&
     (!m.private || m.to === socket.id || m.from === socket.id)
   )
 );
+
 
 
 io.emit("lobbyUpdate", getLobbyInfo());
@@ -835,9 +898,15 @@ socket.on("denkiJoin", () => {
       time: getTimeString()
     };
 
-    messagesLog.push(normalizeLog(startMsg));
-    saveLogs();
-    io.to(socket.room).emit("message", startMsg);
+    const log = normalizeLog(startMsg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", startMsg);
+
   }
 
 });
@@ -938,8 +1007,13 @@ const msg = {
   time: getTimeString()
 };
 
-messagesLog.push(normalizeLog(msg));
+const log = normalizeLog(msg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
 saveLogs();
+
 io.to(socket.room).emit("message", msg);
 
 // ===== 残り1イス判定 =====
@@ -972,9 +1046,15 @@ if (usedSeats.length >= TOTAL_SEATS - 1) {
     time: getTimeString()
   };
 
-  messagesLog.push(normalizeLog(resultMsg));
-  saveLogs();
-  io.to(socket.room).emit("message", resultMsg);
+  const log = normalizeLog(resultMsg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", resultMsg);
+
 
   game.ended = true;
   game.phase = "end";
@@ -1051,9 +1131,15 @@ if (resultText) {
     time: getTimeString()
   };
 
-  messagesLog.push(normalizeLog(resultMsg));
-  saveLogs();
-  io.to(socket.room).emit("message", resultMsg);
+  const log = normalizeLog(resultMsg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", resultMsg);
+
 
   game.ended = true;
   game.phase = "end";
@@ -1107,10 +1193,17 @@ return;
         room:socket.room,
         time:getTimeString()
       };
-      messagesLog.push(normalizeLog(msg));
+     const log = normalizeLog(msg);
 
-      saveLogs();
-      io.to(socket.room).emit("message",msg);
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message",msg);
+return;
+
+
       return;
     }
 if(text==="女子罰"){
@@ -1134,9 +1227,15 @@ if(text==="女子罰"){
     time: getTimeString()
   };
 
-  messagesLog.push(normalizeLog(msg));
-  saveLogs();
-  io.to(socket.room).emit("message", msg);
+const log = normalizeLog(msg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", msg);
+
   addPunishCount(socket.room);
 // ===== 絶頂解放判定 =====
 if (
@@ -1154,9 +1253,15 @@ if (
     time: getTimeString()
   };
 
-  messagesLog.push(normalizeLog(sysMsg));
-  saveLogs();
-  io.to(socket.room).emit("message", sysMsg);
+  const log = normalizeLog(sysMsg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", sysMsg);
+
   io.to(socket.room).emit("zecchoUnlock");
 
 }
@@ -1185,9 +1290,15 @@ if(text==="男子罰"){
     time: getTimeString()
   };
 
-  messagesLog.push(normalizeLog(msg));
-  saveLogs();
-  io.to(socket.room).emit("message", msg);
+const log = normalizeLog(msg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", msg);
+
   addPunishCount(socket.room);
 // ===== 絶頂解放判定 =====
 if (
@@ -1205,9 +1316,15 @@ if (
     time: getTimeString()
   };
 
-  messagesLog.push(normalizeLog(sysMsg));
-  saveLogs();
-  io.to(socket.room).emit("message", sysMsg);
+  const log = normalizeLog(sysMsg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", sysMsg);
+
   io.to(socket.room).emit("zecchoUnlock");
 
 }
@@ -1236,10 +1353,15 @@ if(text==="命令女"){
     room: socket.room,
     time: getTimeString()
   };
+  const log = normalizeLog(msg);
 
-  messagesLog.push(normalizeLog(msg));
-  saveLogs();
-  io.to(socket.room).emit("message", msg);
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", msg);
+
   addPunishCount(socket.room);
 // ===== 絶頂解放判定 =====
 if (
@@ -1257,9 +1379,15 @@ if (
     time: getTimeString()
   };
 
-  messagesLog.push(normalizeLog(sysMsg));
-  saveLogs();
-  io.to(socket.room).emit("message", sysMsg);
+  const log = normalizeLog(sysMsg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", sysMsg);
+
   io.to(socket.room).emit("zecchoUnlock");
 
 }
@@ -1288,9 +1416,15 @@ if(text==="命令男"){
     time: getTimeString()
   };
 
-  messagesLog.push(normalizeLog(msg));
-  saveLogs();
-  io.to(socket.room).emit("message", msg);
+  const log = normalizeLog(msg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", msg);
+
   addPunishCount(socket.room);
 // ===== 絶頂解放判定 =====
 if (
@@ -1308,9 +1442,15 @@ if (
     time: getTimeString()
   };
 
-  messagesLog.push(normalizeLog(sysMsg));
-  saveLogs();
-  io.to(socket.room).emit("message", sysMsg);
+  const log = normalizeLog(sysMsg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", sysMsg);
+
   io.to(socket.room).emit("zecchoUnlock");
 
 }
@@ -1341,9 +1481,15 @@ if(text==="苦痛罰"){
     time: getTimeString()
   };
 
-  messagesLog.push(normalizeLog(msg));
-  saveLogs();
-  io.to(socket.room).emit("message", msg);
+  const log = normalizeLog(msg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", msg);
+
   addPunishCount(socket.room);
 // ===== 絶頂解放判定 =====
 if (
@@ -1361,9 +1507,15 @@ if (
     time: getTimeString()
   };
 
-  messagesLog.push(normalizeLog(sysMsg));
-  saveLogs();
-  io.to(socket.room).emit("message", sysMsg);
+  const log = normalizeLog(sysMsg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", sysMsg);
+
   io.to(socket.room).emit("zecchoUnlock");
 
 }
@@ -1380,9 +1532,15 @@ if (text === "絶頂許可") {
     room: socket.room,
     time: getTimeString()
   };
-  messagesLog.push(normalizeLog(msg));
-  saveLogs();
-  io.to(socket.room).emit("message", msg);
+  const log = normalizeLog(msg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", msg);
+
   return;
 }
 
@@ -1391,7 +1549,12 @@ if (text === "絶頂許可") {
  
     
 if (data.to) {
-  const targetUser = users.find(u => u.id === data.to);
+
+  const targetUser =
+    users.find(u => u.id === data.to);
+
+  const sender =
+    users.find(u => u.id === socket.id);
 
   const msg = {
     name: socket.username,
@@ -1400,16 +1563,25 @@ if (data.to) {
     time: getTimeString(),
     private: true,
     to: data.to,
-    toName: targetUser?.name || "不明"
+    from: socket.id,
+    toName: targetUser?.name || "不明",
+
+    // ★ 追加
+    color: sender?.color || "black"
   };
 
-  messagesLog.push(normalizeLog(msg));
+  const log = normalizeLog(msg);
+
+  adminLogs.push(log);
+  roomLogs.push(log);
 
   saveLogs();
-  socket.emit("message", msg);
-  io.to(data.to).emit("message", msg);
+
+  io.to(socket.room).emit("message", msg);
+
   return;
 }
+
 
 
 const u = users.find(x => x.id === socket.id);
@@ -1421,10 +1593,15 @@ const u = users.find(x => x.id === socket.id);
   room: socket.room,
   time: getTimeString()
 };
-messagesLog.push(normalizeLog(msg));
+  const log = normalizeLog(msg);
 
-        saveLogs();
-    io.to(socket.room).emit("message",msg);
+adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message",msg);
+
   });
 
    socket.on("leave",()=>socket.disconnect(true));
@@ -1442,10 +1619,9 @@ setTimeout(() => {
 
     if (stillUsers.length === 0) {
 
-      // ===== ログ削除 =====
-      messagesLog =
-        messagesLog.filter(m => m.room !== leftRoom);
-      saveLogs();
+     // ===== 部屋ログ削除 =====
+    roomLogs =
+    roomLogs.filter(m => m.room !== leftRoom);
 
       // ===== 罰ストック削除 =====
       delete punishStockByRoom[leftRoom];
