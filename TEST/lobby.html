@@ -43,6 +43,10 @@
 
 .room.room4 { background:#ffe4cc; }
 
+.room.room5 {
+  background: #ffb3d9;
+}
+
 .room.denki {
   background: #fff4cc;
 }
@@ -96,6 +100,13 @@ input[type="password"] {
   <li>
     <a href="https://chat.luvul.net/ChatRoom?room_id=427627" target="_blank">
       ▶ オナニー部屋元部屋
+    </a>
+  </li>
+
+   <li>女子限定部屋</li>
+  <li>
+    <a href="https://chat.luvul.net/ChatRoom?room_id=426332" target="_blank">
+      ▶ 女子VS女子サイコロ対戦元部屋
     </a>
   </li>
 
@@ -184,9 +195,18 @@ input[type="password"] {
     人数（<span id="count-room5">0</span>人）
     <span id="names-room5">なし</span>
   </div>
-  <label><input type="checkbox" id="age-room5">18+</label>
+ <label>
+  <input type="checkbox" id="age-room5">
+  18+
+</label>
 
-  <button onclick="enterRoom('room5')">入室</button>
+<label>
+  <input type="checkbox" id="girl-room5">
+  女子
+</label>
+
+<button onclick="enterRoom('room5')">入室</button>
+
 </div>
 
 
@@ -341,6 +361,18 @@ function enterRoom(room) {
       return;
     }
   }
+if (room === "room5") {
+
+  const girlCheck =
+    document.getElementById("girl-room5");
+
+  if (!girlCheck || !girlCheck.checked) {
+    document.getElementById("error").textContent =
+      "女子のみ入室できます";
+    return;
+  }
+
+}
 
 
   // ===== 既存処理 =====
