@@ -549,15 +549,35 @@ socket.on("userList", list => {
       privateTarget.appendChild(opt);
 
       // ===== ミュートボタン =====
-      const muteBtn =
-        document.createElement("button");
+   // ===== ミュートボタン =====
+const muteBtn =
+  document.createElement("button");
 
-      muteBtn.textContent = "ミュート";
-      muteBtn.style.marginLeft = "6px";
+// 初期表示
+if (myMutes.includes(u.id)) {
+  muteBtn.textContent = "済";
+} else {
+  muteBtn.textContent = "消";
+}
 
-      muteBtn.onclick = () => {
-        socket.emit("muteUser", u.id);
-      };
+muteBtn.style.marginLeft = "6px";
+muteBtn.style.padding = "2px 6px";
+muteBtn.style.fontSize = "12px";
+muteBtn.style.lineHeight = "1.2";
+
+muteBtn.onclick = () => {
+
+  socket.emit("muteUser", u.id);
+
+  // 表示トグル
+  if (muteBtn.textContent === "消") {
+    muteBtn.textContent = "済";
+  } else {
+    muteBtn.textContent = "消";
+  }
+
+};
+
 
       li.appendChild(muteBtn);
     }
