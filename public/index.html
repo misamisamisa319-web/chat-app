@@ -370,7 +370,7 @@ window.addEventListener("load", () => {
 /* ===== ロビーからの情報 ===== */
 const room = localStorage.getItem("chatRoom");
 // ===== 女子専用部屋：男子罰ボタン非表示 =====
-if (room === "room1") {
+if (room === "girls") {
 
   const boyBtn =
     document.getElementById("boyPunishBtn");
@@ -379,8 +379,9 @@ if (room === "room1") {
     boyBtn.style.display = "none";
   }
 }
+
 // ===== 女子専用部屋：男オナボタン非表示 =====
-if (room === "room1") {
+if (room === "girls") {
 
   const boyOnaBtn =
     document.getElementById("boyOnaBtn");
@@ -389,6 +390,7 @@ if (room === "room1") {
     boyOnaBtn.style.display = "none";
   }
 }
+
 
 
 const roomNames = {

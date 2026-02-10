@@ -829,7 +829,7 @@ return;
 
   }
 // ===== 女子専用部屋制御 =====
-if (room === "room1" && gender !== "female") {
+if (room === "girls" && gender !== "female") {
 
   socket.emit("message", {
     name: "system",
@@ -841,6 +841,7 @@ if (room === "room1" && gender !== "female") {
   socket.disconnect(true);
   return;
 }
+
 
   // ===== ここで初めて入室 =====
   socket.username = name;
@@ -1291,18 +1292,7 @@ io.to(socket.room).emit("message", sysMsg);
 }
 
 if(text==="男子罰"){
-// ===== 女子専用部屋制限 =====
-if (socket.room === "room1") {
 
-  socket.emit("message", {
-    name: "system",
-    text: "女子専用部屋では使用できません",
-    room: socket.room,
-    time: getTimeString()
-  });
-
-  return;
-}
 
   if (!canUsePunish(socket.room)){
     socket.emit("message",{
@@ -1429,18 +1419,6 @@ io.to(socket.room).emit("message", sysMsg);
   return;
 }
 if(text==="命令男"){
-// ===== 女子専用部屋制限 =====
-if (socket.room === "room1") {
-
-  socket.emit("message", {
-    name: "system",
-    text: "女子専用部屋では使用できません",
-    room: socket.room,
-    time: getTimeString()
-  });
-
-  return;
-}
 
   if (!canUsePunish(socket.room)){
     socket.emit("message",{
