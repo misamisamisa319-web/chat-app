@@ -477,10 +477,11 @@ socket.on("muteSync", list => {
 
 socket.on("message", d => {
 
-  // ===== ミュート遮断 =====
-  if (d.from && myMutes.includes(d.from)) {
-    return;
-  }
+// ===== ミュート遮断 =====
+if (d.name && myMutes.includes(d.name)) {
+  return;
+}
+
 
   // ===== 内緒表示制御 =====
   if (d.private) {
