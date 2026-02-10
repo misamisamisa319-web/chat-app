@@ -770,7 +770,8 @@ socket.on("denkiSitConfirm", () => {
     }
     socket.emit("checkResult", { ok:true });
   });
-socket.on("join", ({ name, color="black", room="room1" }) => {
+socket.on("join", ({ name, color="black", room="room1", gender }) => {
+
 
   // ===== BAN =====
   if (bans[name] && bans[name] > Date.now()) {
@@ -816,15 +817,30 @@ return;
 
   } else {
 
-    users.push({
-      id: socket.id,
-      name,
-      color,
-      room,
-      lastActive: Date.now()
-    });
+  users.push({
+  id: socket.id,
+  name,
+  color,
+  room,
+  gender,
+  lastActive: Date.now()
+});
+
 
   }
+// ===== 女子専用部屋制御 =====
+if (room === "room1" && gender !== "female") {
+
+  socket.emit("message", {
+    name: "system",
+    text: "女子専用部屋のため入室できません",
+    room,
+    time: getTimeString()
+  });
+
+  socket.disconnect(true);
+  return;
+}
 
   // ===== ここで初めて入室 =====
   socket.username = name;
@@ -1275,6 +1291,18 @@ io.to(socket.room).emit("message", sysMsg);
 }
 
 if(text==="男子罰"){
+// ===== 女子専用部屋制限 =====
+if (socket.room === "room1") {
+
+  socket.emit("message", {
+    name: "system",
+    text: "女子専用部屋では使用できません",
+    room: socket.room,
+    time: getTimeString()
+  });
+
+  return;
+}
 
   if (!canUsePunish(socket.room)){
     socket.emit("message",{
@@ -1401,6 +1429,18 @@ io.to(socket.room).emit("message", sysMsg);
   return;
 }
 if(text==="命令男"){
+// ===== 女子専用部屋制限 =====
+if (socket.room === "room1") {
+
+  socket.emit("message", {
+    name: "system",
+    text: "女子専用部屋では使用できません",
+    room: socket.room,
+    time: getTimeString()
+  });
+
+  return;
+}
 
   if (!canUsePunish(socket.room)){
     socket.emit("message",{
