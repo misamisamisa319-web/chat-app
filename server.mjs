@@ -10,6 +10,8 @@ const io = new Server(server);
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 let users = [];
+let personalMutes = {}; // 個人ミュート
+
 
 // ===== ログ分離（追加） =====
 let roomLogs = [];
@@ -658,6 +660,54 @@ io.on("connection", socket => {
     );
 
   });
+/* ===== 個人ミュート ===== */
+socket.on("muteUser", targetId => {
+
+  if (!socket.room) return;
+
+  const room = socket.room;
+
+  // 配列初期化
+  if (!personalMutes[socket.id]) {
+    personalMutes[socket.id] = [];
+  }
+
+  const list = personalMutes[socket.id];
+
+  // 既にミュート中なら解除
+  if (list.includes(targetId)) {
+
+    personalMutes[socket.id] =
+      list.filter(id => id !== targetId);
+
+    return;
+  }
+
+  // ミュート追加
+  personalMutes[socket.id].push(targetId);
+
+  const targetUser =
+    users.find(u => u.id === targetId);
+
+  if (!targetUser) return;
+
+  const msg = {
+    name: "system",
+    text: `${socket.username} が ${targetUser.name} をミュートしました`,
+    room: room,
+    time: getTimeString()
+  };
+
+  const log = normalizeLog(msg);
+
+  adminLogs.push(log);
+  roomLogs.push(log);
+
+  saveLogs();
+
+  io.to(room).emit("message", msg);
+
+});
 
 
   // ===== 再戦ボタン =====

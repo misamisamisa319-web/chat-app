@@ -210,9 +210,15 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 
   <button onclick="sendPunish('女子罰')">女子罰</button>
-  <button onclick="sendPunish('男子罰')">男子罰</button>
+  <button id="boyPunishBtn"
+        onclick="sendPunish('男子罰')">
+男子罰
+</button>
   <button onclick="sendPunish('命令女')">女オナ</button>
-  <button onclick="sendPunish('命令男')">男オナ</button>
+  <button id="boyOnaBtn"
+        onclick="sendPunish('命令男')">
+男オナ
+</button>
   <button onclick="sendPunish('苦痛罰')">女痛罰</button>
   <button id="zecchoBtn"
         onclick="sendPunish('絶頂許可')"
@@ -369,11 +375,29 @@ const roomNames = {
   privateD: "個室D"
 };
 
-
 const roomLabel = document.getElementById("roomLabel");
 
 if (roomLabel && room) {
   roomLabel.textContent = `${roomNames[room] || room}`;
+}
+
+// ===== 女子部屋制御（ここに追加） =====
+if (room === "room5") {
+
+  const boyPunishBtn =
+    document.getElementById("boyPunishBtn");
+
+  const boyOnaBtn =
+    document.getElementById("boyOnaBtn");
+
+  if (boyPunishBtn){
+    boyPunishBtn.style.display = "none";
+  }
+
+  if (boyOnaBtn){
+    boyOnaBtn.style.display = "none";
+  }
+
 }
 
 const key = localStorage.getItem("chatKey");
