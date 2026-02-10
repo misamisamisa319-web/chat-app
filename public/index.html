@@ -349,11 +349,15 @@ window.addEventListener("load", () => {
     myColor = savedColor;
     colorSelect.value = myColor;
 
-    socket.emit("join", {
-      name: username,
-      color: myColor,
-      room: savedRoom
-    });
+ const gender =
+  localStorage.getItem("chatGender");
+
+socket.emit("join", {
+  name: username,
+  color: myColor,
+  room: savedRoom,
+  gender
+});
 
     // 電気椅子UI 即表示（リロード対策）
     socket.emit("denkiStateRequest");
@@ -752,15 +756,17 @@ joinBtn.onclick = () => {
   username = nameInput.value.trim();
   localStorage.setItem("chatName", username);
 
+  const gender =
+    localStorage.getItem("chatGender");
+
   socket.emit("join", {
-  name: username,
-  color: myColor,
-  room,
-  key,
-});
+    name: username,
+    color: myColor,
+    room,
+    key,
+    gender
+  });
 
-
-  // 電気椅子UI 即表示
   socket.emit("denkiStateRequest");
 
   joined = true;

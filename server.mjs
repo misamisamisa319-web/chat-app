@@ -836,6 +836,7 @@ users.push({
   name,
   color,
   room,
+  gender,
   lastActive: Date.now()
 });
 
