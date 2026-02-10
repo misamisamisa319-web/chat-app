@@ -706,6 +706,12 @@ socket.on("muteUser", targetId => {
   saveLogs();
 
   io.to(room).emit("message", msg);
+  // ===== ミュート同期 =====
+io.to(socket.id).emit(
+  "muteSync",
+  personalMutes[socket.id]
+);
+
 
 });
 
@@ -1274,13 +1280,15 @@ if(text==="女子罰"){
   }
 
   const msg={
-    name: socket.username,
-    text: getGirlPunish(socket.room),
-    color: "red",
-    bold: true,
-    room: socket.room,
-    time: getTimeString()
-  };
+  name: socket.username,
+  text: getGirlPunish(socket.room),
+  color: "red",
+  bold: true,
+  room: socket.room,
+  time: getTimeString(),
+  from: socket.id
+};
+
 
 const log = normalizeLog(msg);
 
@@ -1336,14 +1344,16 @@ if(text==="男子罰"){
     return;
   }
 
-  const msg={
-    name: socket.username,
-    text: getBoyPunish(socket.room),
-    color: "blue",
-    bold: true,
-    room: socket.room,
-    time: getTimeString()
-  };
+ const msg={
+  name: socket.username,
+  text: getBoyPunish(socket.room),
+  color: "blue",
+  bold: true,
+  room: socket.room,
+  time: getTimeString(),
+  from: socket.id
+};
+
 
 const log = normalizeLog(msg);
 
@@ -1401,13 +1411,15 @@ if(text==="命令女"){
   }
 
   const msg={
-    name: socket.username,
-    text: getOnaGirlPunish(socket.room),
-    color: "deeppink",
-    bold: true,
-    room: socket.room,
-    time: getTimeString()
-  };
+  name: socket.username,
+  text: getOnaGirlPunish(socket.room),
+  color: "deeppink",
+  bold: true,
+  room: socket.room,
+  time: getTimeString(),
+  from: socket.id
+};
+
   const log = normalizeLog(msg);
 
 adminLogs.push(log);
@@ -1463,13 +1475,15 @@ if(text==="命令男"){
   }
 
   const msg={
-    name: socket.username,
-    text: getOnaBoyPunish(socket.room),
-    color: "navy",
-    bold: true,
-    room: socket.room,
-    time: getTimeString()
-  };
+  name: socket.username,
+  text: getOnaBoyPunish(socket.room),
+  color: "navy",
+  bold: true,
+  room: socket.room,
+  time: getTimeString(),
+  from: socket.id
+};
+
 
   const log = normalizeLog(msg);
 
@@ -1528,13 +1542,15 @@ if(text==="苦痛罰"){
   }
 
   const msg={
-    name: socket.username,
-    text: getPainPunish(socket.room),
-    color: "purple",
-    bold: true,
-    room: socket.room,
-    time: getTimeString()
-  };
+  name: socket.username,
+  text: getPainPunish(socket.room),
+  color: "purple",
+  bold: true,
+  room: socket.room,
+  time: getTimeString(),
+  from: socket.id
+};
+
 
   const log = normalizeLog(msg);
 
@@ -1580,13 +1596,15 @@ io.to(socket.room).emit("message", sysMsg);
 
 if (text === "絶頂許可") {
   const msg = {
-    name: socket.username,
-    text: getHitoriPunish(socket.room),
-    color: "gray",
-    bold: true,
-    room: socket.room,
-    time: getTimeString()
-  };
+  name: socket.username,
+  text: getHitoriPunish(socket.room),
+  color: "gray",
+  bold: true,
+  room: socket.room,
+  time: getTimeString(),
+  from: socket.id
+};
+
   const log = normalizeLog(msg);
 
 adminLogs.push(log);
@@ -1641,13 +1659,15 @@ if (data.to) {
 
 const u = users.find(x => x.id === socket.id);
 
-    const msg = {
+const msg = {
   name: socket.username,
   text,
   color: data.color || u?.color,
   room: socket.room,
-  time: getTimeString()
+  time: getTimeString(),
+  from: socket.id
 };
+
   const log = normalizeLog(msg);
 
 adminLogs.push(log);
