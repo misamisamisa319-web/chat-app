@@ -188,8 +188,17 @@ input[type="password"] {
     人数（<span id="count-girls">0</span>人）
     <span id="names-girls">なし</span>
   </div>
-  <label><input type="checkbox" id="age-girls">18+</label>
-  <button onclick="enterRoom('girls')">入室</button>
+ <label>
+  <input type="checkbox" id="age-girls">18+
+</label>
+
+<label>
+  <input type="checkbox" id="female-girls">
+  女子です
+</label>
+
+<button onclick="enterRoom('girls')">入室</button>
+
 </div>
 
 
@@ -330,6 +339,19 @@ function enterRoom(room) {
     "denki1",
     "denki2"
   ];
+// ===== 女子専用チェック =====
+if (room === "girls") {
+
+  const femaleCheck =
+    document.getElementById("female-girls");
+
+  if (!femaleCheck || !femaleCheck.checked) {
+    document.getElementById("error").textContent =
+      "女子のみ入室できます";
+    return;
+  }
+}
+
 
   if (needAgeCheck.includes(room)) {
 

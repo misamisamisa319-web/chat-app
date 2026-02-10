@@ -770,7 +770,21 @@ socket.on("denkiSitConfirm", () => {
     }
     socket.emit("checkResult", { ok:true });
   });
-socket.on("join", ({ name, color="black", room="room1" }) => {
+socket.on("join", ({ name, color="black", room="room1", gender }) => {
+  // ===== 女子専用部屋制限 =====
+if (room === "girls" && gender !== "female") {
+
+  socket.emit("message", {
+    name: "system",
+    text: "女子専用部屋です",
+    room,
+    time: getTimeString()
+  });
+
+  socket.disconnect(true);
+  return;
+}
+
 
 
   // ===== BAN =====
