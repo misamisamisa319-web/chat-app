@@ -677,11 +677,18 @@ socket.on("muteUser", targetId => {
   // 既にミュート中なら解除
   if (list.includes(targetId)) {
 
-    personalMutes[socket.id] =
-      list.filter(id => id !== targetId);
+  personalMutes[socket.id] =
+    list.filter(id => id !== targetId);
 
-    return;
-  }
+  // ===== 同期送信 =====
+  io.to(socket.id).emit(
+    "muteSync",
+    personalMutes[socket.id]
+  );
+
+  return;
+}
+
 
   // ミュート追加
   personalMutes[socket.id].push(targetId);
