@@ -43,10 +43,6 @@
 
 .room.room4 { background:#ffe4cc; }
 
-.room.girls {
-  background: #ffe6f2;
-}
-
 .room.denki {
   background: #fff4cc;
 }
@@ -181,25 +177,6 @@ input[type="password"] {
 
   <button onclick="enterRoom('room4')">入室</button>
 </div>
-<!-- ===== girls ===== -->
-<div class="room girls">
-  <div class="room-title">女子専用ルーム</div>
-  <div class="room-info">
-    人数（<span id="count-girls">0</span>人）
-    <span id="names-girls">なし</span>
-  </div>
- <label>
-  <input type="checkbox" id="age-girls">18+
-</label>
-
-<label>
-  <input type="checkbox" id="female-girls">
-  女子です
-</label>
-
-<button onclick="enterRoom('girls')">入室</button>
-
-</div>
 
 
 <!-- ===== denki（既存） ===== -->
@@ -298,7 +275,6 @@ socket.on("lobbyUpdate", rooms => {
     "room2",
     "room3",
     "room4",
-    "girls",
     "denki",
     "denki1",
     "denki2",
@@ -334,24 +310,10 @@ function enterRoom(room) {
     "room2",
     "room3",
     "room4",
-    "girls",
     "denki",
     "denki1",
     "denki2"
   ];
-// ===== 女子専用チェック =====
-if (room === "girls") {
-
-  const femaleCheck =
-    document.getElementById("female-girls");
-
-  if (!femaleCheck || !femaleCheck.checked) {
-    document.getElementById("error").textContent =
-      "女子のみ入室できます";
-    return;
-  }
-}
-
 
   if (needAgeCheck.includes(room)) {
 

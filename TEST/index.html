@@ -110,11 +110,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   <h2>入室</h2>
   <div id="roomInfo" style="margin-bottom:10px; color:#555;"></div>
   <input id="nameInput" placeholder="名前">
-
-
-
-<button id="joinBtn">入室</button>
-
+  <button id="joinBtn">入室</button>
 </div>
 
 <div id="chat">
@@ -214,16 +210,9 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 
   <button onclick="sendPunish('女子罰')">女子罰</button>
-  <button id="boyPunishBtn"
-        onclick="sendPunish('男子罰')">
-  男子罰
-</button>
+  <button onclick="sendPunish('男子罰')">男子罰</button>
   <button onclick="sendPunish('命令女')">女オナ</button>
-  <button id="boyOnaBtn"
-        onclick="sendPunish('命令男')">
-  男オナ
-</button>
-
+  <button onclick="sendPunish('命令男')">男オナ</button>
   <button onclick="sendPunish('苦痛罰')">女痛罰</button>
   <button id="zecchoBtn"
         onclick="sendPunish('絶頂許可')"
@@ -267,9 +256,6 @@ const login = document.getElementById("login");
 const chat = document.getElementById("chat");
 const joinBtn = document.getElementById("joinBtn");
 const nameInput = document.getElementById("nameInput");
-const genderSelect =
-  document.getElementById("genderSelect");
-
 const roomInfo = document.getElementById("roomInfo");
 
 const messages = document.getElementById("messages");
@@ -349,15 +335,11 @@ window.addEventListener("load", () => {
     myColor = savedColor;
     colorSelect.value = myColor;
 
- const gender =
-  localStorage.getItem("chatGender");
-
-socket.emit("join", {
-  name: username,
-  color: myColor,
-  room: savedRoom,
-  gender
-});
+    socket.emit("join", {
+      name: username,
+      color: myColor,
+      room: savedRoom
+    });
 
     // 電気椅子UI 即表示（リロード対策）
     socket.emit("denkiStateRequest");
@@ -370,29 +352,6 @@ socket.emit("join", {
 
 /* ===== ロビーからの情報 ===== */
 const room = localStorage.getItem("chatRoom");
-// ===== 女子専用部屋：男子罰ボタン非表示 =====
-if (room === "girls") {
-
-  const boyBtn =
-    document.getElementById("boyPunishBtn");
-
-  if (boyBtn) {
-    boyBtn.style.display = "none";
-  }
-}
-
-// ===== 女子専用部屋：男オナボタン非表示 =====
-if (room === "girls") {
-
-  const boyOnaBtn =
-    document.getElementById("boyOnaBtn");
-
-  if (boyOnaBtn) {
-    boyOnaBtn.style.display = "none";
-  }
-}
-
-
 
 const roomNames = {
   room1: "ルーム1",
@@ -756,17 +715,14 @@ joinBtn.onclick = () => {
   username = nameInput.value.trim();
   localStorage.setItem("chatName", username);
 
-  const gender =
-    localStorage.getItem("chatGender");
-
   socket.emit("join", {
     name: username,
     color: myColor,
     room,
-    key,
-    gender
+    key
   });
 
+  // 電気椅子UI 即表示
   socket.emit("denkiStateRequest");
 
   joined = true;
