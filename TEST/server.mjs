@@ -817,18 +817,17 @@ return;
 
   } else {
 
-  users.push({
+users.push({
   id: socket.id,
   name,
   color,
   room,
-  gender,
   lastActive: Date.now()
 });
 
 
-  }
 
+ }
 
   // ===== ここで初めて入室 =====
   socket.username = name;
