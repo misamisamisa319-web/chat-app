@@ -177,6 +177,17 @@ input[type="password"] {
 
   <button onclick="enterRoom('room4')">入室</button>
 </div>
+<!-- ===== room5 ===== -->
+<div class="room room5">
+  <div class="room-title">女子限定部屋</div>
+  <div class="room-info">
+    人数（<span id="count-room5">0</span>人）
+    <span id="names-room5">なし</span>
+  </div>
+  <label><input type="checkbox" id="age-room5">18+</label>
+
+  <button onclick="enterRoom('room5')">入室</button>
+</div>
 
 
 <!-- ===== denki（既存） ===== -->
@@ -270,20 +281,22 @@ input[type="password"] {
 const socket = io();
 
 socket.on("lobbyUpdate", rooms => {
-  const allRooms = [
-    "room1",
-    "room2",
-    "room3",
-    "room4",
-    "denki",
-    "denki1",
-    "denki2",
-    "special",
-    "privateA",
-    "privateB",
-    "privateC",
-    "privateD"
-  ];
+const allRooms = [
+  "room1",
+  "room2",
+  "room3",
+  "room4",
+  "room5",
+  "denki",
+  "denki1",
+  "denki2",
+  "special",
+  "privateA",
+  "privateB",
+  "privateC",
+  "privateD"
+];
+
 
   allRooms.forEach(room => {
     const countEl = document.getElementById(`count-${room}`);
@@ -306,14 +319,16 @@ function enterRoom(room) {
 
   // ===== 18歳チェック（通常＋電気椅子のみ） =====
   const needAgeCheck = [
-    "room1",
-    "room2",
-    "room3",
-    "room4",
-    "denki",
-    "denki1",
-    "denki2"
-  ];
+  "room1",
+  "room2",
+  "room3",
+  "room4",
+  "room5",
+  "denki",
+  "denki1",
+  "denki2"
+];
+
 
   if (needAgeCheck.includes(room)) {
 
