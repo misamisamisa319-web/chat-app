@@ -467,20 +467,44 @@ socket.on("pastMessages", logs => {
 
 });
 
+// ===== 個人ミュート管理 =====
+let myMutes = [];
+
+// server から同期（後で拡張用）
+socket.on("muteSync", list => {
+  myMutes = list || [];
+});
+
 socket.on("message", d => {
-  // 内緒は送信者 or 受信者だけ
+
+// ===== ミュート遮断 =====
+if (d.name && myMutes.includes(d.name)) {
+  return;
+}
+
+
+  // ===== 内緒表示制御 =====
   if (d.private) {
     if (d.to !== myId && d.name !== username) return;
   }
 
-  if (soundLevel !== "off" && d.name && d.name !== username) {
-    notifySound.volume = SOUND_LEVELS[soundLevel];
+  // ===== 通知音 =====
+  if (
+    soundLevel !== "off" &&
+    d.name &&
+    d.name !== username
+  ) {
+    notifySound.volume =
+      SOUND_LEVELS[soundLevel];
+
     notifySound.currentTime = 0;
     notifySound.play().catch(()=>{});
   }
 
   renderMsg(d);
+
 });
+
 socket.on("zecchoUnlock", () => {
 
   const btn = document.getElementById("zecchoBtn");
@@ -494,21 +518,77 @@ socket.on("zecchoUnlock", () => {
 
 
 socket.on("userList", list => {
+
   userList.innerHTML = "";
-  privateTarget.innerHTML = `<option value="">なし</option>`;
+  privateTarget.innerHTML =
+    `<option value="">なし</option>`;
+
   list.forEach(u => {
+
     const li = document.createElement("li");
-    li.textContent = u.name;
-    li.style.color = u.color || "#000";
-    userList.appendChild(li);
+
+    // ===== 名前表示 =====
+    const nameSpan =
+      document.createElement("span");
+
+    nameSpan.textContent = u.name;
+    nameSpan.style.color =
+      u.color || "#000";
+
+    li.appendChild(nameSpan);
+
+    // ===== 自分以外のみ操作ボタン =====
     if (u.id !== myId) {
-      const opt = document.createElement("option");
+
+      // 内緒用
+      const opt =
+        document.createElement("option");
+
       opt.value = u.id;
       opt.textContent = u.name;
+
       privateTarget.appendChild(opt);
+
+      // ===== ミュートボタン =====
+   // ===== ミュートボタン =====
+const muteBtn =
+  document.createElement("button");
+
+// 初期表示
+if (myMutes.includes(u.id)) {
+  muteBtn.textContent = "済";
+} else {
+  muteBtn.textContent = "消";
+}
+
+muteBtn.style.marginLeft = "6px";
+muteBtn.style.padding = "2px 6px";
+muteBtn.style.fontSize = "12px";
+muteBtn.style.lineHeight = "1.2";
+
+muteBtn.onclick = () => {
+
+  socket.emit("muteUser", u.id);
+
+  // 表示トグル
+  if (muteBtn.textContent === "消") {
+    muteBtn.textContent = "済";
+  } else {
+    muteBtn.textContent = "消";
+  }
+
+};
+
+
+      li.appendChild(muteBtn);
     }
+
+    userList.appendChild(li);
+
   });
+
 });
+
 
 /* ===== 電気椅子：状態 ===== */
 socket.on("denkiState", state => {
