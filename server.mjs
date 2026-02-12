@@ -741,18 +741,44 @@ function denkiStateRoom(room){
 ================================ */
 
 io.on("connection", socket => {
-  socket.emit("lobbyUpdate", getLobbyInfo());
+  socket.on("denkiStateRequest", () => {
 
-    socket.on("denkiStateRequest", () => {
+  if (!["denki","denki1","denki2"].includes(socket.room)) return;
 
-    if (!["denki","denki1","denki2"].includes(socket.room)) return;
+  const game = denkiRooms[socket.room];
 
-    io.to(socket.id).emit(
-      "denkiState",
-      denkiStateRoom(socket.room)
-    );
+  const player = game.players.find(
+    p => p.name === socket.username
+  );
 
-  });
+  if (player) {
+    player.id = socket.id;
+  }
+
+  io.to(socket.id).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
+
+});
+
+
+  // ===== ID同期 =====
+  const player = game.players.find(
+    p => p.name === socket.username
+  );
+
+  if (player) {
+    player.id = socket.id;
+  }
+
+  io.to(socket.id).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
+
+});
+
 
 /* ===== 個人ミュート（部屋＋名前） ===== */
 socket.on("muteUser", targetId => {

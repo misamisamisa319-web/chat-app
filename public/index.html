@@ -326,8 +326,13 @@ denkiSetBtn.onclick = () => {
   }
 };
 denkiSitBtn.onclick = () => {
+
+  if (!denkiState) return;
+
   socket.emit("denkiSitConfirm");
+
 };
+
 denkiRematchBtn.onclick = () => {
   socket.emit("denkiRematch");
 };
@@ -642,10 +647,17 @@ socket.on("denkiState", state => {
 function onDenkiSelect(seat) {
   if (!denkiState || !denkiState.players) return;
 
-
   const players = denkiState.players || [];
-  const me = players.find(p => p.id === myId);
+
+  let me = players.find(p => p.id === myId);
+
+  // ★ IDズレ保険
+  if (!me) {
+    me = players.find(p => p.name === username);
+  }
+
   if (!me) return;
+
 
   // 仕掛ける側
   if (denkiState.phase === "set" && me.isTurn) {
@@ -697,18 +709,45 @@ if (isSpectator) {
   // ===== プレイヤー操作制御 =====
   if (!isSpectator) {
 
-    if (denkiState.phase === "set" && me.isTurn) {
-      denkiSetBtn.disabled = false;
-      denkiStatus.textContent = "あなたの番：椅子を仕掛ける";
-    }
-    else if (denkiState.phase === "sit" && !me.isTurn) {
-      denkiSitBtn.disabled = false;
-      denkiStatus.textContent = "あなたの番：椅子に座る";
-    }
-    else if (denkiState.phase === "shock" && me.isTurn) {
-      denkiShockBtn.disabled = false;
-      denkiStatus.textContent = "⚡ 電流を流してください";
-    }
+    if (
+  denkiState.phase === "set" &&
+  me &&
+  (
+    me.isTurn ||
+    players[denkiState.turn]?.id === myId ||
+    players[denkiState.turn]?.name === username
+  )
+) {
+  denkiSetBtn.disabled = false;
+  denkiStatus.textContent = "あなたの番：椅子を仕掛ける";
+}
+
+    else if (
+  denkiState.phase === "sit" &&
+  me &&
+  (
+    !me.isTurn ||
+    players[denkiState.turn]?.id !== myId ||
+    players[denkiState.turn]?.name !== username
+  )
+) {
+  denkiSitBtn.disabled = false;
+  denkiStatus.textContent = "あなたの番：椅子に座る";
+}
+
+  else if (
+  denkiState.phase === "shock" &&
+  me &&
+  (
+    me.isTurn ||
+    players[denkiState.turn]?.id === myId ||
+    players[denkiState.turn]?.name === username
+  )
+) {
+  denkiShockBtn.disabled = false;
+  denkiStatus.textContent = "⚡ 電流を流してください";
+}
+
     else if (!isSpectator) {
       denkiStatus.textContent = "相手の操作待ち";
     }
