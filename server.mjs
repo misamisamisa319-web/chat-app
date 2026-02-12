@@ -329,9 +329,11 @@ const hitoriPunishItems = [
 "絶頂許可1.一番好きなオナニーの方法を告白し、その方法で絶頂する。",
 "絶頂許可2.性感帯をすべて告白して。そこを中心にオナニーして絶頂する。",
 "絶頂許可3.エッチな想像でされてみたいことを告白して。それを想像しながらオナニーして絶頂する。",
-"絶頂許可4.これまで寸止めした回数絶頂するまで手を止めてはいけない。",
+"絶頂許可4.「私は変態のドMです。」と言い続けながら立ったまま絶頂する。",
 "絶頂許可5.これまで中出しされた人の人数を告白。その人数分連続絶頂する。",
 "絶頂許可6.参加者の人数分連続絶頂する。",
+"絶頂許可7.これまで寸止めした回数絶頂するまで手を止めてはいけない。",
+
 ];
 
 //命令女
@@ -424,6 +426,72 @@ const specialPainPunishItems = [
 "苦痛罰20.おまんこに刺激物を塗る",
 ];
 
+const femaleEventItems = [
+"女イベント1.",
+"女イベント2.",
+"女イベント3.",
+"女イベント4.",
+"女イベント5.",
+"女イベント6.",
+"女イベント7.",
+"女イベント8.",
+"女イベント9.",
+"女イベント10.",
+"女イベント11.",
+"女イベント12.",
+"女イベント13.",
+"女イベント14.",
+"女イベント15.",
+"女イベント16.",
+"女イベント17.",
+"女イベント18.",
+"女イベント19.",
+"女イベント20.",
+"女イベント21.",
+"女イベント22.",
+"女イベント23.",
+"女イベント24.",
+"女イベント25.",
+"女イベント26.",
+"女イベント27.",
+"女イベント28.",
+"女イベント29.",
+"女イベント30.",
+];
+
+const maleEventItems = [
+"男イベント1.",
+"男イベント2.",
+"男イベント3.",
+"男イベント4.",
+"男イベント5.",
+"男イベント6.",
+"男イベント7.",
+"男イベント8.",
+"男イベント9.",
+"男イベント10.",
+"男イベント11.",
+"男イベント12.",
+"男イベント13.",
+"男イベント14.",
+"男イベント15.",
+"男イベント16.",
+"男イベント17.",
+"男イベント18.",
+"男イベント19.",
+"男イベント20.",
+"男イベント21.",
+"男イベント22.",
+"男イベント23.",
+"男イベント24.",
+"男イベント25.",
+"男イベント26.",
+"男イベント27.",
+"男イベント28.",
+"男イベント29.",
+"男イベント30.",
+];
+
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 let punishStockByRoom = {};
 // ===== 罰累計（絶頂解放用） =====
@@ -471,6 +539,8 @@ function initPunishRoom(room){
       onaGirl: shuffle([...onaGirlPunishItems]),
       onaBoy: shuffle([...onaBoyPunishItems]),
       pain: shuffle([...specialPainPunishItems]),
+      maleEvent: shuffle([...maleEventItems]),
+      femaleEvent: shuffle([...femaleEventItems]),
     };
   }
 }
@@ -510,6 +580,23 @@ function getPainPunish(room){
     punishStockByRoom[room].pain = shuffle([...specialPainPunishItems]);
   return punishStockByRoom[room].pain.shift();
 }
+function getMaleEvent(room){
+  initPunishRoom(room);
+  if (!punishStockByRoom[room].maleEvent.length){
+    punishStockByRoom[room].maleEvent =
+      shuffle([...maleEventItems]);
+  }
+  return punishStockByRoom[room].maleEvent.shift();
+}
+function getFemaleEvent(room){
+  initPunishRoom(room);
+  if (!punishStockByRoom[room].femaleEvent.length){
+    punishStockByRoom[room].femaleEvent =
+      shuffle([...femaleEventItems]);
+  }
+  return punishStockByRoom[room].femaleEvent.shift();
+}
+
 
 /* ===============================
    15分無反応切断（復旧）
@@ -1584,11 +1671,7 @@ saveLogs();
 io.to(socket.room).emit("message", sysMsg);
 
   io.to(socket.room).emit("zecchoUnlock");
-
 }
-
-
-
   return;
 }
 
@@ -1676,6 +1759,47 @@ roomLogs.push(log);
 saveLogs();
 
 io.to(socket.room).emit("message", msg);
+
+  return;
+}
+// ===== 男イベント =====
+if (text === "男イベント") {
+
+  const item = getMaleEvent(socket.room);
+
+  const msg = {
+    name: "system",
+    text: item,
+    room: socket.room,
+    bold: true,
+    time: getTimeString()
+  };
+
+  io.to(socket.room).emit("message", msg);
+
+  messagesLog.push(normalizeLog(msg));
+  saveLogs();
+
+  return;
+}
+
+// ===== 女イベント =====
+if (text === "女イベント") {
+
+  const item = getFemaleEvent(socket.room);
+
+  const msg = {
+    name: "system",
+    text: item,
+    room: socket.room,
+    bold: true,
+    time: getTimeString()
+  };
+
+  io.to(socket.room).emit("message", msg);
+
+  messagesLog.push(normalizeLog(msg));
+  saveLogs();
 
   return;
 }

@@ -199,16 +199,14 @@ input, button, select { padding: 10px; font-size: 16px; }
 <!-- ===== 罰トグル ===== -->
 <button id="punishToggleBtn">
   罰メニュー
-</button>
+ </button>
+
 <!-- ===== 罰ボタン ===== -->
 <div id="punishWrap" style="
   display:none;
   gap:7px;
   flex-wrap:wrap;
-  padding:6px 0;
-">
-
-
+  padding:6px 0;">
   <button onclick="sendPunish('女子罰')">女子罰</button>
   <button id="boyPunishBtn"
         onclick="sendPunish('男子罰')">
@@ -224,6 +222,17 @@ input, button, select { padding: 10px; font-size: 16px; }
         onclick="sendPunish('絶頂許可')"
         style="display:none;">
   絶頂許可
+</button>
+<button id="maleEventBtn"
+        style="display:none;"
+        onclick="sendPunish('男イベント')">
+  男イベント
+</button>
+
+<button id="femaleEventBtn"
+        style="display:none;"
+        onclick="sendPunish('女イベント')">
+  女イベント
 </button>
 
 </div>
@@ -420,6 +429,24 @@ if (room === "room6") {
   }
 
 }
+// ===== ルーム6制御（イベントボタン表示） =====
+if (room === "room6") {
+
+  const maleEventBtn =
+    document.getElementById("maleEventBtn");
+
+  const femaleEventBtn =
+    document.getElementById("femaleEventBtn");
+
+  if (maleEventBtn){
+    maleEventBtn.style.display = "inline-block";
+  }
+
+  if (femaleEventBtn){
+    femaleEventBtn.style.display = "inline-block";
+  }
+
+}
 
 
 const key = localStorage.getItem("chatKey");
@@ -571,7 +598,7 @@ socket.on("userList", list => {
 
       privateTarget.appendChild(opt);
 
-      // ===== ミュートボタン =====
+    
    // ===== ミュートボタン =====
 const muteBtn =
   document.createElement("button");
