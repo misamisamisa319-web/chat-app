@@ -32,6 +32,17 @@
 .feature-list li {
   padding: 2px 0;
 }
+.room-title-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.room-desc {
+  font-weight: normal;
+  font-size: 13px;
+  color: #555;
+}
 
 /* ===== ルーム別カラー ===== */
 .room.room1 {
@@ -96,43 +107,52 @@ input[type="password"] {
     <li>「消」おしたらミュート「済」を押したら解除</li>
     </ul>
 
- <div class="feature-title">部屋紹介</div>
-<ul class="feature-list">
+ <details>
 
-  <li>ルーム1.2 サイコロ対戦部屋</li>
-  <li>
-    <a href="https://chat.luvul.net/ChatRoom?room_id=426738" target="_blank">
-      ▶ サイコロ対戦元部屋
-    </a>
-  </li>
+  <summary class="feature-title">
+    部屋紹介
+  </summary>
 
-  <li>ルーム3.4 オナニー部屋</li>
-  <li>
-    <a href="https://chat.luvul.net/ChatRoom?room_id=427627" target="_blank">
-      ▶ オナニー部屋元部屋
-    </a>
-  </li>
+  <ul class="feature-list">
 
-   <li>女子限定部屋</li>
-  <li>
-    <a href="https://chat.luvul.net/ChatRoom?room_id=426332" target="_blank">
-      ▶ 女子VS女子サイコロ対戦元部屋
-    </a>
-  </li>
+    <li>ルーム1.2 サイコロ対戦部屋</li>
+    <li>
+      <a href="https://chat.luvul.net/ChatRoom?room_id=426738" target="_blank">
+        ▶ サイコロ対戦元部屋
+      </a>
+    </li>
 
-  <li>電気椅子部屋1.2.3（2人対戦・観戦可）</li>
-  <li>
-    <a href="https://chat.luvul.net/ChatRoom?room_id=427364" target="_blank">
-      ▶ 電気椅子元部屋
-    </a>
-  </li>
+    <li>ルーム3.4 オナニー部屋</li>
+    <li>
+      <a href="https://chat.luvul.net/ChatRoom?room_id=427627" target="_blank">
+        ▶ オナニー部屋元部屋
+      </a>
+    </li>
 
-  <li>スペシャルルーム（身内用）</li>
-  <li>
-  <a href="https://chat.luvul.net/ChatRoom?room_id=424208" target="_blank">
-    ▶ 雑談部屋・ご意見、ご感想はこちら
-  </a>
-</li>
+    <li>女子限定部屋</li>
+    <li>
+      <a href="https://chat.luvul.net/ChatRoom?room_id=426332" target="_blank">
+        ▶ 女子VS女子サイコロ対戦元部屋
+      </a>
+    </li>
+
+    <li>電気椅子部屋1.2.3（2人対戦・観戦可）</li>
+    <li>
+      <a href="https://chat.luvul.net/ChatRoom?room_id=427364" target="_blank">
+        ▶ 電気椅子元部屋
+      </a>
+    </li>
+
+    <li>スペシャルルーム（身内用）</li>
+    <li>
+      <a href="https://chat.luvul.net/ChatRoom?room_id=424208" target="_blank">
+        ▶ 雑談部屋・ご意見、ご感想はこちら
+      </a>
+    </li>
+
+  </ul>
+
+</details>
 
 <div class="feature-title">機能説明</div>
 <ul class="feature-list">
@@ -152,7 +172,18 @@ input[type="password"] {
 
 <!-- ===== room1 ===== -->
 <div class="room room1">
-  <div class="room-title">ルーム1</div>
+  <div class="room-title-row">
+
+  <span class="room-title">
+    ルーム1
+  </span>
+
+  <span class="room-desc">
+    部屋紹介
+  </span>
+
+</div>
+
   <div class="room-info">
     人数（<span id="count-room1">0</span>人）
     <span id="names-room1">なし</span>
