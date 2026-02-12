@@ -411,32 +411,22 @@ if (room === "room5") {
 
 }
 
-// ===== ルーム6制御（罰ボタン非表示） =====
-if (room === "room6") {
 
-  const punishToggleBtn =
-    document.getElementById("punishToggleBtn");
+// ===== ルーム6制御（イベントボタン表示） =====
+if (room === "room6") {
 
   const punishWrap =
     document.getElementById("punishWrap");
-
-  if (punishToggleBtn){
-    punishToggleBtn.style.display = "none";
-  }
-
-  if (punishWrap){
-    punishWrap.style.display = "none";
-  }
-
-}
-// ===== ルーム6制御（イベントボタン表示） =====
-if (room === "room6") {
 
   const maleEventBtn =
     document.getElementById("maleEventBtn");
 
   const femaleEventBtn =
     document.getElementById("femaleEventBtn");
+
+  if (punishWrap){
+    punishWrap.style.display = "flex";
+  }
 
   if (maleEventBtn){
     maleEventBtn.style.display = "inline-block";
@@ -447,6 +437,7 @@ if (room === "room6") {
   }
 
 }
+
 
 
 const key = localStorage.getItem("chatKey");
