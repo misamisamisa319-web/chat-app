@@ -365,6 +365,7 @@ const roomNames = {
   room3: "ルーム3",
   room4: "ルーム4",
   room5: "女子部屋",
+  room6: "巻き込み",   // ← 追加
   denki: "電気1",
   denki1: "電気椅2",
   denki2: "電気3",
@@ -375,13 +376,14 @@ const roomNames = {
   privateD: "個室D"
 };
 
+
 const roomLabel = document.getElementById("roomLabel");
 
 if (roomLabel && room) {
   roomLabel.textContent = `${roomNames[room] || room}`;
 }
 
-// ===== 女子部屋制御（ここに追加） =====
+// ===== 女子部屋制御 =====
 if (room === "room5") {
 
   const boyPunishBtn =
@@ -399,6 +401,26 @@ if (room === "room5") {
   }
 
 }
+
+// ===== ルーム6制御（罰ボタン非表示） =====
+if (room === "room6") {
+
+  const punishToggleBtn =
+    document.getElementById("punishToggleBtn");
+
+  const punishWrap =
+    document.getElementById("punishWrap");
+
+  if (punishToggleBtn){
+    punishToggleBtn.style.display = "none";
+  }
+
+  if (punishWrap){
+    punishWrap.style.display = "none";
+  }
+
+}
+
 
 const key = localStorage.getItem("chatKey");
 

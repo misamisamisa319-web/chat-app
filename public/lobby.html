@@ -46,6 +46,10 @@
 .room.room5 {
   background: #ffb3d9;
 }
+.room.room6 {
+  background: #222;
+  color: #fff;
+}
 
 .room.denki {
   background: #fff4cc;
@@ -206,9 +210,23 @@ input[type="password"] {
   <input type="checkbox" id="girl-room5">
   女子
 </label>
-
 <button onclick="enterRoom('room5')">入室</button>
+</div>
 
+<!-- ===== room6 ===== -->
+<div class="room room6">
+  <div class="room-title">巻き込まれ有見学無部屋</div>
+  <div class="room-info">
+    人数（<span id="count-room6">0</span>人）
+    <span id="names-room6">なし</span>
+  </div>
+
+  <label>
+    <input type="checkbox" id="age-room6">
+    18+
+  </label>
+
+  <button onclick="enterRoom('room6')">入室</button>
 </div>
 
 
@@ -309,6 +327,7 @@ const allRooms = [
   "room3",
   "room4",
   "room5",
+  "room6",  
   "denki",
   "denki1",
   "denki2",
@@ -346,6 +365,7 @@ function enterRoom(room) {
   "room3",
   "room4",
   "room5",
+  "room6",
   "denki",
   "denki1",
   "denki2"
