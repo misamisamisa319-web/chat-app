@@ -663,10 +663,15 @@ function updateDenkiUI() {
 
   denkiWrap.style.display = "block";
 
-  if (!denkiState || !denkiState.players) return;
+  if (
+    !denkiState ||
+    !denkiState.players ||
+    denkiState.players.length === 0
+  ) return;
 
   const players = denkiState.players;
   const me = players.find(p => p.id === myId); // 観客は undefined
+
 
   // ===== ボタン初期状態 =====
   denkiSetBtn.style.display = "inline-block";
@@ -688,11 +693,6 @@ if (isSpectator) {
 
   denkiStatus.textContent = "👀 観戦中";
 }
-
-
-  if (players.length < 2 || isSpectator) {
-    denkiStatus.textContent = "観戦中";
-  }
 
   // ===== プレイヤー操作制御 =====
   if (!isSpectator) {
@@ -812,9 +812,13 @@ buttons.forEach(b => {
   }
 
   // 座りフェーズ
-  if (denkiState.phase === "sit") {
-    b.disabled = false;
-  }
+if (
+  denkiState.phase === "sit" &&
+  !me.isTurn
+) {
+  b.disabled = false;
+}
+
 
   // 仮座り表示（全員）
   if (denkiState.sitPreview === num) {

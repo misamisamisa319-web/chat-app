@@ -1270,8 +1270,7 @@ io.to(socket.room).emit("message", resultMsg);
   game.ended = true;
   game.phase = "end";
   setTimeout(() => {
-  game.players = [];
-  game.started = false;
+
 
   io.to(socket.room).emit(
     "denkiState",
@@ -1355,8 +1354,7 @@ io.to(socket.room).emit("message", resultMsg);
   game.ended = true;
   game.phase = "end";
   setTimeout(() => {
-  game.players = [];
-  game.started = false;
+  
 
   io.to(socket.room).emit(
     "denkiState",
