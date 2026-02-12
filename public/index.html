@@ -731,18 +731,15 @@ if (isSpectator) {
   denkiStatus.textContent = "あなたの番：椅子を仕掛ける";
 }
 
-    else if (
+ else if (
   denkiState.phase === "sit" &&
   me &&
-  (
-    !me.isTurn ||
-    players[denkiState.turn]?.id !== myId ||
-    players[denkiState.turn]?.name !== username
-  )
+  !me.isTurn
 ) {
   denkiSitBtn.disabled = false;
   denkiStatus.textContent = "あなたの番：椅子に座る";
 }
+
 
   else if (
   denkiState.phase === "shock" &&
