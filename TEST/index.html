@@ -660,11 +660,20 @@ function onDenkiSelect(seat) {
 
 
   // 仕掛ける側
-  if (denkiState.phase === "set" && me.isTurn) {
-    selectedSeat = seat;
-    updateDenkiUI();
-    return;
-  }
+ if (
+  denkiState.phase === "set" &&
+  me &&
+  (
+    me.isTurn ||
+    denkiState.players[denkiState.turn]?.id === myId |
+    denkiState.players[denkiState.turn]?.name === username
+  )
+) {
+  selectedSeat = seat;
+  updateDenkiUI();
+  return;
+}
+
 
   // 座るフェーズは無条件で送る（判定はサーバー側）
 if (denkiState.phase === "sit") {
@@ -772,7 +781,8 @@ if (isSpectator) {
 
     let totalA = 0;
 
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 9; i++) {
+
       const v = pA.turns?.[i - 1];
 
       if (v === "shock") {
@@ -788,7 +798,8 @@ if (isSpectator) {
       }
     }
 
-    rowA.children[11].textContent = totalA;
+    rowA.children[10].textContent = totalA;
+
   }
 
   if (pB && rowB) {
@@ -812,7 +823,8 @@ if (isSpectator) {
       }
     }
 
-    rowB.children[11].textContent = totalB;
+    rowB.children[10].textContent = totalB;
+
   }
 
 
@@ -853,10 +865,16 @@ buttons.forEach(b => {
   // 座りフェーズ
 if (
   denkiState.phase === "sit" &&
-  !me.isTurn
+  me &&
+  (
+    !me.isTurn ||
+    denkiState.players[denkiState.turn]?.id !== myId ||
+    denkiState.players[denkiState.turn]?.name !== username
+  )
 ) {
   b.disabled = false;
 }
+
 
 
   // 仮座り表示（全員）

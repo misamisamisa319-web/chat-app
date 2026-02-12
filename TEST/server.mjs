@@ -763,21 +763,6 @@ io.on("connection", socket => {
 });
 
 
-  // ===== ID同期 =====
-  const player = game.players.find(
-    p => p.name === socket.username
-  );
-
-  if (player) {
-    player.id = socket.id;
-  }
-
-  io.to(socket.id).emit(
-    "denkiState",
-    denkiStateRoom(socket.room)
-  );
-
-});
 
 
 /* ===== 個人ミュート（部屋＋名前） ===== */
