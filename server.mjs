@@ -860,6 +860,34 @@ socket.on("join", ({ name, color="black", room="room1" }) => {
     socket.disconnect(true);
     return;
   }
+// ===== room6 入室制限 =====
+const ngNames = ["見学","観戦","ROM"];
+
+if (room === "room6") {
+
+  // ===== NGワード =====
+  const hasNgWord =
+    ngNames.some(w => name.includes(w));
+
+  // ===== 1文字禁止 =====
+  const isOneChar =
+    name.length <= 1;
+
+  if (hasNgWord || isOneChar) {
+
+    socket.emit("message", {
+      name: "system",
+      text: "この部屋は見学・短名入室できません",
+      room,
+      time: getTimeString()
+    });
+
+    socket.disconnect(true);
+    return;
+  }
+
+}
+
 
   // ===== 同名チェック =====
   const existingUser =
