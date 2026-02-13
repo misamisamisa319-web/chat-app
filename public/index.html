@@ -847,10 +847,10 @@ buttons.forEach(b => {
     return;
   }
 
- // ===== 仕掛けフェーズ
+
+  // ===== 仕掛けフェーズ
 if (
   denkiState.phase === "set" &&
-  denkiState.started &&
   me.isTurn
 ) {
   b.disabled = false;
@@ -859,6 +859,7 @@ if (
     b.style.background = "#ffe066";
   }
 }
+
 
 // 座りフェーズ
 if (
