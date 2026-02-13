@@ -741,6 +741,13 @@ function denkiStateRoom(room){
 ================================ */
 
 io.on("connection", socket => {
+
+socket.emit("lobbyUpdate", getLobbyInfo());
+
+socket.on("lobbyUpdateRequest", () => {
+  socket.emit("lobbyUpdate", getLobbyInfo());
+});
+
   socket.on("denkiStateRequest", () => {
 
   if (!["denki","denki1","denki2"].includes(socket.room)) return;
@@ -1038,6 +1045,9 @@ return;
     "userList",
     users.filter(u=>u.room===room)
   );
+io.emit("lobbyUpdate", getLobbyInfo());
+
+
 
   socket.emit(
     "pastMessages",
@@ -1877,6 +1887,8 @@ io.to(socket.room).emit("message",msg);
 
    socket.on("leave",()=>socket.disconnect(true));
   socket.on("disconnect",()=>{
+    if (!socket.room) return;
+
     const leftRoom = socket.room;
 
     users = users.filter(u => u.id !== socket.id);
@@ -1911,7 +1923,7 @@ setTimeout(() => {
 
   io.emit("lobbyUpdate", getLobbyInfo());
 
-}, 0);
+}, 100);
 
   });   // ← disconnect 閉じ
 });     // ← io.on("connection") 閉じ

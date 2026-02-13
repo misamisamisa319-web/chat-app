@@ -32,6 +32,17 @@
 .feature-list li {
   padding: 2px 0;
 }
+.room-title-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.room-desc {
+  font-weight: normal;
+  font-size: 13px;
+  color: #555;
+}
 
 /* ===== ルーム別カラー ===== */
 .room.room1 {
@@ -45,6 +56,15 @@
 
 .room.room5 {
   background: #ffb3d9;
+}
+.room.room6 {
+  background: #222;
+  color: #fff;
+}
+.room.room6,
+.room.room6 span,
+.room.room6 label {
+  color: #fff;
 }
 
 .room.denki {
@@ -92,43 +112,52 @@ input[type="password"] {
     <li>「消」おしたらミュート「済」を押したら解除</li>
     </ul>
 
- <div class="feature-title">部屋紹介</div>
-<ul class="feature-list">
+ <details>
 
-  <li>ルーム1.2 サイコロ対戦部屋</li>
-  <li>
-    <a href="https://chat.luvul.net/ChatRoom?room_id=426738" target="_blank">
-      ▶ サイコロ対戦元部屋
-    </a>
-  </li>
+  <summary class="feature-title">
+    部屋紹介
+  </summary>
 
-  <li>ルーム3.4 オナニー部屋</li>
-  <li>
-    <a href="https://chat.luvul.net/ChatRoom?room_id=427627" target="_blank">
-      ▶ オナニー部屋元部屋
-    </a>
-  </li>
+  <ul class="feature-list">
 
-   <li>女子限定部屋</li>
-  <li>
-    <a href="https://chat.luvul.net/ChatRoom?room_id=426332" target="_blank">
-      ▶ 女子VS女子サイコロ対戦元部屋
-    </a>
-  </li>
+    <li>ルーム1.2 サイコロ対戦部屋</li>
+    <li>
+      <a href="https://chat.luvul.net/ChatRoom?room_id=426738" target="_blank">
+        ▶ サイコロ対戦元部屋
+      </a>
+    </li>
 
-  <li>電気椅子部屋1.2.3（2人対戦・観戦可）</li>
-  <li>
-    <a href="https://chat.luvul.net/ChatRoom?room_id=427364" target="_blank">
-      ▶ 電気椅子元部屋
-    </a>
-  </li>
+    <li>ルーム3.4 オナニー部屋</li>
+    <li>
+      <a href="https://chat.luvul.net/ChatRoom?room_id=427627" target="_blank">
+        ▶ オナニー部屋元部屋
+      </a>
+    </li>
 
-  <li>スペシャルルーム（身内用）</li>
-  <li>
-  <a href="https://chat.luvul.net/ChatRoom?room_id=424208" target="_blank">
-    ▶ 雑談部屋・ご意見、ご感想はこちら
-  </a>
-</li>
+    <li>女子限定部屋</li>
+    <li>
+      <a href="https://chat.luvul.net/ChatRoom?room_id=426332" target="_blank">
+        ▶ 女子VS女子サイコロ対戦元部屋
+      </a>
+    </li>
+
+    <li>電気椅子部屋1.2.3（2人対戦・観戦可）</li>
+    <li>
+      <a href="https://chat.luvul.net/ChatRoom?room_id=427364" target="_blank">
+        ▶ 電気椅子元部屋
+      </a>
+    </li>
+
+    <li>スペシャルルーム（身内用）</li>
+    <li>
+      <a href="https://chat.luvul.net/ChatRoom?room_id=424208" target="_blank">
+        ▶ 雑談部屋・ご意見、ご感想はこちら
+      </a>
+    </li>
+
+  </ul>
+
+</details>
 
 <div class="feature-title">機能説明</div>
 <ul class="feature-list">
@@ -148,7 +177,18 @@ input[type="password"] {
 
 <!-- ===== room1 ===== -->
 <div class="room room1">
-  <div class="room-title">ルーム1</div>
+  <div class="room-title-row">
+
+  <span class="room-title">
+    ルーム1
+  </span>
+
+  <span class="room-desc">
+    サイコロ対決
+  </span>
+
+</div>
+
   <div class="room-info">
     人数（<span id="count-room1">0</span>人）
     <span id="names-room1">なし</span>
@@ -160,7 +200,18 @@ input[type="password"] {
 
 <!-- ===== room2 ===== -->
 <div class="room room2">
-  <div class="room-title">ルーム2</div>
+ <div class="room-title-row">
+
+  <span class="room-title">
+    ルーム2
+  </span>
+
+  <span class="room-desc">
+    サイコロ対決
+  </span>
+
+</div>
+
   <div class="room-info">
     人数（<span id="count-room2">0</span>人）
     <span id="names-room2">なし</span>
@@ -170,7 +221,18 @@ input[type="password"] {
   <button onclick="enterRoom('room2')">入室</button>
 </div>
 <div class="room room3">
-  <div class="room-title">ルーム3</div>
+  <div class="room-title-row">
+
+  <span class="room-title">
+    ルーム3
+  </span>
+
+  <span class="room-desc">
+    オナニー部屋
+  </span>
+
+</div>
+
   <div class="room-info">
     人数（<span id="count-room3">0</span>人）
     <span id="names-room3">なし</span>
@@ -181,7 +243,18 @@ input[type="password"] {
 </div>
 
 <div class="room room4">
-  <div class="room-title">ルーム4</div>
+  <div class="room-title-row">
+
+  <span class="room-title">
+    ルーム4
+  </span>
+
+  <span class="room-desc">
+    オナニー部屋
+  </span>
+
+</div>
+
   <div class="room-info">
     人数（<span id="count-room4">0</span>人）
     <span id="names-room4">なし</span>
@@ -190,9 +263,21 @@ input[type="password"] {
 
   <button onclick="enterRoom('room4')">入室</button>
 </div>
+
 <!-- ===== room5 ===== -->
 <div class="room room5">
-  <div class="room-title">女子限定部屋</div>
+  <div class="room-title-row">
+
+  <span class="room-title">
+    女子限定部屋
+  </span>
+
+  <span class="room-desc">
+    女子のみ入室可
+  </span>
+
+</div>
+
   <div class="room-info">
     人数（<span id="count-room5">0</span>人）
     <span id="names-room5">なし</span>
@@ -206,15 +291,51 @@ input[type="password"] {
   <input type="checkbox" id="girl-room5">
   女子
 </label>
-
 <button onclick="enterRoom('room5')">入室</button>
+</div>
 
+<!-- ===== room6 ===== -->
+<div class="room room6">
+  <div class="room-title-row">
+
+  <span class="room-title">
+    巻き込まれ部屋
+  </span>
+
+  <span class="room-desc">
+    未実装 見学での参加不可、必ず名前で入室すること。
+  </span>
+
+</div>
+
+  <div class="room-info">
+    人数（<span id="count-room6">0</span>人）
+    <span id="names-room6">なし</span>
+  </div>
+
+  <label>
+    <input type="checkbox" id="age-room6">
+    18+
+  </label>
+
+  <button onclick="enterRoom('room6')">入室</button>
 </div>
 
 
 <!-- ===== denki（既存） ===== -->
 <div class="room denki">
-  <div class="room-title">電気椅子1</div>
+  <div class="room-title-row">
+
+  <span class="room-title">
+    電気椅子1
+  </span>
+
+  <span class="room-desc">
+    2人対戦・観戦可
+  </span>
+
+</div>
+
   <div class="room-info">
     人数（<span id="count-denki">0</span>人）
     <span id="names-denki">なし</span>
@@ -226,7 +347,18 @@ input[type="password"] {
 
 <!-- ===== denki1（追加） ===== -->
 <div class="room denki">
-  <div class="room-title">電気椅子2</div>
+  <div class="room-title-row">
+
+  <span class="room-title">
+    電気椅子2
+  </span>
+
+  <span class="room-desc">
+    2人対戦・観戦可
+  </span>
+
+</div>
+
   <div class="room-info">
     人数（<span id="count-denki1">0</span>人）
     <span id="names-denki1">なし</span>
@@ -237,7 +369,18 @@ input[type="password"] {
 
 <!-- ===== denki2（追加） ===== -->
 <div class="room denki">
-  <div class="room-title">電気椅子3</div>
+  <div class="room-title-row">
+
+  <span class="room-title">
+    電気椅子3
+  </span>
+
+  <span class="room-desc">
+    2人対戦・観戦可
+  </span>
+
+</div>
+
   <div class="room-info">
     人数（<span id="count-denki2">0</span>人）
     <span id="names-denki2">なし</span>
@@ -248,7 +391,18 @@ input[type="password"] {
 
 <!-- ===== special ===== -->
 <div class="room special">
-  <div class="room-title">スペシャル</div>
+  <div class="room-title-row">
+
+  <span class="room-title">
+    スペシャル
+  </span>
+
+  <span class="room-desc">
+    身内用ルーム
+  </span>
+
+</div>
+
   <div class="room-info">
     人数（<span id="count-special">0</span>人）
     <span id="names-special">なし</span>
@@ -309,6 +463,7 @@ const allRooms = [
   "room3",
   "room4",
   "room5",
+  "room6",  
   "denki",
   "denki1",
   "denki2",
@@ -346,6 +501,7 @@ function enterRoom(room) {
   "room3",
   "room4",
   "room5",
+  "room6",
   "denki",
   "denki1",
   "denki2"
