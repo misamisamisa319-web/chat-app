@@ -1258,13 +1258,22 @@ io.to(socket.room).emit("message", resultMsg);
 
   game.ended = true;
   game.phase = "end";
-  setTimeout(() => {
+ setTimeout(() => {
 
+  // ===== players リセット =====
+  game.players = [];
+
+  game.turn = 0;
+  game.trapSeat = null;
+  game.sitSeat = null;
+  game.sitPreview = null;
+  game.started = false;
 
   io.to(socket.room).emit(
     "denkiState",
     denkiStateRoom(socket.room)
   );
+
 }, 3000);
 
 
@@ -1343,13 +1352,23 @@ io.to(socket.room).emit("message", resultMsg);
   game.ended = true;
   game.phase = "end";
   setTimeout(() => {
-  
+
+  // ===== players リセット =====
+  game.players = [];
+
+  game.turn = 0;
+  game.trapSeat = null;
+  game.sitSeat = null;
+  game.sitPreview = null;
+  game.started = false;
 
   io.to(socket.room).emit(
     "denkiState",
     denkiStateRoom(socket.room)
   );
+
 }, 3000);
+
 
 
   io.to(socket.room).emit(
