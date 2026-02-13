@@ -717,6 +717,7 @@ function denkiStateRoom(room){
   return {
     phase: game.phase,
     ended: game.ended,
+    started: game.started,
     trapSeat: game.phase === "shock" ? game.trapSeat : null,
     sitSeat: game.sitSeat,
     sitPreview: game.sitPreview,
@@ -1084,27 +1085,26 @@ if (game.players.length === 2) {
   }
 
   // ===== 開始 =====
-  if (!game.started) {
+if (!game.started) {
 
-    game.started = true;
-    game.phase = "set";
+  game.started = true;
+
+  const startMsg = {
+    name: "system",
+    text: `⚡ 勝負開始！ ${game.players[0].name} vs ${game.players[1].name}`,
+    room: socket.room,
+    time: getTimeString()
+  };
+
+  const log = normalizeLog(startMsg);
+  adminLogs.push(log);
+roomLogs.push(log);
+
+saveLogs();
+
+io.to(socket.room).emit("message", startMsg);
 
 
-    const startMsg = {
-      name: "system",
-      text: `⚡ 勝負開始！ ${game.players[0].name} vs ${game.players[1].name}`,
-      room: socket.room,
-      time: getTimeString()
-    };
-
-    const log = normalizeLog(startMsg);
-
-    adminLogs.push(log);
-    roomLogs.push(log);
-
-    saveLogs();
-
-    io.to(socket.room).emit("message", startMsg);
 
   }
 
