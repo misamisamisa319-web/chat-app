@@ -1074,7 +1074,7 @@ if (game.players.length === 2) {
     });
 
     game.turn = 0;
-    game.phase = "set";
+    game.phase = "wait";
     game.trapSeat = null;
     game.sitSeat = null;
     game.sitPreview = null;
@@ -1087,6 +1087,8 @@ if (game.players.length === 2) {
   if (!game.started) {
 
     game.started = true;
+    game.phase = "set";
+
 
     const startMsg = {
       name: "system",
