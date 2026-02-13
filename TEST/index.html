@@ -885,14 +885,19 @@ if (
 const meJoined =
   denkiState.players.some(p => p.id === myId);
 
-const gameStarted =
-  denkiState.phase === "set" ? false : !denkiState.ended;
+// ===== 試合中判定 =====
+const gamePlaying =
+  denkiState.phase !== "set" &&
+  !denkiState.ended;
 
-if (meJoined || gameStarted) {
+// ===== 表示制御 =====
+if (meJoined || gamePlaying) {
   denkiJoinBtn.style.display = "none";
-} else {
+}
+else {
   denkiJoinBtn.style.display = "inline-block";
 }
+
 }
 
 
