@@ -185,7 +185,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 <button id="denkiSetBtn">仕掛ける</button>
 <button id="denkiShockBtn">⚡ 電流流す</button>
 <button id="denkiSitBtn">座る</button>
-<button id="denkiRematchBtn" style="display:none;">再戦する</button>
+
 
 
 
@@ -303,7 +303,6 @@ denkiSetBtn.disabled = true;
 denkiShockBtn.disabled = true;
 const denkiSitBtn = document.getElementById("denkiSitBtn");
 denkiSitBtn.disabled = true;
-const denkiRematchBtn = document.getElementById("denkiRematchBtn");
 const denkiJoinBtn = document.getElementById("denkiJoinBtn");
 
 denkiJoinBtn.onclick = () => {
@@ -331,10 +330,6 @@ denkiSitBtn.onclick = () => {
 
   socket.emit("denkiSitConfirm");
 
-};
-
-denkiRematchBtn.onclick = () => {
-  socket.emit("denkiRematch");
 };
 
 
@@ -891,22 +886,15 @@ const meJoined =
   denkiState.players.some(p => p.id === myId);
 
 const gameStarted =
-  denkiState.phase !== "set";
+  denkiState.phase === "set" ? false : !denkiState.ended;
 
 if (meJoined || gameStarted) {
   denkiJoinBtn.style.display = "none";
 } else {
   denkiJoinBtn.style.display = "inline-block";
 }
-
-  // ===== 再戦ボタン =====
-  if (denkiState.ended) {
-    denkiRematchBtn.style.display = "inline-block";
-  } else {
-    denkiRematchBtn.style.display = "none";
-  }
-
 }
+
 
 
 
