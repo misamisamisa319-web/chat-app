@@ -650,7 +650,6 @@ function createDenki(){
     sitSeat: null,
     sitPreview: null,
     ended: false,
-    rematchVotes: {},
     started: false
   };
 }
@@ -670,7 +669,6 @@ let denki = {
   sitSeat: null, 
   sitPreview: null, // ★ 仮座り用（追加）
   ended: false,        // ← 追加①：試合終了中か
-  rematchVotes: {},   // ← 追加②：再戦押した人
 };
 
 function denkiState(){
@@ -838,61 +836,6 @@ socket.on("muteUser", targetId => {
     muteByRoom[room][me]
   );
 
-});
-
-
-
-  // ===== 再戦ボタン =====
-socket.on("denkiRematch", () => {
-
-  if (!["denki","denki1","denki2"].includes(socket.room)) return;
-
-  const game = denkiRooms[socket.room];
-
-  if (!game.ended) return;
-
-  const player = game.players.find(p => p.id === socket.id);
-  if (!player) return;
-
-  game.rematchVotes[socket.id] = true;
-
-  if (Object.keys(game.rematchVotes).length === 2) {
-
-    game.ended = false;
-    game.rematchVotes = {};
-
-    game.players.forEach(p => {
-      p.score = 0;
-      p.shock = 0;
-      p.turns = [];
-    });
-
-    game.turn = 0;
-    game.phase = "set";
-    game.trapSeat = null;
-    game.sitSeat = null;
-    game.sitPreview = null;
-    game.started = false;
-
-
-    const msg = {
-      name: "system",
-      text: "🔁 再戦開始！",
-      room: socket.room,
-      time: getTimeString()
-    };
-const log = normalizeLog(msg);
-
-adminLogs.push(log);
-roomLogs.push(log);
-
-saveLogs();
-
-io.to(socket.room).emit("message", msg);
-
-  }
-
-  io.to(socket.room).emit("denkiState", denkiStateRoom(socket.room));
 });
 
 
@@ -1119,7 +1062,29 @@ socket.on("denkiJoin", () => {
     denkiStateRoom(socket.room)
   );
 
-  if (game.players.length === 2 && !game.started) {
+if (game.players.length === 2) {
+
+  // ===== 終了後リセット =====
+  if (game.ended) {
+
+    game.players.forEach(p => {
+      p.score = 0;
+      p.shock = 0;
+      p.turns = [];
+    });
+
+    game.turn = 0;
+    game.phase = "set";
+    game.trapSeat = null;
+    game.sitSeat = null;
+    game.sitPreview = null;
+    game.ended = false;
+    game.started = false;
+
+  }
+
+  // ===== 開始 =====
+  if (!game.started) {
 
     game.started = true;
 
@@ -1132,14 +1097,17 @@ socket.on("denkiJoin", () => {
 
     const log = normalizeLog(startMsg);
 
-adminLogs.push(log);
-roomLogs.push(log);
+    adminLogs.push(log);
+    roomLogs.push(log);
 
-saveLogs();
+    saveLogs();
 
-io.to(socket.room).emit("message", startMsg);
+    io.to(socket.room).emit("message", startMsg);
 
   }
+
+}
+
 
 });
 
@@ -1290,13 +1258,22 @@ io.to(socket.room).emit("message", resultMsg);
 
   game.ended = true;
   game.phase = "end";
-  setTimeout(() => {
+ setTimeout(() => {
 
+  // ===== players リセット =====
+  game.players = [];
+
+  game.turn = 0;
+  game.trapSeat = null;
+  game.sitSeat = null;
+  game.sitPreview = null;
+  game.started = false;
 
   io.to(socket.room).emit(
     "denkiState",
     denkiStateRoom(socket.room)
   );
+
 }, 3000);
 
 
@@ -1375,13 +1352,23 @@ io.to(socket.room).emit("message", resultMsg);
   game.ended = true;
   game.phase = "end";
   setTimeout(() => {
-  
+
+  // ===== players リセット =====
+  game.players = [];
+
+  game.turn = 0;
+  game.trapSeat = null;
+  game.sitSeat = null;
+  game.sitPreview = null;
+  game.started = false;
 
   io.to(socket.room).emit(
     "denkiState",
     denkiStateRoom(socket.room)
   );
+
 }, 3000);
+
 
 
   io.to(socket.room).emit(

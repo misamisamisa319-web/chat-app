@@ -1269,6 +1269,10 @@ io.to(socket.room).emit("message", resultMsg);
   game.sitPreview = null;
   game.started = false;
 
+  game.phase = "set";
+  game.ended = false;
+
+
   io.to(socket.room).emit(
     "denkiState",
     denkiStateRoom(socket.room)
