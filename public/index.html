@@ -654,14 +654,13 @@ function onDenkiSelect(seat) {
   if (!me) return;
 
 
- // 仕掛ける側
-if (
+  // 仕掛ける側
+ if (
   denkiState.phase === "set" &&
-  denkiState.started &&
   me &&
   (
     me.isTurn ||
-    denkiState.players[denkiState.turn]?.id === myId ||
+    denkiState.players[denkiState.turn]?.id === myId |
     denkiState.players[denkiState.turn]?.name === username
   )
 ) {
@@ -671,7 +670,6 @@ if (
 }
 
 
-
   // 座るフェーズは無条件で送る（判定はサーバー側）
 if (denkiState.phase === "sit") {
   socket.emit("denkiSit", seat);
@@ -679,16 +677,7 @@ if (denkiState.phase === "sit") {
 }
 function updateDenkiUI() {
 
- if (
-  denkiState.players.length === 2 &&
-  denkiState.started
-){
   denkiWrap.style.display = "block";
-}
-else{
-  denkiWrap.style.display = "none";
-}
-
 
   if (
   !denkiState ||
@@ -856,23 +845,18 @@ buttons.forEach(b => {
     return;
   }
 
+  // 仕掛けフェーズ
+  if (denkiState.phase === "set" && me.isTurn) {
+    b.disabled = false;
 
-// ===== 仕掛けフェーズ
-if (
-  denkiState.phase === "set" &&
-  me.isTurn
-) {
-  b.disabled = false;
-
-  if (selectedSeat === num) {
-    b.style.background = "#ffe066";
+    if (selectedSeat === num) {
+      b.style.background = "#ffe066";
+    }
   }
-}
 
-
-
-// 座りフェーズ
-if (denkiState.phase === "sit" &&
+  // 座りフェーズ
+if (
+  denkiState.phase === "sit" &&
   me &&
   (
     !me.isTurn ||

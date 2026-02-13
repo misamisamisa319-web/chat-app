@@ -717,7 +717,6 @@ function denkiStateRoom(room){
   return {
     phase: game.phase,
     ended: game.ended,
-    started: game.started,
     trapSeat: game.phase === "shock" ? game.trapSeat : null,
     sitSeat: game.sitSeat,
     sitPreview: game.sitPreview,
@@ -1075,7 +1074,7 @@ if (game.players.length === 2) {
     });
 
     game.turn = 0;
-    game.phase = "wait";
+    game.phase = "set";
     game.trapSeat = null;
     game.sitSeat = null;
     game.sitPreview = null;
@@ -1085,26 +1084,25 @@ if (game.players.length === 2) {
   }
 
   // ===== 開始 =====
-if (!game.started) {
+  if (!game.started) {
 
-  game.started = true;
-  game.phase = "set"; 
-  const startMsg = {
-    name: "system",
-    text: `⚡ 勝負開始！ ${game.players[0].name} vs ${game.players[1].name}`,
-    room: socket.room,
-    time: getTimeString()
-  };
+    game.started = true;
 
-  const log = normalizeLog(startMsg);
-  adminLogs.push(log);
-roomLogs.push(log);
+    const startMsg = {
+      name: "system",
+      text: `⚡ 勝負開始！ ${game.players[0].name} vs ${game.players[1].name}`,
+      room: socket.room,
+      time: getTimeString()
+    };
 
-saveLogs();
+    const log = normalizeLog(startMsg);
 
-io.to(socket.room).emit("message", startMsg);
+    adminLogs.push(log);
+    roomLogs.push(log);
 
+    saveLogs();
 
+    io.to(socket.room).emit("message", startMsg);
 
   }
 
@@ -1270,10 +1268,6 @@ io.to(socket.room).emit("message", resultMsg);
   game.sitSeat = null;
   game.sitPreview = null;
   game.started = false;
-
-  game.phase = "set";
-  game.ended = false;
-
 
   io.to(socket.room).emit(
     "denkiState",
