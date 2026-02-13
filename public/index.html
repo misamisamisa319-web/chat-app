@@ -679,7 +679,16 @@ if (denkiState.phase === "sit") {
 }
 function updateDenkiUI() {
 
+ if (
+  denkiState.players.length === 2 &&
+  denkiState.started
+){
   denkiWrap.style.display = "block";
+}
+else{
+  denkiWrap.style.display = "none";
+}
+
 
   if (
   !denkiState ||
@@ -848,7 +857,7 @@ buttons.forEach(b => {
   }
 
 
-  // ===== 仕掛けフェーズ
+// ===== 仕掛けフェーズ
 if (
   denkiState.phase === "set" &&
   me.isTurn
@@ -861,10 +870,9 @@ if (
 }
 
 
+
 // 座りフェーズ
-if (
-  denkiState.phase === "sit" &&
-  denkiState.started &&
+if (denkiState.phase === "sit" &&
   me &&
   (
     !me.isTurn ||

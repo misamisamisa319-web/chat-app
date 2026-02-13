@@ -1088,7 +1088,7 @@ if (game.players.length === 2) {
 if (!game.started) {
 
   game.started = true;
-
+  game.phase = "set"; 
   const startMsg = {
     name: "system",
     text: `⚡ 勝負開始！ ${game.players[0].name} vs ${game.players[1].name}`,
