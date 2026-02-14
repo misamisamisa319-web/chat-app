@@ -755,12 +755,7 @@ if (isSpectator) {
   denkiShockBtn.disabled = false;
   denkiStatus.textContent = "⚡ 電流を流してください";
 }
-   else if (
-  denkiState.started === true &&
-  denkiState.phase === "set"
-) {
-  denkiStatus.textContent = "あなたの番：椅子を仕掛ける";
-}
+   
 
     else if (!isSpectator) {
       denkiStatus.textContent = "相手の操作待ち";
