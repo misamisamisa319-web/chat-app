@@ -1110,6 +1110,12 @@ if (game.players.length === 2) {
   // ===== 開始 =====
   if (!game.started) {
 
+    game.turn = 0;
+    game.phase = "set";
+    game.trapSeat = null;
+    game.sitSeat = null;
+    game.sitPreview = null;
+
     game.started = true;
 
     const startMsg = {
