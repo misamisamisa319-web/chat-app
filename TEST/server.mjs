@@ -733,6 +733,8 @@ function denkiStateRoom(room){
     phase: game.phase,
     ended: game.ended,
     started: game.started,
+    turn: game.turn,
+
 
     trapSeat: game.phase === "shock" ? game.trapSeat : null,
     sitSeat: game.sitSeat,

@@ -661,7 +661,8 @@ function onDenkiSelect(seat) {
   me &&
   (
     me.isTurn ||
-    denkiState.players[denkiState.turn]?.id === myId |
+    denkiState.players[denkiState.turn]?.id === myId ||
+
     denkiState.players[denkiState.turn]?.name === username
   )
 ) {
@@ -754,8 +755,11 @@ if (isSpectator) {
   denkiShockBtn.disabled = false;
   denkiStatus.textContent = "⚡ 電流を流してください";
 }
-   else if (!denkiState.started) {
-  denkiStatus.textContent = "対戦準備中…";
+   else if (
+  denkiState.started === true &&
+  denkiState.phase === "set"
+) {
+  denkiStatus.textContent = "あなたの番：椅子を仕掛ける";
 }
 
     else if (!isSpectator) {
