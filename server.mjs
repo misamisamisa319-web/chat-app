@@ -732,6 +732,8 @@ function denkiStateRoom(room){
   return {
     phase: game.phase,
     ended: game.ended,
+    started: game.started,
+
     trapSeat: game.phase === "shock" ? game.trapSeat : null,
     sitSeat: game.sitSeat,
     sitPreview: game.sitPreview,
@@ -1134,6 +1136,8 @@ if (game.players.length === 2) {
   const game = denkiRooms[socket.room];
 
   if (game.phase !== "set") return;
+  if (!game.started) return;
+
 
   const me = game.players[game.turn];
   if (!me || me.id !== socket.id) return;
@@ -1154,6 +1158,8 @@ socket.on("denkiSit", seat => {
   const game = denkiRooms[socket.room];
 
   if (game.phase !== "sit") return;
+  if (!game.started) return;
+
 
   // 座る側 = turnじゃない方
   const victimIndex = game.turn === 0 ? 1 : 0;
@@ -1175,6 +1181,8 @@ socket.on("denkiShock", () => {
   const game = denkiRooms[socket.room];
 
   if (game.phase !== "shock") return;
+  if (!game.started) return;
+
 
   const attacker = game.players[game.turn];
   if (!attacker || attacker.id !== socket.id) return;

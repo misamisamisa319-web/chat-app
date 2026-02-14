@@ -656,6 +656,7 @@ function onDenkiSelect(seat) {
 
   // 仕掛ける側
  if (
+  denkiState.started === true &&
   denkiState.phase === "set" &&
   me &&
   (
@@ -671,9 +672,13 @@ function onDenkiSelect(seat) {
 
 
   // 座るフェーズは無条件で送る（判定はサーバー側）
-if (denkiState.phase === "sit") {
+if (
+  denkiState.started === true &&
+  denkiState.phase === "sit"
+) {
   socket.emit("denkiSit", seat);
 }
+
 }
 function updateDenkiUI() {
 
@@ -714,7 +719,8 @@ if (isSpectator) {
   if (!isSpectator) {
 
     if (
-  denkiState.phase === "set" &&
+      denkiState.started === true &&
+      denkiState.phase === "set" &&
   me &&
   (
     me.isTurn ||
@@ -747,6 +753,9 @@ if (isSpectator) {
 ) {
   denkiShockBtn.disabled = false;
   denkiStatus.textContent = "⚡ 電流を流してください";
+}
+   else if (!denkiState.started) {
+  denkiStatus.textContent = "対戦準備中…";
 }
 
     else if (!isSpectator) {
@@ -846,13 +855,18 @@ buttons.forEach(b => {
   }
 
   // 仕掛けフェーズ
-  if (denkiState.phase === "set" && me.isTurn) {
-    b.disabled = false;
+if (
+  denkiState.started === true &&
+  denkiState.phase === "set" &&
+  me.isTurn
+) {
+  b.disabled = false;
 
-    if (selectedSeat === num) {
-      b.style.background = "#ffe066";
-    }
+  if (selectedSeat === num) {
+    b.style.background = "#ffe066";
   }
+}
+
 
   // 座りフェーズ
 if (
@@ -887,8 +901,9 @@ const meJoined =
 
 // ===== 試合中判定 =====
 const gamePlaying =
-  denkiState.phase !== "set" &&
+  denkiState.started === true &&
   !denkiState.ended;
+
 
 // ===== 表示制御 =====
 if (meJoined || gamePlaying) {
