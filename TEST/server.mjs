@@ -105,11 +105,25 @@ function addDate(timeStr) {
     return res.status(403).send("Forbidden");
   }
 
-  const userRows = users.map(u => `
-    <tr>
-      <td>${u.name}</td>
-      <td>${u.room}</td>
-      <td>
+  const userRows = [...users]
+.sort((a, b) => {
+
+  const roomA = Number(
+    (a.room || "").replace("room", "")
+  );
+
+  const roomB = Number(
+    (b.room || "").replace("room", "")
+  );
+
+  return roomA - roomB;
+
+})
+.map(u => `
+  <tr>
+    <td>${u.name}</td>
+    <td>${u.room}</td>
+    <td>
        <form method="POST" action="/admin/kick" style="display:inline;">
   <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
   <input type="hidden" name="userId" value="${u.id}">
@@ -124,7 +138,8 @@ function addDate(timeStr) {
 
       </td>
     </tr>
-  `).join("");
+`).join("");
+
 
  const logRows = [...adminLogs].reverse().map(m => {
 
