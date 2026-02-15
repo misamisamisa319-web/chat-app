@@ -111,24 +111,38 @@ function addDate(timeStr) {
     return res.status(403).send("Forbidden");
   }
 
-  const userRows = [...users]
+  const roomOrder = [
+  "room1",
+  "room2",
+  "room3",
+  "room4",
+  "room5",
+  "room6",
+  "denki",
+  "denki1",
+  "denki2",
+  "special",
+  "privateA",
+  "privateB",
+  "privateC",
+  "privateD"
+];
+
+const userRows = [...users]
 .sort((a, b) => {
 
-  const roomA = Number(
-    (a.room || "").replace("room", "")
-  );
+  const rA = roomOrder.indexOf(a.room);
+  const rB = roomOrder.indexOf(b.room);
 
-  const roomB = Number(
-    (b.room || "").replace("room", "")
-  );
+  if (rA !== rB) return rA - rB;
 
-  return roomA - roomB;
+  return a.name.localeCompare(b.name, "ja");
 
 })
 .map(u => `
   <tr>
-    <td>${u.name}</td>
     <td>${u.room}</td>
+    <td>${u.name}</td>
     <td>
        <form method="POST" action="/admin/kick" style="display:inline;">
   <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
@@ -147,7 +161,17 @@ function addDate(timeStr) {
 `).join("");
 
 
- const logRows = [...adminLogs].reverse().map(m => {
+const selectedRoom = req.query.room || "all";
+
+const filteredLogs =
+  selectedRoom === "all"
+    ? adminLogs
+    : adminLogs.filter(m =>
+        m.room === selectedRoom
+      );
+
+ const logRows = [...filteredLogs].reverse().map(m => {
+
 
   let nameDisplay = m.name;
 
@@ -187,11 +211,79 @@ function addDate(timeStr) {
 
       <h3>接続中ユーザー</h3>
       <table>
-        <tr><th>名前</th><th>部屋</th><th>操作</th></tr>
+       <tr><th>部屋</th><th>名前</th><th>操作</th></tr>
+
         ${userRows}
       </table>
 
       <h3>ログ</h3>
+      <form method="GET" action="/admin" style="margin-bottom:10px;">
+
+  <input type="hidden" name="key"
+    value="${process.env.ADMIN_KEY}">
+
+  <select name="room"
+    onchange="this.form.submit()">
+<option value="all"
+  ${selectedRoom==="all"?"selected":""}>
+  全部
+</option>
+
+<option value="room1"
+  ${selectedRoom==="room1"?"selected":""}>
+  room1
+</option>
+
+<option value="room2"
+  ${selectedRoom==="room2"?"selected":""}>
+  room2
+</option>
+
+<option value="room3"
+  ${selectedRoom==="room3"?"selected":""}>
+  room3
+</option>
+
+<option value="room4"
+  ${selectedRoom==="room4"?"selected":""}>
+  room4
+</option>
+
+<option value="room5"
+  ${selectedRoom==="room5"?"selected":""}>
+  room5
+</option>
+
+<option value="room6"
+  ${selectedRoom==="room6"?"selected":""}>
+  room6
+</option>
+
+<option value="denki"
+  ${selectedRoom==="denki"?"selected":""}>
+  denki
+</option>
+
+<option value="denki1"
+  ${selectedRoom==="denki1"?"selected":""}>
+  denki1
+</option>
+
+<option value="denki2"
+  ${selectedRoom==="denki2"?"selected":""}>
+  denki2
+</option>
+
+<option value="special"
+  ${selectedRoom==="special"?"selected":""}>
+  special
+</option>
+
+
+  </select>
+
+</form>
+
       <table>
         <tr><th>時刻</th><th>部屋</th><th>名前</th><th>種別</th><th>内容</th></tr>
         ${logRows}
