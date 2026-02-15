@@ -10,6 +10,12 @@ const io = new Server(server);
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 let users = [];
+// ===== 部屋空ログ削除タイマー =====
+let emptyRoomTimers = {};
+
+const EMPTY_DELETE_TIME =
+  10 * 60 * 1000; // 10分
+
 // ===== 個人ミュート（部屋単位・名前保存） =====
 let muteByRoom = {
   // room1: {
@@ -1055,6 +1061,17 @@ return;
   socket.username = name;
   socket.room = room;
   socket.join(room);
+  // ===== 空室削除タイマー停止 =====
+if (emptyRoomTimers[room]){
+
+  clearTimeout(
+    emptyRoomTimers[room]
+  );
+
+  delete emptyRoomTimers[room];
+
+}
+
 
   io.to(room).emit(
     "userList",
@@ -1998,31 +2015,53 @@ io.to(socket.room).emit("message",msg);
 
 setTimeout(() => {
 
-  if (leftRoom) {
+ if (leftRoom) {
 
-    const stillUsers =
-      users.filter(u => u.room === leftRoom);
+  const stillUsers =
+    users.filter(u => u.room === leftRoom);
 
-    if (stillUsers.length === 0) {
+  if (stillUsers.length === 0) {
 
-     // ===== 部屋ログ削除 =====
-    roomLogs =
-    roomLogs.filter(m => m.room !== leftRoom);
+    // ===== 10分後削除タイマー =====
+    emptyRoomTimers[leftRoom] =
+      setTimeout(() => {
 
-      // ===== 罰ストック削除 =====
-      delete punishStockByRoom[leftRoom];
-      delete punishCooldownByRoom[leftRoom];
-      delete punishCountByRoom[leftRoom];
-      delete zecchoUnlockedByRoom[leftRoom];
+        const checkUsers =
+          users.filter(
+            u => u.room === leftRoom
+          );
 
+        if (checkUsers.length === 0) {
 
-      // ===== 電気椅子リセット =====
-      if (["denki","denki1","denki2"].includes(leftRoom)) {
-        denkiRooms[leftRoom] = createDenki();
-      }
+          // ===== 部屋ログ削除 =====
+          roomLogs =
+            roomLogs.filter(
+              m => m.room !== leftRoom
+            );
 
-    }
+          // ===== 罰系リセット =====
+          delete punishStockByRoom[leftRoom];
+          delete punishCooldownByRoom[leftRoom];
+          delete punishCountByRoom[leftRoom];
+          delete zecchoUnlockedByRoom[leftRoom];
+
+          // ===== 電気椅子リセット =====
+          if (
+            ["denki","denki1","denki2"]
+              .includes(leftRoom)
+          ){
+            denkiRooms[leftRoom] =
+              createDenki();
+          }
+
+        }
+
+      }, EMPTY_DELETE_TIME);
+
   }
+
+}
+
 
   io.emit("lobbyUpdate", getLobbyInfo());
 
