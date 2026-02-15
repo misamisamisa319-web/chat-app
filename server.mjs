@@ -1863,12 +1863,13 @@ if (text === "男イベント") {
   const item = getMaleEvent(socket.room);
 
   const msg = {
-    name: "system",
-    text: item,
-    room: socket.room,
-    bold: true,
-    time: getTimeString()
-  };
+  name: socket.username,
+  text: item,
+  room: socket.room,
+  bold: true,
+  time: getTimeString()
+};
+
 
   io.to(socket.room).emit("message", msg);
 
@@ -1884,12 +1885,13 @@ if (text === "女イベント") {
   const item = getFemaleEvent(socket.room);
 
   const msg = {
-    name: "system",
-    text: item,
-    room: socket.room,
-    bold: true,
-    time: getTimeString()
-  };
+  name: socket.username,
+  text: item,
+  room: socket.room,
+  bold: true,
+  time: getTimeString()
+};
+
 
   io.to(socket.room).emit("message", msg);
 
@@ -1905,12 +1907,13 @@ if (text === "共通イベント") {
     getCommonEvent(socket.room);
 
   const msg = {
-    name: "system",
-    text: item,
-    room: socket.room,
-    bold: true,
-    time: getTimeString()
-  };
+  name: socket.username,
+  text: item,
+  room: socket.room,
+  bold: true,
+  time: getTimeString()
+};
+
 
   io.to(socket.room).emit("message", msg);
 
