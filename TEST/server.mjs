@@ -1133,6 +1133,11 @@ if (game.players.length === 2) {
     saveLogs();
 
     io.to(socket.room).emit("message", startMsg);
+    io.to(socket.room).emit(
+  "denkiState",
+  denkiStateRoom(socket.room)
+);
+
 
   }
 
