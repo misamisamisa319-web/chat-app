@@ -973,7 +973,13 @@ socket.on("denkiSitConfirm", () => {
     }
     socket.emit("checkResult", { ok:true });
   });
-socket.on("join", ({ name, color="black", room="room1" }) => {
+socket.on("join", ({
+  name,
+  color="black",
+  room="room1",
+  connectKey
+}) => {
+
 
   // ===== BAN =====
   if (bans[name] && bans[name] > Date.now()) {
@@ -1013,49 +1019,64 @@ if (room === "room6") {
   }
 
 }
+// ===== 同名検索 =====
+const existingUser =
+  users.find(u =>
+    u.name === name &&
+    u.room === room
+  );
 
+// ===== 同名チェック =====
+if (existingUser) {
 
-  // ===== 同名チェック =====
-  const existingUser =
-    users.find(u =>
-      u.name === name &&
-      u.room === room
-    );
-
-  if (existingUser) {
+  // ===== 接続キー一致 → 復帰 =====
+  if (
+    existingUser.connectKey &&
+    existingUser.connectKey === connectKey
+  ){
 
     const oldSocket =
       io.sockets.sockets.get(existingUser.id);
 
-    if (oldSocket) {
-
-      socket.emit("message", {
-  name:"system",
-  text:"同じ名前の人がいます",
-  room,
-  time:getTimeString()
-});
-
-socket.disconnect(true);
-return;
-
+    if (oldSocket){
+      oldSocket.disconnect(true);
     }
 
-    // 再接続
     existingUser.id = socket.id;
     existingUser.lastActive = Date.now();
 
-  } else {
+  }
+  else {
 
-    users.push({
-      id: socket.id,
-      name,
-      color,
+    socket.emit("message", {
+      name:"system",
+      text:"同じ名前の人がいます",
       room,
-      lastActive: Date.now()
+      time:getTimeString()
     });
 
+    socket.disconnect(true);
+    return;
+
   }
+
+} else {
+
+  users.push({
+    id: socket.id,
+    name,
+    color,
+    room,
+    connectKey,
+    lastActive: Date.now()
+  });
+
+}
+
+  
+
+  
+
 
   // ===== ここで初めて入室 =====
   socket.username = name;

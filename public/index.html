@@ -981,6 +981,22 @@ else {
 
 
 
+// ===== 接続キー生成 =====
+let connectKey =
+  localStorage.getItem("connectKey");
+
+if (!connectKey){
+
+  connectKey =
+    Math.random().toString(36).slice(2) +
+    Date.now().toString(36);
+
+  localStorage.setItem(
+    "connectKey",
+    connectKey
+  );
+
+}
 
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
@@ -990,11 +1006,13 @@ joinBtn.onclick = () => {
   localStorage.setItem("chatName", username);
 
   socket.emit("join", {
-    name: username,
-    color: myColor,
-    room,
-    key
-  });
+  name: username,
+  color: myColor,
+  room,
+  key,
+  connectKey
+});
+
 
   // 電気椅子UI 即表示
   socket.emit("denkiStateRequest");

@@ -217,7 +217,11 @@ input, button, select { padding: 10px; font-size: 16px; }
         onclick="sendPunish('命令男')">
 男オナ
 </button>
-  <button onclick="sendPunish('苦痛罰')">苦痛罰</button>
+ <button id="painPunishBtn"
+        onclick="sendPunish('苦痛罰')">
+苦痛罰
+</button>
+
   <button id="zecchoBtn"
         onclick="sendPunish('絶頂許可')"
         style="display:none;">
@@ -414,6 +418,27 @@ if (room === "room5") {
 
   if (boyOnaBtn){
     boyOnaBtn.style.display = "none";
+  }
+
+}
+// ===== 苦痛罰表示制御 =====
+const painPunishBtn =
+  document.getElementById("painPunishBtn");
+
+if (painPunishBtn){
+
+  if (
+    room === "special" ||
+    room === "denki"  ||
+    room === "denki1" ||
+    room === "denki2"
+  ){
+    painPunishBtn.style.display =
+      "inline-block";
+  }
+  else{
+    painPunishBtn.style.display =
+      "none";
   }
 
 }
