@@ -512,6 +512,40 @@ const maleEventItems = [
 "男イベント30.",
 ];
 
+const commonEventItems = [
+"共通イベント1.",
+"共通イベント2.",
+"共通イベント3.",
+"共通イベント4.",
+"共通イベント5.",
+"共通イベント6.",
+"共通イベント7.",
+"共通イベント8.",
+"共通イベント9.",
+"共通イベント10.",
+"共通イベント11.",
+"共通イベント12.",
+"共通イベント13.",
+"共通イベント14.",
+"共通イベント15.",
+"共通イベント16.",
+"共通イベント17.",
+"共通イベント18.",
+"共通イベント19.",
+"共通イベント20.",
+"共通イベント21.",
+"共通イベント22.",
+"共通イベント23.",
+"共通イベント24.",
+"共通イベント25.",
+"共通イベント26.",
+"共通イベント27.",
+"共通イベント28.",
+"共通イベント29.",
+"共通イベント30.",
+];
+
+
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 let punishStockByRoom = {};
 // ===== 罰累計（絶頂解放用） =====
@@ -561,6 +595,8 @@ function initPunishRoom(room){
       pain: shuffle([...specialPainPunishItems]),
       maleEvent: shuffle([...maleEventItems]),
       femaleEvent: shuffle([...femaleEventItems]),
+      commonEvent: shuffle([...commonEventItems]),
+
     };
   }
 }
@@ -615,6 +651,18 @@ function getFemaleEvent(room){
       shuffle([...femaleEventItems]);
   }
   return punishStockByRoom[room].femaleEvent.shift();
+}
+function getCommonEvent(room){
+
+  initPunishRoom(room);
+
+  if (!punishStockByRoom[room].commonEvent.length){
+    punishStockByRoom[room].commonEvent =
+      shuffle([...commonEventItems]);
+  }
+
+  return punishStockByRoom[room].commonEvent.shift();
+
 }
 
 
@@ -1815,12 +1863,13 @@ if (text === "男イベント") {
   const item = getMaleEvent(socket.room);
 
   const msg = {
-    name: "system",
-    text: item,
-    room: socket.room,
-    bold: true,
-    time: getTimeString()
-  };
+  name: socket.username,
+  text: item,
+  room: socket.room,
+  bold: true,
+  time: getTimeString()
+};
+
 
   io.to(socket.room).emit("message", msg);
 
@@ -1836,16 +1885,42 @@ if (text === "女イベント") {
   const item = getFemaleEvent(socket.room);
 
   const msg = {
-    name: "system",
-    text: item,
-    room: socket.room,
-    bold: true,
-    time: getTimeString()
-  };
+  name: socket.username,
+  text: item,
+  room: socket.room,
+  bold: true,
+  time: getTimeString()
+};
+
 
   io.to(socket.room).emit("message", msg);
 
   messagesLog.push(normalizeLog(msg));
+  saveLogs();
+
+  return;
+}
+// ===== 共通イベント =====
+if (text === "共通イベント") {
+
+  const item =
+    getCommonEvent(socket.room);
+
+  const msg = {
+  name: socket.username,
+  text: item,
+  room: socket.room,
+  bold: true,
+  time: getTimeString()
+};
+
+
+  io.to(socket.room).emit("message", msg);
+
+  messagesLog.push(
+    normalizeLog(msg)
+  );
+
   saveLogs();
 
   return;
