@@ -435,6 +435,27 @@ if (room === "room6") {
   if (femaleEventBtn){
     femaleEventBtn.style.display = "inline-block";
   }
+  const girlPunishBtn =
+  document.querySelector("button[onclick=\"sendPunish('女子罰')\"]");
+
+const boyPunishBtn =
+  document.getElementById("boyPunishBtn");
+
+const girlOnaBtn =
+  document.querySelector("button[onclick=\"sendPunish('命令女')\"]");
+
+const boyOnaBtn =
+  document.getElementById("boyOnaBtn");
+
+const painBtn =
+  document.querySelector("button[onclick=\"sendPunish('苦痛罰')\"]");
+
+if (girlPunishBtn) girlPunishBtn.style.display = "none";
+if (boyPunishBtn) boyPunishBtn.style.display = "none";
+if (girlOnaBtn)   girlOnaBtn.style.display = "none";
+if (boyOnaBtn)    boyOnaBtn.style.display = "none";
+if (painBtn)      painBtn.style.display = "none";
+
 
 }
 

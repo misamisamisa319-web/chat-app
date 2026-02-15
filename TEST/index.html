@@ -235,6 +235,13 @@ input, button, select { padding: 10px; font-size: 16px; }
   女イベント
 </button>
 
+<button id="commonEventBtn"
+        style="display:none;"
+        onclick="sendPunish('共通イベント')">
+  共通イベント
+</button>
+
+
 </div>
 
 
@@ -424,6 +431,10 @@ if (room === "room6") {
   const femaleEventBtn =
     document.getElementById("femaleEventBtn");
 
+  const commonEventBtn =
+  document.getElementById("commonEventBtn");
+
+
   if (punishWrap){
     punishWrap.style.display = "flex";
   }
@@ -435,6 +446,11 @@ if (room === "room6") {
   if (femaleEventBtn){
     femaleEventBtn.style.display = "inline-block";
   }
+
+  if (commonEventBtn){
+  commonEventBtn.style.display = "inline-block";
+}
+
   const girlPunishBtn =
   document.querySelector("button[onclick=\"sendPunish('女子罰')\"]");
 
