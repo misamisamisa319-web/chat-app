@@ -1107,44 +1107,56 @@ socket.on("denkiSitConfirm", () => {
   const game = denkiRooms[socket.room];
 
   if (game.phase !== "sit") return;
+  if (!game.started) return;
 
   const victimIndex = game.turn === 0 ? 1 : 0;
   const victim = game.players[victimIndex];
   if (!victim || victim.id !== socket.id) return;
 
   if (game.sitPreview == null) return;
-game.sitSeat = game.sitPreview;
-game.sitPreview = null;
-game.phase = "shock";
 
+  // ===== 座り確定 =====
+  game.sitSeat = game.sitPreview;
+  game.sitPreview = null;
 
-// ===== 座り確定ログ =====
-const sitMsg = {
-  name: "system",
-  text: `${victim.name} が決定しました`,
-  room: socket.room,
-  time: getTimeString()
-};
+  // ===== フェーズ移行 =====
+  game.phase = "shock";
 
-const sitLog =
-  normalizeLog(sitMsg);
-
-adminLogs.push(sitLog);
-roomLogs.push(sitLog);
-
-saveLogs();
-
-io.to(socket.room).emit("message", sitMsg);
-
-io.to(socket.room).emit(
-  "denkiState",
-  denkiStateRoom(socket.room)
-);
-
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
 
 });
 
+socket.on("denkiSitConfirm", () => {
 
+  if (!["denki","denki1","denki2"].includes(socket.room)) return;
+
+  const game = denkiRooms[socket.room];
+
+  if (game.phase !== "sit") return;
+  if (!game.started) return;
+
+  const victimIndex = game.turn === 0 ? 1 : 0;
+  const victim = game.players[victimIndex];
+  if (!victim || victim.id !== socket.id) return;
+
+  if (game.sitPreview == null) return;
+
+  // ===== 座り確定 =====
+  game.sitSeat = game.sitPreview;
+  game.sitPreview = null;
+
+  // ===== フェーズ移行 =====
+  game.phase = "shock";
+
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
+
+});
 
 
   socket.on("checkRoomKey", ({ room, key }) => {
@@ -1460,7 +1472,7 @@ setTimeout(() => {
     denkiStateRoom(socket.room)
   );
 
-}, 300);
+}, 0);
 
 
 
@@ -1499,21 +1511,38 @@ socket.on("denkiSit", seat => {
   if (game.phase !== "sit") return;
   if (!game.started) return;
 
-
   // 座る側 = turnじゃない方
   const victimIndex = game.turn === 0 ? 1 : 0;
   const victim = game.players[victimIndex];
   if (!victim || victim.id !== socket.id) return;
 
+  // ===== 仮座り =====
   game.sitPreview = seat;
 
+  // ===== ログ（座りました）=====
+  const sitMsg = {
+    name: "system",
+    text: `${victim.name} が座りました`,
+    room: socket.room,
+    time: getTimeString()
+  };
 
+  const log = normalizeLog(sitMsg);
+
+  adminLogs.push(log);
+  roomLogs.push(log);
+
+  saveLogs();
+
+  io.to(socket.room).emit("message", sitMsg);
 
   io.to(socket.room).emit(
     "denkiState",
     denkiStateRoom(socket.room)
   );
+
 });
+
 
 socket.on("denkiShock", () => {
 
@@ -1526,7 +1555,7 @@ socket.on("denkiShock", () => {
 
 
   const attacker = game.players[game.turn];
-  if (!attacker || attacker.id !== socket.id) return;
+  
 
   const victimIndex = game.turn === 0 ? 1 : 0;
   const victim = game.players[victimIndex];
@@ -1743,20 +1772,27 @@ io.to(socket.room).emit("message", resultMsg);
   return;
 }
 // ===== ラウンド終了処理 =====
-game.turn = game.turn === 0 ? 1 : 0;
 
-game.phase = "set";
+// ★ 少し待ってからターン交代
+setTimeout(() => {
 
-game.trapSeat   = null;
-game.sitSeat    = null;
-game.sitPreview = null;
+  game.turn = game.turn === 0 ? 1 : 0;
 
-io.to(socket.room).emit(
-  "denkiState",
-  denkiStateRoom(socket.room)
-);
+  game.phase = "set";
+
+  game.trapSeat   = null;
+  game.sitSeat    = null;
+  game.sitPreview = null;
+
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
+
+}, 800);
 
 return;
+
  });
 
   socket.on("message", data=>{
