@@ -876,8 +876,10 @@ if (
 
   selectedSeat = seat;
 
-  // ★ ここでは送信しない
-  // 仕掛けるボタン押下時のみ送信
+  socket.emit(
+    "denkiTrapPreview",
+    seat
+  );
 
   return;
 }
@@ -887,11 +889,15 @@ if (
 
 // ===== 座り仮選択 =====
 if (
-  denkiState.started &&
   denkiState.phase === "sit"
 ) {
 
   selectedSeat = seat;
+
+  socket.emit(
+    "denkiSit",
+    seat
+  );
 
   const sitBtn =
     document.getElementById("denkiSitBtn");
@@ -901,6 +907,7 @@ if (
   }
 
 }
+
 
 
 
