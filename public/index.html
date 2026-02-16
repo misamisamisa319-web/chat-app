@@ -932,9 +932,8 @@ if (isSpectator) {
   // ===== プレイヤー操作制御 =====
   if (!isSpectator) {
 
-    if (
-      denkiState.started === true &&
-      denkiState.phase === "set" &&
+  if (
+  denkiState.phase === "set" &&
   me &&
   (
     me.isTurn ||
@@ -945,6 +944,7 @@ if (isSpectator) {
   denkiSetBtn.disabled = false;
   denkiStatus.textContent = "あなたの番：椅子を仕掛ける";
 }
+
 
  else if (
   denkiState.phase === "sit" &&
@@ -1066,9 +1066,8 @@ buttons.forEach(b => {
     return;
   }
 
-  // 仕掛けフェーズ
+ // 仕掛けフェーズ
 if (
-  denkiState.started === true &&
   denkiState.phase === "set" &&
   me.isTurn
 ) {
