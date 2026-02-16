@@ -876,10 +876,8 @@ if (
 
   selectedSeat = seat;
 
-  socket.emit(
-    "denkiTrapPreview",
-    seat
-  );
+  // ★ 仮選択即描画
+  updateDenkiUI();
 
   return;
 }
@@ -1068,21 +1066,19 @@ if (!isSpectator) {
 
   // ===== 椅子描画 =====
 const buttons = denkiBoard.querySelectorAll("button");
-
 buttons.forEach(b => {
 
   const num = Number(b.textContent);
 
-  // ★ 先に色判定
-  if (
-    selectedSeat === num &&
-    denkiState.phase === "set"
-  ){
-    b.style.background = "red";
-  }
-  else{
-    b.style.background = "";
-  }
+  b.style.background = "";
+  b.disabled = true;
+  b.style.display = "inline-block";
+
+// ===== 自分仮選択色 =====
+if (selectedSeat === num) {
+  b.style.background = "red";
+}
+
 
 
  // 使用済み非表示
@@ -1121,18 +1117,12 @@ if (
 // 座りフェーズ
 if (
   denkiState.phase === "sit" &&
-  !isMyTurn
+  !isMyTurn &&
+  !isSpectator
 ) {
   b.disabled = false;
 }
-// ===== 自分仮選択色 =====
-if (
-  selectedSeat === num &&
-  denkiState.phase === "set" &&
-  !denkiState.trapSeat
-) {
-  b.style.background = "red";
-}
+
 
 
   // 仮座り表示（全員）
