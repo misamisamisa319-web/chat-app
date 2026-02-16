@@ -870,10 +870,17 @@ if (
   denkiState.phase === "set" &&
   isMyTurn
 ) {
+
   selectedSeat = seat;
-  updateDenkiUI();
+
+  socket.emit(
+    "denkiSet",
+    seat
+  );
+
   return;
 }
+
 
 
 

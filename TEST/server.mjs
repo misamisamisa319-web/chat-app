@@ -1472,7 +1472,19 @@ if (game.players.length === 2) {
 if (!me || me.id !== socket.id) return;
 
 game.trapSeat = seat;
-game.phase = "sit";
+
+// ★ 即座に座りフェーズにしない
+setTimeout(() => {
+
+  game.phase = "sit";
+
+  io.to(socket.room).emit(
+    "denkiState",
+    denkiStateRoom(socket.room)
+  );
+
+}, 300);
+
 
 // ===== ファイナルサンダー？ =====
 const setUser = me;
