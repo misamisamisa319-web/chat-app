@@ -198,57 +198,77 @@ input, button, select { padding: 10px; font-size: 16px; }
   <ul id="userList"></ul>
 </div>
 
-<button id="timer3Btn">3分</button>
-<button id="timer5Btn">5分</button>
 
-<!-- ===== 罰トグル ===== -->
-<button id="punishToggleBtn">
-  罰メニュー
- </button>
+<!-- ===== タイマー＋罰トグル横並び ===== -->
+<div id="timerPunishRow" style="
+  display:flex;
+  gap:8px;
+  padding:4px 0;
+  flex-wrap:wrap;
+">
 
-<!-- ===== 罰ボタン ===== -->
+  <!-- 罰トグル -->
+  <button id="punishToggleBtn">
+    罰メニュー
+  </button>
+
+  <!-- タイマー -->
+  <button id="timer3Btn">3分</button>
+  <button id="timer5Btn">5分</button>
+
+</div>
+
+<!-- ===== 罰ボタン本体 ===== -->
 <div id="punishWrap" style="
   display:none;
   gap:7px;
   flex-wrap:wrap;
-  padding:6px 0;">
+  padding:6px 0;
+">
+
   <button onclick="sendPunish('女子罰')">女子罰</button>
+
   <button id="boyPunishBtn"
-        onclick="sendPunish('男子罰')">
-男子罰
-</button>
+    onclick="sendPunish('男子罰')">
+    男子罰
+  </button>
+
   <button onclick="sendPunish('命令女')">女オナ</button>
+
   <button id="boyOnaBtn"
-        onclick="sendPunish('命令男')">
-男オナ
-</button>
- <button id="painPunishBtn"
-        onclick="sendPunish('苦痛罰')">
-苦痛罰
-</button>
+    onclick="sendPunish('命令男')">
+    男オナ
+  </button>
+
+  <button id="painPunishBtn"
+    onclick="sendPunish('苦痛罰')">
+    苦痛罰
+  </button>
 
   <button id="zecchoBtn"
-        onclick="sendPunish('絶頂許可')"
-        style="display:none;">
-  絶頂許可
-</button>
-<button id="maleEventBtn"
-        style="display:none;"
-        onclick="sendPunish('男イベント')">
-  男イベント
-</button>
+    onclick="sendPunish('絶頂許可')"
+    style="display:none;">
+    絶頂許可
+  </button>
 
-<button id="femaleEventBtn"
-        style="display:none;"
-        onclick="sendPunish('女イベント')">
-  女イベント
-</button>
+  <button id="maleEventBtn"
+    style="display:none;"
+    onclick="sendPunish('男イベント')">
+    男イベント
+  </button>
 
-<button id="commonEventBtn"
-        style="display:none;"
-        onclick="sendPunish('共通イベント')">
-  共通イベント
-</button>
+  <button id="femaleEventBtn"
+    style="display:none;"
+    onclick="sendPunish('女イベント')">
+    女イベント
+  </button>
+
+  <button id="commonEventBtn"
+    style="display:none;"
+    onclick="sendPunish('共通イベント')">
+    共通イベント
+  </button>
+
 
 
 </div>
