@@ -929,52 +929,54 @@ if (isSpectator) {
   denkiStatus.textContent = "👀 観戦中";
 }
 
-  // ===== プレイヤー操作制御 =====
-  if (!isSpectator) {
+ 
+
+ // ===== プレイヤー操作制御 =====
+if (!isSpectator) {
+
+  // ===== ターン本人判定 =====
+  const turnPlayer =
+    players[denkiState.turn];
+
+  const isMyTurn =
+    turnPlayer?.id === myId ||
+    turnPlayer?.name === username;
+
 
   if (
-  denkiState.phase === "set" &&
-  me &&
-  (
-    me.isTurn ||
-    players[denkiState.turn]?.id === myId ||
-    players[denkiState.turn]?.name === username
-  )
-) {
-  denkiSetBtn.disabled = false;
-  denkiStatus.textContent = "あなたの番：椅子を仕掛ける";
-}
-
-
- else if (
-  denkiState.phase === "sit" &&
-  me &&
-  !me.isTurn
-) {
-  denkiSitBtn.disabled = false;
-  denkiStatus.textContent = "あなたの番：椅子に座る";
-}
-
+    denkiState.phase === "set" &&
+    isMyTurn
+  ) {
+    denkiSetBtn.disabled = false;
+    denkiStatus.textContent =
+      "あなたの番：椅子を仕掛ける";
+  }
 
   else if (
-  denkiState.phase === "shock" &&
-  me &&
-  (
-    me.isTurn ||
-    players[denkiState.turn]?.id === myId ||
-    players[denkiState.turn]?.name === username
-  )
-) {
-  denkiShockBtn.disabled = false;
-  denkiStatus.textContent = "⚡ 電流を流してください";
-}
-   
-
-    else if (!isSpectator) {
-      denkiStatus.textContent = "相手の操作待ち";
-    }
-
+    denkiState.phase === "sit" &&
+    !isMyTurn
+  ) {
+    denkiSitBtn.disabled = false;
+    denkiStatus.textContent =
+      "あなたの番：椅子に座る";
   }
+
+  else if (
+    denkiState.phase === "shock" &&
+    isMyTurn
+  ) {
+    denkiShockBtn.disabled = false;
+    denkiStatus.textContent =
+      "⚡ 電流を流してください";
+  }
+
+  else {
+    denkiStatus.textContent =
+      "相手の操作待ち";
+  }
+
+}
+
 
   // ===== スコア表示 =====
   denkiScore.textContent = players.map(p =>
@@ -1079,18 +1081,6 @@ if (
 }
 
 
-  // 座りフェーズ
-if (
-  denkiState.phase === "sit" &&
-  me &&
-  (
-    !me.isTurn ||
-    denkiState.players[denkiState.turn]?.id !== myId ||
-    denkiState.players[denkiState.turn]?.name !== username
-  )
-) {
-  b.disabled = false;
-}
 
 
 
