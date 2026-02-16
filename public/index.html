@@ -856,20 +856,25 @@ function onDenkiSelect(seat) {
   if (!me) return;
 
 
+// ===== ターン本人判定 =====
+const turnPlayer =
+  denkiState.players[denkiState.turn];
+
+const isMyTurn =
+  turnPlayer?.id === myId ||
+  turnPlayer?.name === username;
+
+
 // 仕掛ける側
 if (
   denkiState.phase === "set" &&
-  me &&
-  (
-    me.isTurn ||
-    denkiState.players[denkiState.turn]?.id === myId ||
-    denkiState.players[denkiState.turn]?.name === username
-  )
+  isMyTurn
 ) {
   selectedSeat = seat;
   updateDenkiUI();
   return;
 }
+
 
 
  // ===== 座り仮選択 =====
