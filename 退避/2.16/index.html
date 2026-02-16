@@ -1073,17 +1073,10 @@ buttons.forEach(b => {
 
   const num = Number(b.textContent);
 
-  // ★ 先に色判定
-  if (
-    selectedSeat === num &&
-    denkiState.phase === "set"
-  ){
-    b.style.background = "red";
-  }
-  else{
-    b.style.background = "";
-  }
-
+  b.style.background = "";
+  b.disabled = true;
+ b.style.display = "inline-block";
+ 
 
  // 使用済み非表示
 if (
