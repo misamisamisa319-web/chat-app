@@ -1054,11 +1054,15 @@ buttons.forEach(b => {
   b.disabled = true;
   b.style.display = "inline-block";
 
-  // 使用済み非表示
-  if (denkiState.usedSeats?.includes(num)) {
-    b.style.display = "none";
-    return;
-  }
+ // 使用済み非表示
+if (
+  denkiState.usedSeats?.includes(num) &&
+  denkiState.phase !== "set"
+) {
+  b.style.display = "none";
+  return;
+}
+
 
   // 観戦者は操作不可だが仮座りは見える
   if (isSpectator) {
