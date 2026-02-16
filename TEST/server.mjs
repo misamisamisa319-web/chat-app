@@ -462,8 +462,8 @@ const hitoriPunishItems = [
 
 //命令女
 const onaGirlPunishItems = [
-"命令女1.乳首に触れないように乳輪を指でくるくるなぞる２分間。",
-"命令女2.乳頭を薬指でふれるかふれないかの位置で上下にスリスリする2分間。",
+"命令女1.乳首に触れないように乳輪を指でくるくるなぞる3分間。",
+"命令女2.乳頭を薬指でふれるかふれないかの位置で上下にスリスリする3分間。",
 "命令女3.乳首をコリコリする3分間。",
 "命令女4.乳首を親指と中指でコリコリ潰しながら人差し指でスリスリ3分間する。",
 "命令女5.乳首を親指と中指でコリコリ潰しながら人差し指の爪でカリカリ3分間する。",
@@ -474,7 +474,7 @@ const onaGirlPunishItems = [
 "命令女10.人差指or中指をクリトリスに当て、PCのマウスをクリックするくらいの強さでクリトリスを3分間タップする。",
 "命令女11.中指・薬指二本の指をクリトリスに当て、時計回りに3分間スリスリする。",
 "命令女12.人差し指と中指でクリトリスを軽く挟み込んでシコシコ3分間する。",
-"命令女13.オマンコの中に指を入れズボズボ出し入れを３分間する。",
+"命令女13.オマンコの中に指を入れズボズボ出し入れを3分間する。",
 "命令女14.オマンコに玩具または棒状の物をズボズボ出し入れ3分間する。",
 "命令女15.オマンコにバイブかディルドを入れて抜けないようにパンツを履き全力で押し込むように10回叩く。入れる玩具がない場合は寸止め1回する。",
 "命令女16.オマンコにバイブかディルドを入れて抜けないようにパンツを履き膝立ちになり、そこから勢いよく座り奥までバイブを押し込むを10回する。入れる玩具がない場合は寸止めを3回する。",
@@ -495,15 +495,15 @@ const onaGirlPunishItems = [
 ];
 //命令男
 const onaBoyPunishItems = [
-"命令男1.乳首に触れないように乳輪を指でくるくるなぞる２分間。",
-"命令男2.乳頭を薬指でふれるかふれないかの位置で上下にスリスリする2分間。",
+"命令男1.乳首に触れないように乳輪を指でくるくるなぞる3分間。",
+"命令男2.乳頭を薬指でふれるかふれないかの位置で上下にスリスリする3分間。",
 "命令男3.乳首をコリコリする3分間。",
 "命令男4.乳首を親指と中指でコリコリ潰しながら人差し指でスリスリ3分間する。",
 "命令男5.乳首を親指と中指でコリコリ潰しながら人差し指の爪でカリカリ3分間する。",
 "命令男6.乳首にメンソレータムをぬって3分間塗り込む、もしない場合は我慢汁を塗る。",
 "命令男7.亀頭にメンソレータムを塗って3分間塗り込む、ない場合は歯磨き粉を薄く塗る。",
 "命令男8.１秒間に１回のペースでしこしこ３分する。",
-"命令男9.人差し指と中指を折り曲げてカリ首にひっかけるように亀頭だけ３分間しこしこする。",
+"命令男9.人差し指と中指を折り曲げてカリ首にひっかけるように亀頭だけ3分間しこしこする。",
 "命令男10.亀頭を手のひらで撫でるようにスリスリ３分間する。",
 "命令男11.竿部分だけをしこしこ３分間する。",
 "命令男12.利き手じゃない方でしこしこ３分間する。",
@@ -655,6 +655,10 @@ let punishStockByRoom = {};
 // ===== 罰累計（絶頂解放用） =====
 let punishCountByRoom = {};
 let zecchoUnlockedByRoom = {};
+// ===== タイマー状態 =====
+let roomTimerEndByRoom = {};
+let roomTimerTimeoutByRoom = {};
+
 
 function addPunishCount(room){
 
@@ -922,6 +926,73 @@ socket.on("lobbyUpdateRequest", () => {
   socket.emit("lobbyUpdate", getLobbyInfo());
 });
 
+// ===== タイマー開始 =====
+socket.on("timerStart", ({ seconds }) => {
+
+  const room = socket.room;
+  if (!room) return;
+
+  if (roomTimerEndByRoom[room]) {
+
+    socket.emit("message", {
+      name: "system",
+      text: "タイマー作動中",
+      room: room,
+      time: getTimeString()
+    });
+
+    return;
+  }
+
+  const endTime =
+    Date.now() + (seconds * 1000);
+
+  roomTimerEndByRoom[room] = endTime;
+
+  const startMsg = {
+    name: "system",
+    text: `${seconds/60}分タイマー開始`,
+    room: room,
+    time: getTimeString()
+  };
+
+  const log = normalizeLog(startMsg);
+
+  adminLogs.push(log);
+  roomLogs.push(log);
+
+  saveLogs();
+
+  io.to(room).emit("message", startMsg);
+  io.to(room).emit("timerSync", { endTime });
+
+  roomTimerTimeoutByRoom[room] =
+    setTimeout(() => {
+
+      delete roomTimerEndByRoom[room];
+      delete roomTimerTimeoutByRoom[room];
+
+      const endMsg = {
+        name: "system",
+        text: "タイマー終了",
+        room: room,
+        time: getTimeString()
+      };
+
+      const log = normalizeLog(endMsg);
+
+      adminLogs.push(log);
+      roomLogs.push(log);
+
+      saveLogs();
+
+      io.to(room).emit("message", endMsg);
+      io.to(room).emit("timerEnd");
+
+    }, seconds * 1000);
+
+});
+
   socket.on("denkiStateRequest", () => {
 
   if (!["denki","denki1","denki2"].includes(socket.room)) return;
@@ -1042,15 +1113,58 @@ socket.on("denkiSitConfirm", () => {
   if (!victim || victim.id !== socket.id) return;
 
   if (game.sitPreview == null) return;
+game.sitSeat = game.sitPreview;
+game.sitPreview = null;
+game.phase = "shock";
 
-  game.sitSeat = game.sitPreview;
-  game.sitPreview = null;
-  game.phase = "shock";
+// ===== ファイナルサンダー！ =====
+const victimUser = victim;
 
-  io.to(socket.room).emit(
-    "denkiState",
-    denkiStateRoom(socket.room)
-  );
+if (victimUser){
+
+  const msg = {
+    name: victimUser.name,
+    text: "ファイナルサンダー！",
+    room: socket.room,
+    time: getTimeString()
+  };
+
+  const log =
+    normalizeLog(msg);
+
+  adminLogs.push(log);
+  roomLogs.push(log);
+
+  saveLogs();
+
+  io.to(socket.room)
+    .emit("message", msg);
+}
+
+// ===== 座り確定ログ =====
+const sitMsg = {
+  name: "system",
+  text: `${victim.name} が決定しました`,
+  room: socket.room,
+  time: getTimeString()
+};
+
+const sitLog =
+  normalizeLog(sitMsg);
+
+adminLogs.push(sitLog);
+roomLogs.push(sitLog);
+
+saveLogs();
+
+io.to(socket.room).emit("message", sitMsg);
+
+io.to(socket.room).emit(
+  "denkiState",
+  denkiStateRoom(socket.room)
+);
+
+
 });
 
 
@@ -1200,13 +1314,26 @@ io.emit("lobbyUpdate", getLobbyInfo());
 
 
 
-  socket.emit(
-    "pastMessages",
-    roomLogs.filter(m =>
-      m.room === room &&
-      (!m.private || m.to === socket.id || m.from === socket.id)
-    )
-  );
+socket.emit(
+  "pastMessages",
+  roomLogs.filter(m =>
+    m.room === room &&
+    (!m.private || m.to === socket.id || m.from === socket.id)
+  )
+);
+// ===== タイマー途中同期 =====
+if (roomTimerEndByRoom[room]) {
+
+  socket.emit("timerSync", {
+    endTime: roomTimerEndByRoom[room]
+  });
+
+}
+
+// ===== 絶頂解放状態同期 =====
+if (zecchoUnlockedByRoom[room]) {
+  socket.emit("zecchoUnlock");
+}
 
   io.emit("lobbyUpdate", getLobbyInfo());
   // ===== ミュート同期（入室時） =====
@@ -1342,15 +1469,60 @@ if (game.players.length === 2) {
 
 
   const me = game.players[game.turn];
-  if (!me || me.id !== socket.id) return;
+if (!me || me.id !== socket.id) return;
 
-  game.trapSeat = seat;
-  game.phase = "sit";
+game.trapSeat = seat;
+game.phase = "sit";
 
-  io.to(socket.room).emit(
-    "denkiState",
-    denkiStateRoom(socket.room)
-  );
+// ===== ファイナルサンダー？ =====
+const setUser = me;
+
+if (setUser){
+
+  const msg = {
+    name: setUser.name,
+    text: "ファイナルサンダー？",
+    room: socket.room,
+    time: getTimeString()
+  };
+
+  const log =
+    normalizeLog(msg);
+
+  adminLogs.push(log);
+  roomLogs.push(log);
+
+  saveLogs();
+
+  io.to(socket.room)
+    .emit("message", msg);
+}
+
+
+// ===== 仕掛けましたログ =====
+const setMsg = {
+  name: "system",
+  text: `${me.name} が仕掛けました`,
+  room: socket.room,
+  time: getTimeString()
+};
+
+const setLog =
+  normalizeLog(setMsg);
+
+adminLogs.push(setLog);
+roomLogs.push(setLog);
+
+saveLogs();
+
+io.to(socket.room)
+  .emit("message", setMsg);
+
+io.to(socket.room).emit(
+  "denkiState",
+  denkiStateRoom(socket.room)
+);
+
 });
 
 socket.on("denkiSit", seat => {
@@ -1369,6 +1541,32 @@ socket.on("denkiSit", seat => {
   if (!victim || victim.id !== socket.id) return;
 
   game.sitPreview = seat;
+
+  // ===== ファイナルサンダー？ =====
+const attacker =
+  game.players[game.turn];
+
+if (attacker){
+
+  const msg = {
+    name: attacker.name,
+    text: "ファイナルサンダー？",
+    room: socket.room,
+    time: getTimeString()
+  };
+
+  const log =
+    normalizeLog(msg);
+
+  adminLogs.push(log);
+  roomLogs.push(log);
+
+  saveLogs();
+
+  io.to(socket.room)
+    .emit("message", msg);
+}
+
 
   io.to(socket.room).emit(
     "denkiState",
@@ -1972,27 +2170,43 @@ io.to(socket.room).emit("message", sysMsg);
 }
 
 if (text === "絶頂許可") {
+
+  // ===== 解放中じゃなければ無効 =====
+  if (!zecchoUnlockedByRoom[socket.room]) {
+    return;
+  }
+
   const msg = {
-  name: socket.username,
-  text: getHitoriPunish(socket.room),
-  color: "gray",
-  bold: true,
-  room: socket.room,
-  time: getTimeString(),
-  from: socket.id
-};
+    name: socket.username,
+    text: getHitoriPunish(socket.room),
+    color: "gray",
+    bold: true,
+    room: socket.room,
+    time: getTimeString(),
+    from: socket.id
+  };
 
   const log = normalizeLog(msg);
 
-adminLogs.push(log);
-roomLogs.push(log);
+  adminLogs.push(log);
+  roomLogs.push(log);
 
-saveLogs();
+  saveLogs();
 
-io.to(socket.room).emit("message", msg);
+  io.to(socket.room).emit("message", msg);
+
+  // ===== 累計リセット =====
+  punishCountByRoom[socket.room] = 0;
+
+  // ===== 解放フラグOFF =====
+  zecchoUnlockedByRoom[socket.room] = false;
+
+  // ===== ボタン非表示送信 =====
+  io.to(socket.room).emit("zecchoHide");
 
   return;
 }
+
 // ===== 男イベント =====
 if (text === "男イベント") {
 

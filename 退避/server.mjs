@@ -288,6 +288,11 @@ const filteredLogs =
         <tr><th>時刻</th><th>部屋</th><th>名前</th><th>種別</th><th>内容</th></tr>
         ${logRows}
       </table>
+      <script>
+setTimeout(() => {
+  location.reload();
+}, 60000);
+</script>
     </body>
     </html>
   `);

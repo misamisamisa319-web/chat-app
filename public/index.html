@@ -185,6 +185,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 <button id="denkiSetBtn">仕掛ける</button>
 <button id="denkiShockBtn">⚡ 電流流す</button>
 <button id="denkiSitBtn">座る</button>
+<button id="denkiConfirmBtn">決定</button>
 
 
 
@@ -196,6 +197,10 @@ input, button, select { padding: 10px; font-size: 16px; }
   <strong>参加者:</strong>
   <ul id="userList"></ul>
 </div>
+
+<button id="timer3Btn">3分</button>
+<button id="timer5Btn">5分</button>
+
 <!-- ===== 罰トグル ===== -->
 <button id="punishToggleBtn">
   罰メニュー
@@ -248,11 +253,16 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 </div>
 
+<div id="timerDisplay"
+     style="
+       font-weight:bold;
+       padding:4px 0;
+       display:none;">
+  ⏱ 00:00
+</div>
 
+<div id="settings">
 
-
-
-  <div id="settings">
     <label>色: <input type="color" id="colorSelect" value="#000000"></label>
     <label>内緒:
       <select id="privateTarget">
@@ -316,6 +326,24 @@ const denkiSitBtn = document.getElementById("denkiSitBtn");
 denkiSitBtn.disabled = true;
 const denkiJoinBtn = document.getElementById("denkiJoinBtn");
 
+const denkiConfirmBtn =
+  document.getElementById("denkiConfirmBtn");
+
+denkiConfirmBtn.disabled = true;
+
+denkiConfirmBtn.onclick = () => {
+
+  if (!denkiState) return;
+  if (selectedSeat === null) return;
+
+  socket.emit("denkiSitConfirm");
+
+  denkiConfirmBtn.disabled = true;
+  selectedSeat = null;
+
+};
+
+
 denkiJoinBtn.onclick = () => {
   socket.emit("denkiJoin");
 };
@@ -338,10 +366,21 @@ denkiSetBtn.onclick = () => {
 denkiSitBtn.onclick = () => {
 
   if (!denkiState) return;
+  if (selectedSeat === null) return;
 
-  socket.emit("denkiSitConfirm");
+  socket.emit("denkiSit", selectedSeat);
+
+  const confirmBtn =
+    document.getElementById("denkiConfirmBtn");
+
+  if (confirmBtn){
+    confirmBtn.disabled = false;
+  }
+
+  denkiSitBtn.disabled = true;
 
 };
+
 
 
 /* 椅子12個 */
@@ -616,6 +655,76 @@ socket.on("zecchoUnlock", () => {
   }
 
 });
+// ===== タイマー同期 =====
+let timerInterval = null;
+
+socket.on("timerSync", ({ endTime }) => {
+
+  const display =
+    document.getElementById("timerDisplay");
+
+  if (!display) return;
+
+  display.style.display = "block";
+
+  if (timerInterval){
+    clearInterval(timerInterval);
+  }
+
+  timerInterval = setInterval(() => {
+
+    const remain =
+      Math.max(0, endTime - Date.now());
+
+    const sec =
+      Math.floor(remain / 1000);
+
+    const m =
+      String(Math.floor(sec / 60))
+        .padStart(2,"0");
+
+    const s =
+      String(sec % 60)
+        .padStart(2,"0");
+
+    display.textContent =
+      `⏱ ${m}:${s}`;
+
+    if (remain <= 0){
+      clearInterval(timerInterval);
+    }
+
+  }, 1000);
+
+});
+
+// ===== タイマー終了 =====
+socket.on("timerEnd", () => {
+
+  const display =
+    document.getElementById("timerDisplay");
+
+  if (display){
+    display.style.display = "none";
+  }
+
+  if (timerInterval){
+    clearInterval(timerInterval);
+  }
+
+});
+
+socket.on("zecchoHide", () => {
+
+  const btn =
+    document.getElementById("zecchoBtn");
+
+  if (btn){
+    btn.style.display = "none";
+  }
+
+});
+
 
 
 
@@ -734,13 +843,23 @@ function onDenkiSelect(seat) {
 }
 
 
-  // 座るフェーズは無条件で送る（判定はサーバー側）
+ // ===== 座り仮選択 =====
 if (
   denkiState.started === true &&
   denkiState.phase === "sit"
 ) {
-  socket.emit("denkiSit", seat);
+
+  selectedSeat = seat;
+
+  const sitBtn =
+    document.getElementById("denkiSitBtn");
+
+  if (sitBtn){
+    sitBtn.disabled = false;
+  }
+
 }
+
 
 }
 function updateDenkiUI() {
@@ -765,6 +884,9 @@ function updateDenkiUI() {
   denkiSetBtn.disabled = true;
   denkiSitBtn.disabled = true;
   denkiShockBtn.disabled = true;
+  denkiConfirmBtn.disabled = true;
+  selectedSeat = null;
+
 
   // ===== 観戦モード判定 =====
   const isSpectator = !me;
@@ -1067,7 +1189,7 @@ leaveBtn.onclick = () => {
 function sendPunish(cmd){
   socket.emit("message",{ text: cmd });
 }
-/* ===== 罰トグル ===== */
+
 window.addEventListener("load", () => {
 
   const punishToggleBtn =
@@ -1090,7 +1212,32 @@ window.addEventListener("load", () => {
 
   };
 
+  // ===== タイマーボタン =====
+  const timer3Btn =
+    document.getElementById("timer3Btn");
+
+  const timer5Btn =
+    document.getElementById("timer5Btn");
+
+  if (timer3Btn){
+    timer3Btn.onclick = () => {
+      socket.emit("timerStart", {
+        seconds: 180
+      });
+    };
+  }
+
+  if (timer5Btn){
+    timer5Btn.onclick = () => {
+      socket.emit("timerStart", {
+        seconds: 300
+      });
+    };
+  }
+
 });
+
+
 
 </script>
 
