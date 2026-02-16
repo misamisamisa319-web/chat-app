@@ -1075,12 +1075,8 @@ buttons.forEach(b => {
 
   b.style.background = "";
   b.disabled = true;
-  b.style.display = "inline-block";
-  // ===== 自分仮選択色 =====
-if (selectedSeat === num) {
-  b.style.background = "red";
-}
-
+ b.style.display = "inline-block";
+ 
 
  // 使用済み非表示
 if (
@@ -1121,6 +1117,14 @@ if (
   !isMyTurn
 ) {
   b.disabled = false;
+}
+// ===== 自分仮選択色 =====
+if (
+  selectedSeat === num &&
+  denkiState.phase === "set" &&
+  !denkiState.trapSeat
+) {
+  b.style.background = "red";
 }
 
 
