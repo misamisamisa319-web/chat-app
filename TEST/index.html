@@ -856,15 +856,13 @@ function onDenkiSelect(seat) {
   if (!me) return;
 
 
-  // 仕掛ける側
- if (
-  denkiState.started === true &&
+// 仕掛ける側
+if (
   denkiState.phase === "set" &&
   me &&
   (
     me.isTurn ||
     denkiState.players[denkiState.turn]?.id === myId ||
-
     denkiState.players[denkiState.turn]?.name === username
   )
 ) {
@@ -876,7 +874,6 @@ function onDenkiSelect(seat) {
 
  // ===== 座り仮選択 =====
 if (
-  denkiState.started === true &&
   denkiState.phase === "sit"
 ) {
 
@@ -890,6 +887,7 @@ if (
   }
 
 }
+
 
 
 }
