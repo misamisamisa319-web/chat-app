@@ -1117,29 +1117,6 @@ game.sitSeat = game.sitPreview;
 game.sitPreview = null;
 game.phase = "shock";
 
-// ===== ファイナルサンダー！ =====
-const victimUser = victim;
-
-if (victimUser){
-
-  const msg = {
-    name: victimUser.name,
-    text: "ファイナルサンダー！",
-    room: socket.room,
-    time: getTimeString()
-  };
-
-  const log =
-    normalizeLog(msg);
-
-  adminLogs.push(log);
-  roomLogs.push(log);
-
-  saveLogs();
-
-  io.to(socket.room)
-    .emit("message", msg);
-}
 
 // ===== 座り確定ログ =====
 const sitMsg = {
@@ -1486,30 +1463,6 @@ setTimeout(() => {
 }, 300);
 
 
-// ===== ファイナルサンダー？ =====
-const setUser = me;
-
-if (setUser){
-
-  const msg = {
-    name: setUser.name,
-    text: "ファイナルサンダー？",
-    room: socket.room,
-    time: getTimeString()
-  };
-
-  const log =
-    normalizeLog(msg);
-
-  adminLogs.push(log);
-  roomLogs.push(log);
-
-  saveLogs();
-
-  io.to(socket.room)
-    .emit("message", msg);
-}
-
 
 // ===== 仕掛けましたログ =====
 const setMsg = {
@@ -1554,30 +1507,6 @@ socket.on("denkiSit", seat => {
 
   game.sitPreview = seat;
 
-  // ===== ファイナルサンダー？ =====
-const attacker =
-  game.players[game.turn];
-
-if (attacker){
-
-  const msg = {
-    name: attacker.name,
-    text: "ファイナルサンダー？",
-    room: socket.room,
-    time: getTimeString()
-  };
-
-  const log =
-    normalizeLog(msg);
-
-  adminLogs.push(log);
-  roomLogs.push(log);
-
-  saveLogs();
-
-  io.to(socket.room)
-    .emit("message", msg);
-}
 
 
   io.to(socket.room).emit(
