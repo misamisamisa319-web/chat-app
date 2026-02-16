@@ -843,6 +843,7 @@ socket.on("denkiState", state => {
 
 function onDenkiSelect(seat) {
   if (!denkiState || !denkiState.players) return;
+  if (!denkiState.started) return;   // ← 追加
 
   const players = denkiState.players || [];
 
@@ -867,6 +868,7 @@ const isMyTurn =
 
 // 仕掛ける側
 if (
+  denkiState.started &&
   denkiState.phase === "set" &&
   isMyTurn
 ) {
@@ -884,8 +886,9 @@ if (
 
 
 
- // ===== 座り仮選択 =====
+// ===== 座り仮選択 =====
 if (
+  denkiState.started &&
   denkiState.phase === "sit"
 ) {
 
@@ -964,14 +967,16 @@ if (!isSpectator) {
       "あなたの番：椅子を仕掛ける";
   }
 
-  else if (
-    denkiState.phase === "sit" &&
-    !isMyTurn
-  ) {
-    denkiSitBtn.disabled = false;
-    denkiStatus.textContent =
-      "あなたの番：椅子に座る";
-  }
+ else if (
+  denkiState.started &&
+  denkiState.phase === "sit" &&
+  !isMyTurn
+) {
+  denkiSitBtn.disabled = false;
+  denkiStatus.textContent =
+    "あなたの番：椅子に座る";
+}
+
 
   else if (
     denkiState.phase === "shock" &&
@@ -1087,6 +1092,7 @@ const isMyTurn =
 
 // 仕掛けフェーズ
 if (
+  denkiState.started &&
   denkiState.phase === "set" &&
   isMyTurn
 ) {
@@ -1096,6 +1102,7 @@ if (
     b.style.background = "#ffe066";
   }
 }
+
 // 座りフェーズ
 if (
   denkiState.phase === "sit" &&
