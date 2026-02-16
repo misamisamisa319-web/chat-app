@@ -399,7 +399,8 @@ denkiSitBtn.onclick = () => {
   if (!denkiState) return;
   if (selectedSeat === null) return;
 
-  socket.emit("denkiSit", selectedSeat);
+  // ★ ここでは送信しない
+  // 決定ボタンで送信する
 
   const confirmBtn =
     document.getElementById("denkiConfirmBtn");
@@ -411,6 +412,7 @@ denkiSitBtn.onclick = () => {
   denkiSitBtn.disabled = true;
 
 };
+
 
 
 
@@ -868,17 +870,14 @@ const isMyTurn =
 
 // 仕掛ける側
 if (
-  denkiState.started &&
   denkiState.phase === "set" &&
   isMyTurn
 ) {
 
   selectedSeat = seat;
 
-  socket.emit(
-    "denkiSet",
-    seat
-  );
+  // ★ ここでは送信しない
+  // 仕掛けるボタン押下時のみ送信
 
   return;
 }
