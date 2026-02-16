@@ -215,6 +215,17 @@ input, button, select { padding: 10px; font-size: 16px; }
   <!-- タイマー -->
   <button id="timer3Btn">3分</button>
   <button id="timer5Btn">5分</button>
+  <input id="timerCustomInput"
+  type="number"
+  min="1"
+  step="1"
+  placeholder="分"
+  style="width:60px;">
+
+<button id="timerCustomBtn">
+  任意
+</button>
+
 
 </div>
 
@@ -1254,6 +1265,32 @@ window.addEventListener("load", () => {
       });
     };
   }
+const timerCustomBtn =
+  document.getElementById("timerCustomBtn");
+
+const timerCustomInput =
+  document.getElementById("timerCustomInput");
+
+if (timerCustomBtn){
+
+  timerCustomBtn.onclick = () => {
+
+    const min =
+      parseInt(timerCustomInput.value);
+
+    if (!min || min <= 0) return;
+
+    socket.emit("timerStart", {
+      seconds: min * 60
+    });
+
+    timerCustomInput.value = "";
+
+  };
+
+}
+
+
 
 });
 
