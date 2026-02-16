@@ -1064,18 +1064,19 @@ if (
 }
 
 
-  // 観戦者は操作不可だが仮座りは見える
-  if (isSpectator) {
-    if (denkiState.sitPreview === num) {
-      b.style.background = "#ccccff";
-    }
-    return;
-  }
+// ===== ターン本人判定 =====
+const turnPlayer =
+  players[denkiState.turn];
 
- // 仕掛けフェーズ
+const isMyTurn =
+  turnPlayer?.id === myId ||
+  turnPlayer?.name === username;
+
+
+// 仕掛けフェーズ
 if (
   denkiState.phase === "set" &&
-  me.isTurn
+  isMyTurn
 ) {
   b.disabled = false;
 
@@ -1083,9 +1084,13 @@ if (
     b.style.background = "#ffe066";
   }
 }
-
-
-
+// 座りフェーズ
+if (
+  denkiState.phase === "sit" &&
+  !isMyTurn
+) {
+  b.disabled = false;
+}
 
 
   // 仮座り表示（全員）
