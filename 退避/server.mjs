@@ -1100,7 +1100,7 @@ socket.on("muteUser", targetId => {
     );
   });
 
-socket.on("denkiSitConfirm", () => {
+socket.on("denkiSitConfirm", seat => {
 
   if (!["denki","denki1","denki2"].includes(socket.room)) return;
 
@@ -1113,39 +1113,10 @@ socket.on("denkiSitConfirm", () => {
   const victim = game.players[victimIndex];
   if (!victim || victim.id !== socket.id) return;
 
-  if (game.sitPreview == null) return;
+  if (seat == null) return;
 
   // ===== 座り確定 =====
-  game.sitSeat = game.sitPreview;
-  game.sitPreview = null;
-
-  // ===== フェーズ移行 =====
-  game.phase = "shock";
-
-  io.to(socket.room).emit(
-    "denkiState",
-    denkiStateRoom(socket.room)
-  );
-
-});
-
-socket.on("denkiSitConfirm", () => {
-
-  if (!["denki","denki1","denki2"].includes(socket.room)) return;
-
-  const game = denkiRooms[socket.room];
-
-  if (game.phase !== "sit") return;
-  if (!game.started) return;
-
-  const victimIndex = game.turn === 0 ? 1 : 0;
-  const victim = game.players[victimIndex];
-  if (!victim || victim.id !== socket.id) return;
-
-  if (game.sitPreview == null) return;
-
-  // ===== 座り確定 =====
-  game.sitSeat = game.sitPreview;
+  game.sitSeat = seat;
   game.sitPreview = null;
 
   // ===== フェーズ移行 =====
