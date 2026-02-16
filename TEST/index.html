@@ -1098,16 +1098,20 @@ const isMyTurn =
 
 // 仕掛けフェーズ
 if (
-  denkiState.started &&
   denkiState.phase === "set" &&
   isMyTurn
 ) {
   b.disabled = false;
-
-  if (selectedSeat === num) {
-    b.style.background = "#ffe066";
-  }
 }
+
+// ===== 自分だけ仕掛け色 =====
+if (
+  selectedSeat === num &&
+  denkiState.phase === "set"
+) {
+  b.style.background = "red";
+}
+
 
 // 座りフェーズ
 if (
