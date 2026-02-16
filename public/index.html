@@ -1107,14 +1107,11 @@ if (
   isMyTurn
 ) {
   b.disabled = false;
-}
 
-// ===== 自分だけ仕掛け色 =====
-if (
-  selectedSeat === num &&
-  denkiState.phase === "set"
-) {
-  b.style.background = "red";
+  // ===== 自分だけ仕掛け色 =====
+  if (selectedSeat === num) {
+    b.style.background = "red";
+  }
 }
 
 
