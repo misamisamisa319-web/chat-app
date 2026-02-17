@@ -167,6 +167,12 @@ const userRows = [...users]
   <button type="submit">IP 永久BAN</button>
 </form>
 
+<form method="POST" action="/admin/ipbanRemove" style="display:inline;">
+  <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+  <input type="hidden" name="ip" value="${u.ip}">
+  <button type="submit">BAN解除</button>
+</form>
+
 
 
 
@@ -385,6 +391,20 @@ app.post("/admin/ipbanPermanent", (req, res) => {
       }
 
     });
+
+  res.redirect("/admin?key=" + process.env.ADMIN_KEY);
+});
+
+app.post("/admin/ipbanRemove", (req, res) => {
+
+  if (req.body.key !== process.env.ADMIN_KEY) {
+    return res.status(403).send("Forbidden");
+  }
+
+  const ip = req.body.ip;
+
+  // ===== BAN解除 =====
+  delete ipBans[ip];
 
   res.redirect("/admin?key=" + process.env.ADMIN_KEY);
 });
