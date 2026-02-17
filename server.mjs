@@ -33,7 +33,10 @@ let adminLogs = [];
 let messagesLog = [];
 
 let bans = {}; // { name: expireTime }
-const LOG_LIFETIME = 3 * 24 * 60 * 60 * 1000; // 3日
+let ipBans = {}; // { ip: expireTime }
+
+
+const OG_LIFETIME = 3 * 24 * 60 * 60 * 1000; // 3日
 
 /* ===== ログ保存 ===== */
 const LOG_FILE = "/data/logs.json";
@@ -140,21 +143,32 @@ const userRows = [...users]
 
 })
 .map(u => `
-  <tr>
-    <td>${u.room}</td>
-    <td>${u.name}</td>
-    <td>
+<tr>
+  <td>${u.room}</td>
+  <td>${u.name}</td>
+  <td>${u.ip || "-"}</td>
+  <td>
+
        <form method="POST" action="/admin/kick" style="display:inline;">
   <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
   <input type="hidden" name="userId" value="${u.id}">
   <button type="submit">キック</button>
 </form>
 
-<form method="POST" action="/admin/ban" style="display:inline;">
+<form method="POST" action="/admin/ipban24" style="display:inline;">
   <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
-  <input type="hidden" name="userName" value="${u.name}">
-  <button type="submit">30分BAN</button>
+  <input type="hidden" name="ip" value="${u.ip}">
+  <button type="submit">IP 24h BAN</button>
 </form>
+
+<form method="POST" action="/admin/ipbanPermanent" style="display:inline;">
+  <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+  <input type="hidden" name="ip" value="${u.ip}">
+  <button type="submit">IP 永久BAN</button>
+</form>
+
+
+
 
       </td>
     </tr>
@@ -211,7 +225,8 @@ const filteredLogs =
 
       <h3>接続中ユーザー</h3>
       <table>
-       <tr><th>部屋</th><th>名前</th><th>操作</th></tr>
+     <tr><th>部屋</th><th>名前</th><th>IP</th><th>操作</th></tr>
+
 
         ${userRows}
       </table>
@@ -316,6 +331,64 @@ app.post("/admin/kick", (req, res) => {
 
   res.redirect("/admin?key=" + process.env.ADMIN_KEY);
 });
+
+app.post("/admin/ipban24", (req, res) => {
+
+  if (req.body.key !== process.env.ADMIN_KEY) {
+    return res.status(403).send("Forbidden");
+  }
+
+  const ip = req.body.ip;
+
+  // ===== 24時間BAN =====
+  ipBans[ip] =
+    Date.now() + (24 * 60 * 60 * 1000);
+
+  // ===== 接続中IP切断 =====
+  users
+    .filter(u => u.ip === ip)
+    .forEach(u => {
+
+      const s =
+        io.sockets.sockets.get(u.id);
+
+      if (s){
+        s.disconnect(true);
+      }
+
+    });
+
+  res.redirect("/admin?key=" + process.env.ADMIN_KEY);
+});
+
+app.post("/admin/ipbanPermanent", (req, res) => {
+
+  if (req.body.key !== process.env.ADMIN_KEY) {
+    return res.status(403).send("Forbidden");
+  }
+
+  const ip = req.body.ip;
+
+  // ===== 永久BAN =====
+  ipBans[ip] = Infinity;
+
+  // ===== 接続中IP切断 =====
+  users
+    .filter(u => u.ip === ip)
+    .forEach(u => {
+
+      const s =
+        io.sockets.sockets.get(u.id);
+
+      if (s){
+        s.disconnect(true);
+      }
+
+    });
+
+  res.redirect("/admin?key=" + process.env.ADMIN_KEY);
+});
+
 
 app.post("/admin/ban", (req, res) => {
 
@@ -919,6 +992,17 @@ io.on("connection", socket => {
 
 socket.emit("lobbyUpdate", getLobbyInfo());
 
+// ===== IP取得 =====
+const rawIp =
+  socket.handshake.headers["x-forwarded-for"] ||
+  socket.handshake.address ||
+  socket.conn.remoteAddress ||
+  "unknown";
+
+const ip =
+  rawIp.split(",")[0].trim();
+
+
 socket.on("lobbyUpdateRequest", () => {
   socket.emit("lobbyUpdate", getLobbyInfo());
 });
@@ -1178,6 +1262,20 @@ socket.on("join", ({
     socket.disconnect(true);
     return;
   }
+  // ===== IP BAN =====
+if (ipBans[ip] && ipBans[ip] > Date.now()) {
+
+  socket.emit("message", {
+    name:"system",
+    text:"IP BAN中のため入室できません",
+    room,
+    time:getTimeString()
+  });
+
+  socket.disconnect(true);
+  return;
+}
+
 // ===== room6 入室制限 =====
 const ngNames = ["見学","観戦","ROM"];
 
@@ -1254,6 +1352,7 @@ if (existingUser) {
     color,
     room,
     connectKey,
+    ip,
     lastActive: Date.now()
   });
 
