@@ -212,21 +212,6 @@ const logRows = [...filteredLogs].reverse().map(m => {
       <td>${m.private ? "内緒" : "通常"}</td>
       <td>${m.text}</td>
 
-      <td>
-     <form method="POST" action="/admin/ipban24">
-     <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
-     <input type="hidden" name="ip" value="${m.ip}">
-     <button type="submit">IP 24h BAN</button>
-     </form>
-
-     <form method="POST" action="/admin/ipbanPermanent">
-     <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
-     <input type="hidden" name="ip" value="${m.ip}">
-     <button type="submit">IP 永久BAN</button>
-     </form>
-
-
-</td>
 </tr>
 `;
 
@@ -255,9 +240,24 @@ const logRows = [...filteredLogs].reverse().map(m => {
       <table>
      <tr><th>部屋</th><th>名前</th><th>IP</th><th>操作</th></tr>
 
-
         ${userRows}
       </table>
+
+    <h3>IP手動BAN</h3>
+
+    <form method="POST" action="/admin/ipban24" style="margin-bottom:10px;">
+  <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+  <input type="text" name="ip" placeholder="IP入力">
+  <button type="submit">24h BAN</button>
+</form>
+
+<form method="POST" action="/admin/ipbanPermanent">
+  <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+  <input type="text" name="ip" placeholder="IP入力">
+  <button type="submit">永久BAN</button>
+</form>
+
+
 
       <h3>ログ</h3>
       <form method="GET" action="/admin" style="margin-bottom:10px;">
