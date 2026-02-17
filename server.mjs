@@ -79,6 +79,7 @@ function getDateTimeString() {
 
   return `${Y}/${M}/${D} ${h}:${m}`;
 }
+
 function normalizeLog(msg){
   return {
     ...msg,
@@ -87,9 +88,12 @@ function normalizeLog(msg){
     text: msg.text || "",
     time: msg.time || "",
     private: msg.private || false,
+    ip: msg.ip || "-",
     savedAt: Date.now()
   };
 }
+
+
 
 
 
@@ -189,8 +193,7 @@ const filteredLogs =
     : adminLogs.filter(m =>
         m.room === selectedRoom
       );
-
- const logRows = [...filteredLogs].reverse().map(m => {
+const logRows = [...filteredLogs].reverse().map(m => {
 
 
   let nameDisplay = m.name;
@@ -205,6 +208,7 @@ const filteredLogs =
       <td>${addDate(m.time)}</td>
       <td>${m.room}</td>
       <td>${nameDisplay}</td>
+      <td>${m.ip || "-"}</td>
       <td>${m.private ? "内緒" : "通常"}</td>
       <td>${m.text}</td>
     </tr>
@@ -306,7 +310,13 @@ const filteredLogs =
 </form>
 
       <table>
-        <tr><th>時刻</th><th>部屋</th><th>名前</th><th>種別</th><th>内容</th></tr>
+        <tr>
+        <th>時刻</th>
+        <th>部屋</th>
+        <th>名前</th>
+        <th>IP</th>
+        <th>種別</th>
+        <th>内容</th></tr>
         ${logRows}
       </table>
       <script>
@@ -2353,7 +2363,8 @@ if (data.to) {
     private: true,
     to: data.to,
     from: socket.id,
-    toName: targetUser?.name || "不明",
+    ip: ip,
+   toName: targetUser?.name || "不明",
 
     // ★ 追加
     color: sender?.color || "black"
@@ -2381,7 +2392,8 @@ const msg = {
   color: data.color || u?.color,
   room: socket.room,
   time: getTimeString(),
-  from: socket.id
+  from: socket.id,
+   ip: ip,
 };
 
   const log = normalizeLog(msg);
