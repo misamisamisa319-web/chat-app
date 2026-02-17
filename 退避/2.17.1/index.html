@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Chat v2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  margin: 0;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans",
+    "Noto Sans JP",
+    Meiryo,
+    sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#login, #chat { flex: 1; display: flex; flex-direction: column; }
+#chat { display: none; }
+
+.system { color: gray; }
+.system.girl { color: red; font-weight: bold; }
+.system.boy { color: blue; font-weight: bold; }
+
+#controls { display: flex; gap: 5px; padding: 5px; position: sticky; top: 0; background: #fff; z-index: 10; }
+input, button, select { padding: 10px; font-size: 16px; }
+#punishWrap {
+  gap: 20px;   /* ボタン同士の間隔 */
+}
+#punishWrap button {
+  padding: 6px 12px;  /* ボタンの中の余白 */
+  font-size: 16px;   /* 文字サイズ */
+}
+
+
+#userList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #f0f0f0;
+  padding: 5px;
+  list-style: none;
+  align-items: center;
+}
+
+#userList li {
+  padding: 3px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+
+#settings { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; padding: 5px; background: #f9f9f9; border-bottom: 1px solid #ccc; }
+#settings input, #settings button, #settings select { padding: 5px; font-size: 14px; }
+
+#messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; padding-bottom: 180px; /* ← これを追加 */ }
+#messages li { margin-bottom: 5px; }
+.private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
+
+.time { opacity: .6; margin-right: 4px; }
+
+/* ===== 電気椅子UI ===== */
+#denkiWrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  margin: 0;
+  padding: 10px;
+  background: #e8f5fb;
+  border-radius: 8px 8px 0 0;
+
+  display: none;
+  z-index: 50;
+}
+
+
+#denkiHeader {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+#denkiStatus {
+  margin-bottom: 6px;
+}
+#denkiBoard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+#denkiBoard button {
+  width: 44px;
+}
+#denkiScore {
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h2>入室</h2>
+  <div id="roomInfo" style="margin-bottom:10px; color:#555;"></div>
+  <input id="nameInput" placeholder="名前">
+  <button id="joinBtn">入室</button>
+</div>
+
+<div id="chat">
+ <div id="controls">
+  <input id="input" placeholder="メッセージ">
+  <button id="sendBtn">送信</button>
+
+  <span id="roomLabel"
+    style="padding:10px; font-weight:bold;">
+  </span>
+</div>
+
+
+  <!-- ⚡ 電気椅子（denki ルームのみ表示） -->
+  <div id="denkiWrap">
+    <!-- ===== 電気椅子 点数表 ===== -->
+<table id="denkiTable" style="
+  width:100%;
+  border-collapse:collapse;
+  margin-bottom:10px;
+  font-size:14px;
+">
+  <thead>
+    <tr>
+      <th style="border:1px solid #999;">名前</th>
+      <th style="border:1px solid #999;">1</th>
+      <th style="border:1px solid #999;">2</th>
+      <th style="border:1px solid #999;">3</th>
+      <th style="border:1px solid #999;">4</th>
+      <th style="border:1px solid #999;">5</th>
+      <th style="border:1px solid #999;">6</th>
+      <th style="border:1px solid #999;">7</th>
+      <th style="border:1px solid #999;">8</th>
+      <th style="border:1px solid #999;">9</th>
+      <th style="border:1px solid #999;">合計</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id="denkiRowA">
+      <td style="border:1px solid #999;">A</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">0</td>
+    </tr>
+    <tr id="denkiRowB">
+      <td style="border:1px solid #999;">B</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">-</td>
+      <td style="border:1px solid #999;">0</td>
+    </tr>
+  </tbody>
+</table>
+
+    <div id="denkiStatus">待機中</div>
+    <div id="denkiScore"></div>
+    <div id="denkiBoard"></div>
+    <button id="denkiJoinBtn">参加</button>
+<button id="denkiSetBtn">仕掛ける</button>
+<button id="denkiShockBtn">⚡ 電流流す</button>
+<button id="denkiSitBtn">座る</button>
+<button id="denkiConfirmBtn">決定</button>
+
+
+
+
+
+  </div>
+<!-- ===== 参加者 ===== -->
+<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+  <strong>参加者:</strong>
+  <ul id="userList"></ul>
+</div>
+
+
+<!-- ===== タイマー＋罰トグル横並び ===== -->
+<div id="timerPunishRow" style="
+  display:flex;
+  gap:8px;
+  padding:4px 0;
+  flex-wrap:wrap;
+">
+
+  <!-- 罰トグル -->
+  <button id="punishToggleBtn">
+    罰メニュー
+  </button>
+
+  <!-- タイマー -->
+  <button id="timer3Btn">3分</button>
+  <button id="timer5Btn">5分</button>
+  <input id="timerCustomInput"
+  type="number"
+  min="1"
+  step="1"
+  placeholder="分"
+  style="width:60px;">
+
+<button id="timerCustomBtn">
+  任意
+</button>
+
+
+</div>
+
+<!-- ===== 罰ボタン本体 ===== -->
+<div id="punishWrap" style="
+  display:none;
+  gap:7px;
+  flex-wrap:wrap;
+  padding:6px 0;
+">
+
+  <button onclick="sendPunish('女子罰')">女子罰</button>
+
+  <button id="boyPunishBtn"
+    onclick="sendPunish('男子罰')">
+    男子罰
+  </button>
+
+  <button onclick="sendPunish('命令女')">女オナ</button>
+
+  <button id="boyOnaBtn"
+    onclick="sendPunish('命令男')">
+    男オナ
+  </button>
+
+  <button id="painPunishBtn"
+    onclick="sendPunish('苦痛罰')">
+    苦痛罰
+  </button>
+
+  <button id="zecchoBtn"
+    onclick="sendPunish('絶頂許可')"
+    style="display:none;">
+    絶頂許可
+  </button>
+
+  <button id="maleEventBtn"
+    style="display:none;"
+    onclick="sendPunish('男イベント')">
+    男イベント
+  </button>
+
+  <button id="femaleEventBtn"
+    style="display:none;"
+    onclick="sendPunish('女イベント')">
+    女イベント
+  </button>
+
+  <button id="commonEventBtn"
+    style="display:none;"
+    onclick="sendPunish('共通イベント')">
+    共通イベント
+  </button>
+
+
+
+</div>
+
+<div id="timerDisplay"
+     style="
+       font-weight:bold;
+       padding:4px 0;
+       display:none;">
+  ⏱ 00:00
+</div>
+
+<div id="settings">
+
+    <label>色: <input type="color" id="colorSelect" value="#000000"></label>
+    <label>内緒:
+      <select id="privateTarget">
+        <option value="">なし</option>
+      </select>
+    </label>
+    <label>
+      音:
+      <select id="soundSelect">
+        <option value="off">OFF</option>
+        <option value="small">小</option>
+        <option value="medium">中</option>
+        <option value="large">大</option>
+      </select>
+    </label>
+    <button id="leaveBtn">退出</button>
+  </div>
+
+  <ul id="messages"></ul>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+
+const login = document.getElementById("login");
+const chat = document.getElementById("chat");
+const joinBtn = document.getElementById("joinBtn");
+const nameInput = document.getElementById("nameInput");
+const roomInfo = document.getElementById("roomInfo");
+
+const messages = document.getElementById("messages");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("sendBtn");
+const leaveBtn = document.getElementById("leaveBtn");
+const userList = document.getElementById("userList");
+const colorSelect = document.getElementById("colorSelect");
+const privateTarget = document.getElementById("privateTarget");
+const soundSelect = document.getElementById("soundSelect");
+
+const notifySound = new Audio("/notify.mp3");
+const SOUND_LEVELS = { off:0, small:0.2, medium:0.5, large:1.0 };
+let soundLevel = localStorage.getItem("soundLevel") || "off";
+soundSelect.value = soundLevel;
+
+let username = "";
+let myColor = "#000000";
+let privateTo = "";
+let joined = false;
+
+/* ===== 電気椅子DOM ===== */
+const denkiWrap = document.getElementById("denkiWrap");
+const denkiStatus = document.getElementById("denkiStatus");
+const denkiBoard = document.getElementById("denkiBoard");
+const denkiScore = document.getElementById("denkiScore");
+const denkiShockBtn = document.getElementById("denkiShockBtn");
+const denkiSetBtn = document.getElementById("denkiSetBtn");
+denkiSetBtn.disabled = true;
+denkiShockBtn.disabled = true;
+const denkiSitBtn = document.getElementById("denkiSitBtn");
+denkiSitBtn.disabled = true;
+const denkiJoinBtn = document.getElementById("denkiJoinBtn");
+
+const denkiConfirmBtn =
+  document.getElementById("denkiConfirmBtn");
+
+denkiConfirmBtn.disabled = true;
+
+denkiConfirmBtn.onclick = () => {
+
+  if (!denkiState) return;
+  if (selectedSeat === null) return;
+
+  socket.emit("denkiSitConfirm");
+
+  denkiConfirmBtn.disabled = true;
+  selectedSeat = null;
+
+};
+
+
+denkiJoinBtn.onclick = () => {
+  socket.emit("denkiJoin");
+};
+
+
+
+
+ let denkiState = {};
+let myId = null;
+let selectedSeat = null; // ★ 仕掛け用に一時保存
+denkiShockBtn.onclick = () => {
+  socket.emit("denkiShock");
+};
+denkiSetBtn.onclick = () => {
+  if (selectedSeat !== null) {
+    socket.emit("denkiSet", selectedSeat);
+    selectedSeat = null;
+  }
+};
+denkiSitBtn.onclick = () => {
+
+  if (!denkiState) return;
+  if (selectedSeat === null) return;
+
+  // ★ ここでは送信しない
+  // 決定ボタンで送信する
+
+  const confirmBtn =
+    document.getElementById("denkiConfirmBtn");
+
+  if (confirmBtn){
+    confirmBtn.disabled = false;
+  }
+
+  denkiSitBtn.disabled = true;
+
+};
+
+
+
+
+/* 椅子12個 */
+for (let i = 1; i <= 12; i++) {
+  const b = document.createElement("button");
+  b.textContent = i;
+  b.onclick = () => onDenkiSelect(i);
+  denkiBoard.appendChild(b);
+}
+window.addEventListener("load", () => {
+  const savedName  = localStorage.getItem("chatName");
+  const savedRoom  = localStorage.getItem("chatRoom");
+  const savedColor = localStorage.getItem("chatColor") || "#000000";
+
+  if (savedName && savedRoom) {
+    username = savedName;
+    myColor = savedColor;
+    colorSelect.value = myColor;
+
+    socket.emit("join", {
+      name: username,
+      color: myColor,
+      room: savedRoom
+    });
+
+    // 電気椅子UI 即表示（リロード対策）
+    socket.emit("denkiStateRequest");
+
+    joined = true;
+    login.style.display = "none";
+    chat.style.display = "flex";
+  }
+});
+
+/* ===== ロビーからの情報 ===== */
+const room = localStorage.getItem("chatRoom");
+
+const roomNames = {
+  room1: "ルーム1",
+  room2: "ルーム2",
+  room3: "ルーム3",
+  room4: "ルーム4",
+  room5: "女子部屋",
+  room6: "巻き込み",   // ← 追加
+  denki: "電気1",
+  denki1: "電気椅2",
+  denki2: "電気3",
+  special: "スペシャル",
+  privateA: "個室A",
+  privateB: "個室B",
+  privateC: "個室C",
+  privateD: "個室D"
+};
+
+
+const roomLabel = document.getElementById("roomLabel");
+
+if (roomLabel && room) {
+  roomLabel.textContent = `${roomNames[room] || room}`;
+}
+
+// ===== 女子部屋制御 =====
+if (room === "room5") {
+
+  const boyPunishBtn =
+    document.getElementById("boyPunishBtn");
+
+  const boyOnaBtn =
+    document.getElementById("boyOnaBtn");
+
+  if (boyPunishBtn){
+    boyPunishBtn.style.display = "none";
+  }
+
+  if (boyOnaBtn){
+    boyOnaBtn.style.display = "none";
+  }
+
+}
+// ===== 苦痛罰表示制御 =====
+const painPunishBtn =
+  document.getElementById("painPunishBtn");
+
+if (painPunishBtn){
+
+  if (
+    room === "special" ||
+    room === "denki"  ||
+    room === "denki1" ||
+    room === "denki2"
+  ){
+    painPunishBtn.style.display =
+      "inline-block";
+  }
+  else{
+    painPunishBtn.style.display =
+      "none";
+  }
+
+}
+
+
+// ===== ルーム6制御（イベントボタン表示） =====
+if (room === "room6") {
+
+  const punishWrap =
+    document.getElementById("punishWrap");
+
+  const maleEventBtn =
+    document.getElementById("maleEventBtn");
+
+  const femaleEventBtn =
+    document.getElementById("femaleEventBtn");
+
+  const commonEventBtn =
+  document.getElementById("commonEventBtn");
+
+
+  if (punishWrap){
+    punishWrap.style.display = "flex";
+  }
+
+  if (maleEventBtn){
+    maleEventBtn.style.display = "inline-block";
+  }
+
+  if (femaleEventBtn){
+    femaleEventBtn.style.display = "inline-block";
+  }
+
+  if (commonEventBtn){
+  commonEventBtn.style.display = "inline-block";
+}
+
+  const girlPunishBtn =
+  document.querySelector("button[onclick=\"sendPunish('女子罰')\"]");
+
+const boyPunishBtn =
+  document.getElementById("boyPunishBtn");
+
+const girlOnaBtn =
+  document.querySelector("button[onclick=\"sendPunish('命令女')\"]");
+
+const boyOnaBtn =
+  document.getElementById("boyOnaBtn");
+
+const painBtn =
+  document.querySelector("button[onclick=\"sendPunish('苦痛罰')\"]");
+
+if (girlPunishBtn) girlPunishBtn.style.display = "none";
+if (boyPunishBtn) boyPunishBtn.style.display = "none";
+if (girlOnaBtn)   girlOnaBtn.style.display = "none";
+if (boyOnaBtn)    boyOnaBtn.style.display = "none";
+if (painBtn)      painBtn.style.display = "none";
+
+
+}
+
+
+
+const key = localStorage.getItem("chatKey");
+
+
+if (!room && !joined) {
+  alert("ロビーから入室してください");
+  location.href = "/lobby.html";
+}
+if (room) roomInfo.textContent = `入室先：${room}`;
+
+/* ===== 表示 ===== */
+function renderMsg(d) {
+  const li = document.createElement("li");
+
+  if (d.time) {
+    const t = document.createElement("span");
+    t.textContent = `[${d.time}] `;
+    t.className = "time";
+    li.appendChild(t);
+  }
+
+  const text = document.createElement("span");
+  if (d.private) {
+    const toName = d.toName || "相手";
+    text.textContent = `【内緒】${d.name} ▶ ${toName}: ${d.text}`;
+    li.classList.add("private");
+  } else {
+    text.textContent = `${d.name}: ${d.text}`;
+  }
+
+ li.appendChild(text);
+li.style.color = d.color || "#000";
+
+if (d.bold) {
+  text.style.fontWeight = "bold";
+}
+
+messages.prepend(li);
+
+}
+
+/* ===== 受信 ===== */
+socket.on("connect", () => {
+
+  myId = socket.id;
+
+  // 電気椅子 状態取得
+  socket.emit("denkiStateRequest");
+
+});
+
+socket.on("pastMessages", logs => {
+
+  messages.innerHTML = "";
+  logs.forEach(renderMsg);
+
+  // ===== 絶頂解放ログ判定 =====
+  const unlocked = logs.some(m =>
+    m.text?.includes("絶頂許可が解放されました")
+  );
+
+  if (unlocked){
+    const btn = document.getElementById("zecchoBtn");
+    if (btn) btn.style.display = "inline-block";
+  }
+
+});
+
+// ===== 個人ミュート管理 =====
+let myMutes = [];
+
+// server から同期（後で拡張用）
+socket.on("muteSync", list => {
+  myMutes = list || [];
+});
+
+socket.on("message", d => {
+
+// ===== ミュート遮断 =====
+if (d.name && myMutes.includes(d.name)) {
+  return;
+}
+
+
+  // ===== 内緒表示制御 =====
+  if (d.private) {
+    if (d.to !== myId && d.name !== username) return;
+  }
+
+  // ===== 通知音 =====
+  if (
+    soundLevel !== "off" &&
+    d.name &&
+    d.name !== username
+  ) {
+    notifySound.volume =
+      SOUND_LEVELS[soundLevel];
+
+    notifySound.currentTime = 0;
+    notifySound.play().catch(()=>{});
+  }
+
+  renderMsg(d);
+
+});
+
+socket.on("zecchoUnlock", () => {
+
+  const btn = document.getElementById("zecchoBtn");
+
+  if (btn){
+    btn.style.display = "inline-block";
+  }
+
+});
+// ===== タイマー同期 =====
+let timerInterval = null;
+
+socket.on("timerSync", ({ endTime }) => {
+
+  const display =
+    document.getElementById("timerDisplay");
+
+  if (!display) return;
+
+  display.style.display = "block";
+
+  if (timerInterval){
+    clearInterval(timerInterval);
+  }
+
+  timerInterval = setInterval(() => {
+
+    const remain =
+      Math.max(0, endTime - Date.now());
+
+    const sec =
+      Math.floor(remain / 1000);
+
+    const m =
+      String(Math.floor(sec / 60))
+        .padStart(2,"0");
+
+    const s =
+      String(sec % 60)
+        .padStart(2,"0");
+
+    display.textContent =
+      `⏱ ${m}:${s}`;
+
+    if (remain <= 0){
+      clearInterval(timerInterval);
+    }
+
+  }, 1000);
+
+});
+
+// ===== タイマー終了 =====
+socket.on("timerEnd", () => {
+
+  const display =
+    document.getElementById("timerDisplay");
+
+  if (display){
+    display.style.display = "none";
+  }
+
+  if (timerInterval){
+    clearInterval(timerInterval);
+  }
+
+});
+
+socket.on("zecchoHide", () => {
+
+  const btn =
+    document.getElementById("zecchoBtn");
+
+  if (btn){
+    btn.style.display = "none";
+  }
+
+});
+
+
+
+
+socket.on("userList", list => {
+
+  userList.innerHTML = "";
+  privateTarget.innerHTML =
+    `<option value="">なし</option>`;
+
+  list.forEach(u => {
+
+    const li = document.createElement("li");
+
+    // ===== 名前表示 =====
+    const nameSpan =
+      document.createElement("span");
+
+    nameSpan.textContent = u.name;
+    nameSpan.style.color =
+      u.color || "#000";
+
+    li.appendChild(nameSpan);
+
+    // ===== 自分以外のみ操作ボタン =====
+    if (u.id !== myId) {
+
+      // 内緒用
+      const opt =
+        document.createElement("option");
+
+      opt.value = u.id;
+      opt.textContent = u.name;
+
+      privateTarget.appendChild(opt);
+
+    
+   // ===== ミュートボタン =====
+const muteBtn =
+  document.createElement("button");
+
+// 初期表示
+if (myMutes.includes(u.name)) {
+  muteBtn.textContent = "済";
+} else {
+  muteBtn.textContent = "消";
+}
+
+muteBtn.style.marginLeft = "6px";
+muteBtn.style.padding = "2px 6px";
+muteBtn.style.fontSize = "12px";
+muteBtn.style.lineHeight = "1.2";
+
+muteBtn.onclick = () => {
+
+  socket.emit("muteUser", u.id);
+
+  // 表示トグル
+  if (muteBtn.textContent === "消") {
+    muteBtn.textContent = "済";
+  } else {
+    muteBtn.textContent = "消";
+  }
+
+};
+
+
+      li.appendChild(muteBtn);
+    }
+
+    userList.appendChild(li);
+
+  });
+
+});
+
+
+/* ===== 電気椅子：状態 ===== */
+socket.on("denkiState", state => {
+  denkiState = state;
+
+  if (!denkiState || !denkiState.players) return;
+
+  updateDenkiUI();
+});
+
+function onDenkiSelect(seat) {
+  if (!denkiState || !denkiState.players) return;
+  if (!denkiState.started) return;   // ← 追加
+
+  const players = denkiState.players || [];
+
+  let me = players.find(p => p.id === myId);
+
+  // ★ IDズレ保険
+  if (!me) {
+    me = players.find(p => p.name === username);
+  }
+
+  if (!me) return;
+
+
+// ===== ターン本人判定 =====
+const turnPlayer =
+  denkiState.players[denkiState.turn];
+
+const isMyTurn =
+  turnPlayer?.id === myId ||
+  turnPlayer?.name === username;
+
+
+// 仕掛ける側
+if (
+  denkiState.phase === "set" &&
+  isMyTurn
+) {
+
+  selectedSeat = seat;
+
+  // ★ 仮選択即描画
+  updateDenkiUI();
+
+  return;
+}
+
+
+
+
+// ===== 座り仮選択 =====
+if (
+  denkiState.phase === "sit"
+) {
+
+  selectedSeat = seat;
+
+  socket.emit(
+    "denkiSit",
+    seat
+  );
+
+  const sitBtn =
+    document.getElementById("denkiSitBtn");
+
+  if (sitBtn){
+    sitBtn.disabled = false;
+  }
+
+}
+
+
+
+
+}
+function updateDenkiUI() {
+
+  denkiWrap.style.display = "block";
+
+  if (
+  !denkiState ||
+  !denkiState.players
+) return;
+
+
+  const players = denkiState.players;
+  const me = players.find(p => p.id === myId); // 観客は undefined
+
+
+  // ===== ボタン初期状態 =====
+  denkiSetBtn.style.display = "inline-block";
+  denkiSitBtn.style.display = "inline-block";
+  denkiShockBtn.style.display = "inline-block";
+
+  denkiSetBtn.disabled = true;
+  denkiSitBtn.disabled = true;
+  denkiShockBtn.disabled = true;
+  denkiConfirmBtn.disabled = true;
+  
+
+
+  // ===== 観戦モード判定 =====
+  const isSpectator = !me;
+  // ===== 観戦UI調整 =====
+if (isSpectator) {
+
+  denkiSetBtn.style.display = "none";
+  denkiSitBtn.style.display = "none";
+  denkiShockBtn.style.display = "none";
+
+  denkiStatus.textContent = "👀 観戦中";
+}
+
+ 
+
+ // ===== プレイヤー操作制御 =====
+if (!isSpectator) {
+
+  // ===== ターン本人判定 =====
+  const turnPlayer =
+    players[denkiState.turn];
+
+  const isMyTurn =
+    turnPlayer?.id === myId ||
+    turnPlayer?.name === username;
+
+
+  if (
+    denkiState.phase === "set" &&
+    isMyTurn
+  ) {
+    denkiSetBtn.disabled = false;
+    denkiStatus.textContent =
+      "あなたの番：椅子を仕掛ける";
+  }
+
+ else if (
+  denkiState.started &&
+  denkiState.phase === "sit" &&
+  !isMyTurn
+) {
+  denkiSitBtn.disabled = false;
+  denkiStatus.textContent =
+    "あなたの番：椅子に座る";
+}
+
+
+  else if (
+    denkiState.phase === "shock" &&
+    isMyTurn
+  ) {
+    denkiShockBtn.disabled = false;
+    denkiStatus.textContent =
+      "⚡ 電流を流してください";
+  }
+
+  else {
+    denkiStatus.textContent =
+      "相手の操作待ち";
+  }
+
+}
+
+
+  // ===== スコア表示 =====
+  denkiScore.textContent = players.map(p =>
+    `${p.name}: ${p.score}点 / ⚡${p.shock}`
+  ).join(" ｜ ");
+
+
+  // ===== 点数表 =====
+  const rowA = document.getElementById("denkiRowA");
+  const rowB = document.getElementById("denkiRowB");
+
+  const pA = players[0];
+  const pB = players[1];
+
+  if (pA && rowA) {
+    rowA.children[0].textContent = pA.name;
+
+    let totalA = 0;
+
+    for (let i = 1; i <= 9; i++) {
+
+      const v = pA.turns?.[i - 1];
+
+      if (v === "shock") {
+        rowA.children[i].textContent = "⚡";
+        totalA = 0;
+      }
+      else if (typeof v === "number") {
+        rowA.children[i].textContent = v;
+        totalA += v;
+      }
+      else {
+        rowA.children[i].textContent = "-";
+      }
+    }
+
+    rowA.children[10].textContent = totalA;
+
+  }
+
+  if (pB && rowB) {
+    rowB.children[0].textContent = pB.name;
+
+    let totalB = 0;
+
+    for (let i = 1; i <= 10; i++) {
+      const v = pB.turns?.[i - 1];
+
+      if (v === "shock") {
+        rowB.children[i].textContent = "⚡";
+        totalB = 0;
+      }
+      else if (typeof v === "number") {
+        rowB.children[i].textContent = v;
+        totalB += v;
+      }
+      else {
+        rowB.children[i].textContent = "-";
+      }
+    }
+
+    rowB.children[10].textContent = totalB;
+
+  }
+
+
+  // ===== 椅子描画 =====
+const buttons = denkiBoard.querySelectorAll("button");
+buttons.forEach(b => {
+
+  const num = Number(b.textContent);
+
+  b.style.background = "";
+  b.disabled = true;
+  b.style.display = "inline-block";
+
+// ===== 自分仮選択色 =====
+if (selectedSeat === num) {
+  b.style.background = "red";
+}
+
+
+
+ // 使用済み非表示
+if (
+  denkiState.usedSeats?.includes(num) &&
+  denkiState.phase !== "set"
+) {
+  b.style.display = "none";
+  return;
+}
+
+
+// ===== ターン本人判定 =====
+const turnPlayer =
+  players[denkiState.turn];
+
+const isMyTurn =
+  turnPlayer?.id === myId ||
+  turnPlayer?.name === username;
+
+
+// 仕掛けフェーズ
+if (
+  denkiState.phase === "set" &&
+  isMyTurn
+) {
+  b.disabled = false;
+
+  // ===== 自分だけ仕掛け色 =====
+  if (selectedSeat === num) {
+    b.style.background = "red";
+  }
+}
+
+
+// 座りフェーズ
+if (
+  denkiState.phase === "sit" &&
+  !isMyTurn &&
+  !isSpectator
+) {
+  b.disabled = false;
+}
+
+
+
+  // 仮座り表示（全員）
+  if (denkiState.sitPreview === num) {
+    b.style.background = "#ccccff";
+  }
+
+  // 確定座り表示
+  if (denkiState.phase === "shock" && denkiState.sitSeat === num) {
+    b.style.background = "#ccccff";
+  }
+
+});
+
+// ===== 参加ボタン制御 =====
+const meJoined =
+  denkiState.players.some(p => p.id === myId);
+
+// ===== 試合中判定 =====
+const gamePlaying =
+  denkiState.started === true &&
+  !denkiState.ended;
+
+
+// ===== 表示制御 =====
+if (meJoined || gamePlaying) {
+  denkiJoinBtn.style.display = "none";
+}
+else {
+  denkiJoinBtn.style.display = "inline-block";
+}
+
+
+}
+
+
+
+
+
+// ===== 接続キー生成 =====
+let connectKey =
+  localStorage.getItem("connectKey");
+
+if (!connectKey){
+
+  connectKey =
+    Math.random().toString(36).slice(2) +
+    Date.now().toString(36);
+
+  localStorage.setItem(
+    "connectKey",
+    connectKey
+  );
+
+}
+
+/* ===== 入室処理 ===== */
+joinBtn.onclick = () => {
+  if (joined || !nameInput.value.trim()) return;
+
+  username = nameInput.value.trim();
+  localStorage.setItem("chatName", username);
+
+  socket.emit("join", {
+  name: username,
+  color: myColor,
+  room,
+  key,
+  connectKey
+});
+
+
+  // 電気椅子UI 即表示
+  socket.emit("denkiStateRequest");
+
+  joined = true;
+  login.style.display = "none";
+  chat.style.display = "flex";
+};
+
+/* ===== 操作 ===== */
+colorSelect.oninput = () => {
+  myColor = colorSelect.value;
+  localStorage.setItem("chatColor", myColor);
+  socket.emit("updateColor", { color: myColor });
+};
+
+soundSelect.onchange = () => {
+  soundLevel = soundSelect.value;
+  localStorage.setItem("soundLevel", soundLevel);
+};
+
+privateTarget.onchange = () => {
+  privateTo = privateTarget.value || "";
+};
+
+sendBtn.onclick = () => {
+  if (!input.value.trim()) return;
+  socket.emit("message", {
+    text: input.value.trim(),
+    color: myColor,
+    to: privateTo || undefined
+  });
+  input.value = "";
+  privateTo = "";
+  privateTarget.value = "";
+};
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendBtn.click();
+  }
+});
+
+leaveBtn.onclick = () => {
+  socket.emit("leave");
+  localStorage.removeItem("chatName");
+  localStorage.removeItem("chatRoom");
+  localStorage.removeItem("chatKey");
+  location.href = "/lobby.html";
+};
+function sendPunish(cmd){
+  socket.emit("message",{ text: cmd });
+}
+
+window.addEventListener("load", () => {
+
+  const punishToggleBtn =
+    document.getElementById("punishToggleBtn");
+
+  const punishWrap =
+    document.getElementById("punishWrap");
+
+  let punishOpen = false;
+
+  punishToggleBtn.onclick = () => {
+
+    punishOpen = !punishOpen;
+
+    if (punishOpen){
+      punishWrap.style.display = "flex";
+    } else {
+      punishWrap.style.display = "none";
+    }
+
+  };
+
+  // ===== タイマーボタン =====
+  const timer3Btn =
+    document.getElementById("timer3Btn");
+
+  const timer5Btn =
+    document.getElementById("timer5Btn");
+
+  if (timer3Btn){
+    timer3Btn.onclick = () => {
+      socket.emit("timerStart", {
+        seconds: 180
+      });
+    };
+  }
+
+  if (timer5Btn){
+    timer5Btn.onclick = () => {
+      socket.emit("timerStart", {
+        seconds: 300
+      });
+    };
+  }
+const timerCustomBtn =
+  document.getElementById("timerCustomBtn");
+
+const timerCustomInput =
+  document.getElementById("timerCustomInput");
+
+if (timerCustomBtn){
+
+  timerCustomBtn.onclick = () => {
+
+    const min =
+      parseInt(timerCustomInput.value);
+
+    if (!min || min <= 0) return;
+
+    socket.emit("timerStart", {
+      seconds: min * 60
+    });
+
+    timerCustomInput.value = "";
+
+  };
+
+}
+
+
+
+});
+
+
+
+</script>
+
+</body>
+</html>

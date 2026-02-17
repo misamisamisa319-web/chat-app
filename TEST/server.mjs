@@ -211,8 +211,26 @@ const logRows = [...filteredLogs].reverse().map(m => {
       <td>${m.ip || "-"}</td>
       <td>${m.private ? "内緒" : "通常"}</td>
       <td>${m.text}</td>
-    </tr>
-  `;
+
+      <td>
+     <form method="POST" action="/admin/ipban24">
+     <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+     <input type="hidden" name="ip" value="${m.ip}">
+     <button type="submit">IP 24h BAN</button>
+     </form>
+
+     <form method="POST" action="/admin/ipbanPermanent">
+     <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+     <input type="hidden" name="ip" value="${m.ip}">
+     <button type="submit">IP 永久BAN</button>
+     </form>
+
+
+</td>
+</tr>
+`;
+
+
 
 }).join("");
 
@@ -376,6 +394,72 @@ app.post("/admin/ipban24", (req, res) => {
 
   res.redirect("/admin?key=" + process.env.ADMIN_KEY);
 });
+
+app.get("/admin/ipbanlist", (req, res) => {
+
+  if (req.query.key !== process.env.ADMIN_KEY) {
+    return res.status(403).send("Forbidden");
+  }
+
+  const rows = Object.entries(ipBans)
+    .map(([ip, expire]) => {
+
+      const type =
+        expire === Infinity
+          ? "永久"
+          : "24時間";
+
+      return `
+<tr>
+<td>${ip}</td>
+<td>${type}</td>
+<td>
+
+<form method="POST" action="/admin/ipbanRemove">
+<input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+<input type="hidden" name="ip" value="${ip}">
+<button type="submit">解除</button>
+</form>
+
+</td>
+</tr>
+`;
+
+    })
+    .join("");
+
+  res.send(`
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>IP BANリスト</title>
+<style>
+body{font-family:sans-serif;padding:20px;}
+table{border-collapse:collapse;width:100%;}
+th,td{border:1px solid #ccc;padding:6px;}
+th{background:#eee;}
+</style>
+</head>
+<body>
+
+<h2>IP BANリスト</h2>
+
+<table>
+<tr>
+<th>IP</th>
+<th>種別</th>
+<th>解除</th>
+</tr>
+${rows}
+</table>
+
+</body>
+</html>
+`);
+
+});
+
 
 app.post("/admin/ipbanPermanent", (req, res) => {
 
