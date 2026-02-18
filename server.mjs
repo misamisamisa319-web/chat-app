@@ -36,7 +36,8 @@ let bans = {}; // { name: expireTime }
 let ipBans = {}; // { ip: expireTime }
 
 
-const OG_LIFETIME = 3 * 24 * 60 * 60 * 1000; // 3日
+const LOG_LIFETIME = 3 * 24 * 60 * 60 * 1000; // 3日
+
 
 /* ===== ログ保存 ===== */
 const LOG_FILE = "/data/logs.json";
@@ -984,6 +985,10 @@ setInterval(()=>{
   });
 }, 60000);
 /* ===== ログ期限削除 ===== */
+
+const LOG_LIFETIME =
+  3 * 24 * 60 * 60 * 1000; // 3日
+
 setInterval(() => {
 
   const now = Date.now();
