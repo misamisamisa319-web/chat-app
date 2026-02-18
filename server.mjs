@@ -359,7 +359,8 @@ app.post("/admin/kick", (req, res) => {
       name: "system",
       text: "管理者によりキックされました",
       room: target.room,
-      time: getTimeString()
+      time: getDateTimeString()
+
     });
     target.disconnect(true);
   }
@@ -986,8 +987,7 @@ setInterval(()=>{
 }, 60000);
 /* ===== ログ期限削除 ===== */
 
-const LOG_LIFETIME =
-  3 * 24 * 60 * 60 * 1000; // 3日
+
 
 setInterval(() => {
 
