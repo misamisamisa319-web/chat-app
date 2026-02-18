@@ -108,9 +108,67 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 <div id="login">
   <h2>入室</h2>
-  <div id="roomInfo" style="margin-bottom:10px; color:#555;"></div>
-  <input id="nameInput" placeholder="名前">
-  <button id="joinBtn">入室</button>
+
+  <div id="roomInfo"
+       style="margin-bottom:10px; color:#555;">
+  </div>
+
+  <input id="nameInput"
+         placeholder="名前">
+
+  <!-- ===== 確認チェック ===== -->
+  <div style="
+    margin-top:12px;
+    font-size:14px;
+    line-height:1.6;
+  ">
+
+    <label>
+      <input type="checkbox"
+             id="confirmAge">
+      18歳未満の利用は禁止です
+    </label>
+    <br>
+
+    <label>
+      <input type="checkbox"
+             id="confirmRule">
+      ルール・禁止事項を確認しました
+    </label>
+    <br>
+
+    <label>
+      <input type="checkbox"
+             id="confirmIp">
+      IPアドレスは保管され、
+      問題発生時は開示される可能性があります
+    </label>
+    
+  <!-- ===== ルール説明 ===== -->
+  <div style="
+    margin-top:14px;
+    padding:10px;
+    font-size:13px;
+    line-height:1.6;
+    background:#f5f5f5;
+    border:1px solid #ccc;
+  ">
+
+    <strong>利用ルール</strong><br>
+
+    ・荒らし行為 / 迷惑行為禁止<br>
+    ・個人情報の公開禁止<br>
+    ・嫌がる行為の強要禁止<br>
+    ・違反時はログ確認・IP対応あり
+
+  </div>
+
+  </div>
+
+  <button id="joinBtn"
+          style="margin-top:12px;">
+    入室
+  </button>
 </div>
 
 <div id="chat">
@@ -443,6 +501,23 @@ window.addEventListener("load", () => {
     socket.emit("denkiStateRequest");
 
     joined = true;
+
+        // ===== 初回確認済みならチェック非表示 =====
+    const confirmed =
+      localStorage.getItem(
+        "entryConfirmed"
+      );
+
+    if (confirmed){
+      const loginDiv =
+        document.getElementById("login");
+
+      if (loginDiv){
+        loginDiv.style.display =
+          "none";
+      }
+    }
+
     login.style.display = "none";
     chat.style.display = "flex";
   }
@@ -1182,6 +1257,42 @@ if (!connectKey){
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
   if (joined || !nameInput.value.trim()) return;
+
+    // ===== 確認チェック判定 =====
+  const ageCheck =
+    document.getElementById("confirmAge");
+
+  const ruleCheck =
+    document.getElementById("confirmRule");
+
+  const ipCheck =
+    document.getElementById("confirmIp");
+
+  const confirmed =
+    localStorage.getItem(
+      "entryConfirmed"
+    );
+
+  // 初回のみ必須
+  if (!confirmed) {
+
+    if (
+      !ageCheck?.checked ||
+      !ruleCheck?.checked ||
+      !ipCheck?.checked
+    ){
+      alert(
+        "確認項目をすべてチェックしてください"
+      );
+      return;
+    }
+
+    localStorage.setItem(
+      "entryConfirmed",
+      "true"
+    );
+  }
+
 
   username = nameInput.value.trim();
   localStorage.setItem("chatName", username);

@@ -195,7 +195,7 @@ input[type="password"] {
     人数（<span id="count-room1">0</span>人）
     <span id="names-room1">なし</span>
   </div>
-  <label><input type="checkbox" id="age-room1">18+</label>
+  
 
   <button onclick="enterRoom('room1')">入室</button>
 </div>
@@ -218,7 +218,7 @@ input[type="password"] {
     人数（<span id="count-room2">0</span>人）
     <span id="names-room2">なし</span>
   </div>
-  <label><input type="checkbox" id="age-room2">18+</label>
+  
 
   <button onclick="enterRoom('room2')">入室</button>
 </div>
@@ -239,7 +239,6 @@ input[type="password"] {
     人数（<span id="count-room3">0</span>人）
     <span id="names-room3">なし</span>
   </div>
-  <label><input type="checkbox" id="age-room3">18+</label>
 
   <button onclick="enterRoom('room3')">入室</button>
 </div>
@@ -261,8 +260,7 @@ input[type="password"] {
     人数（<span id="count-room4">0</span>人）
     <span id="names-room4">なし</span>
   </div>
-  <label><input type="checkbox" id="age-room4">18+</label>
-
+ 
   <button onclick="enterRoom('room4')">入室</button>
 </div>
 
@@ -284,10 +282,7 @@ input[type="password"] {
     人数（<span id="count-room5">0</span>人）
     <span id="names-room5">なし</span>
   </div>
- <label>
-  <input type="checkbox" id="age-room5">
-  18+
-</label>
+
 
 <label>
   <input type="checkbox" id="girl-room5">
@@ -315,10 +310,6 @@ input[type="password"] {
     <span id="names-room6">なし</span>
   </div>
 
-  <label>
-    <input type="checkbox" id="age-room6">
-    18+
-  </label>
 
   <button onclick="enterRoom('room6')">入室</button>
 </div>
@@ -342,7 +333,7 @@ input[type="password"] {
     人数（<span id="count-denki">0</span>人）
     <span id="names-denki">なし</span>
   </div>
-  <label><input type="checkbox" id="age-denki">18+</label>
+ 
 
   <button onclick="enterRoom('denki')">入室</button>
 </div>
@@ -365,7 +356,7 @@ input[type="password"] {
     人数（<span id="count-denki1">0</span>人）
     <span id="names-denki1">なし</span>
   </div>
-  <label><input type="checkbox" id="age-denki1">18+</label>
+ 
   <button onclick="enterRoom('denki1')">入室</button>
 </div>
 
@@ -387,7 +378,7 @@ input[type="password"] {
     人数（<span id="count-denki2">0</span>人）
     <span id="names-denki2">なし</span>
   </div>
-  <label><input type="checkbox" id="age-denki2">18+</label>
+
   <button onclick="enterRoom('denki2')">入室</button>
 </div>
 
@@ -498,31 +489,7 @@ const allRooms = [
 
 function enterRoom(room) {
 
-  // ===== 18歳チェック（通常＋電気椅子のみ） =====
-  const needAgeCheck = [
-  "room1",
-  "room2",
-  "room3",
-  "room4",
-  "room5",
-  "room6",
-  "denki",
-  "denki1",
-  "denki2"
-];
 
-
-  if (needAgeCheck.includes(room)) {
-
-    const ageCheck =
-      document.getElementById(`age-${room}`);
-
-    if (!ageCheck || !ageCheck.checked) {
-      document.getElementById("error").textContent =
-        "18歳以上のみ入室できます";
-      return;
-    }
-  }
 if (room === "room5") {
 
   const girlCheck =
