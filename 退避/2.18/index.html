@@ -112,11 +112,6 @@ input, button, select { padding: 10px; font-size: 16px; }
   <div id="roomInfo"
        style="margin-bottom:10px; color:#555;">
   </div>
-<div id="roomDesc"
-     style="margin-bottom:12px;
-            font-size:13px;
-            color:#666;"></div>
-
 
   <input id="nameInput"
          placeholder="名前">
@@ -148,7 +143,7 @@ input, button, select { padding: 10px; font-size: 16px; }
       IPアドレスは保管され、
       問題発生時は開示される可能性があります
     </label>
-
+    
   <!-- ===== ルール説明 ===== -->
   <div style="
     margin-top:14px;
@@ -530,26 +525,6 @@ window.addEventListener("load", () => {
 
 /* ===== ロビーからの情報 ===== */
 const room = localStorage.getItem("chatRoom");
-
-const isDenki =
-  ["denki","denki1","denki2"]
-    .includes(room);
-
-    const descEl =
-  document.getElementById("roomDesc");
-
-if (isDenki) {
-
-  descEl.textContent =
-    "18歳以上限定 / ルール確認 / IP開示同意が必要です";
-
-} else {
-
-  descEl.textContent =
-    "18歳以上限定 / ルール確認 / IP開示同意が必要です";
-
-}
-
 
 const roomNames = {
   room1: "ルーム1",
