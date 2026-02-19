@@ -2582,10 +2582,11 @@ else {
 
 
           // ===== 罰系リセット =====
-          delete punishStockByRoom[leftRoom];
-          delete punishCooldownByRoom[leftRoom];
-          delete punishCountByRoom[leftRoom];
-          delete zecchoUnlockedByRoom[leftRoom];
+delete punishStockByRoom[leftRoom];
+delete punishCooldownByRoom[leftRoom];
+delete punishTypeCountByRoom[leftRoom];
+delete zecchoUnlockedByRoom[leftRoom];
+
 
           // ===== 電気椅子リセット =====
           if (
