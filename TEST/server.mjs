@@ -839,27 +839,47 @@ const commonEventItems = [
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 let punishStockByRoom = {};
 // ===== 罰累計（絶頂解放用） =====
-let punishCountByRoom = {};
+
 let zecchoUnlockedByRoom = {};
+
+// ===== 同一罰カウント =====
+let punishTypeCountByRoom = {};
+
 // ===== タイマー状態 =====
 let roomTimerEndByRoom = {};
 let roomTimerTimeoutByRoom = {};
 
 
-function addPunishCount(room){
 
-  if (!punishCountByRoom[room]){
-    punishCountByRoom[room] = 0;
+
+// ===== 同一罰カウント追加 =====
+function addPunishTypeCount(room, type){
+
+  if (!punishTypeCountByRoom[room]){
+    punishTypeCountByRoom[room] = {};
   }
 
-  punishCountByRoom[room]++;
+  if (!punishTypeCountByRoom[room][type]){
+    punishTypeCountByRoom[room][type] = 0;
+  }
+
+  punishTypeCountByRoom[room][type]++;
 
 }
-function isZecchoUnlocked(room){
 
-  return (punishCountByRoom[room] || 0) >= 10;
+
+// ===== 同一罰10回解放判定 =====
+function isSamePunishUnlocked(room){
+
+  const data = punishTypeCountByRoom[room];
+
+  if (!data) return false;
+
+  return Object.values(data)
+    .some(count => count >= 10);
 
 }
+
 
 // ===== 罰クールタイム（部屋単位） =====
 let punishCooldownByRoom = {};
@@ -2034,10 +2054,13 @@ saveLogs();
 
 io.to(socket.room).emit("message", msg);
 
-  addPunishCount(socket.room);
+ 
+
+  addPunishTypeCount(socket.room,"女子罰");
+
 // ===== 絶頂解放判定 =====
 if (
-  isZecchoUnlocked(socket.room) &&
+  isSamePunishUnlocked(socket.room) &&
   !zecchoUnlockedByRoom[socket.room]
 ){
   zecchoUnlockedByRoom[socket.room] = true;
@@ -2099,10 +2122,12 @@ saveLogs();
 
 io.to(socket.room).emit("message", msg);
 
-  addPunishCount(socket.room);
+ 
+  addPunishTypeCount(socket.room,"男子罰");
+
 // ===== 絶頂解放判定 =====
 if (
-  isZecchoUnlocked(socket.room) &&
+  isSamePunishUnlocked(socket.room) &&
   !zecchoUnlockedByRoom[socket.room]
 ){
   zecchoUnlockedByRoom[socket.room] = true;
@@ -2164,10 +2189,12 @@ saveLogs();
 
 io.to(socket.room).emit("message", msg);
 
-  addPunishCount(socket.room);
+  
+  addPunishTypeCount(socket.room,"命令女");
+
 // ===== 絶頂解放判定 =====
 if (
-  isZecchoUnlocked(socket.room) &&
+  isSamePunishUnlocked(socket.room) &&
   !zecchoUnlockedByRoom[socket.room]
 ){
   zecchoUnlockedByRoom[socket.room] = true;
@@ -2229,10 +2256,12 @@ saveLogs();
 
 io.to(socket.room).emit("message", msg);
 
-  addPunishCount(socket.room);
+ 
+  addPunishTypeCount(socket.room,"命令男");
+
 // ===== 絶頂解放判定 =====
 if (
-  isZecchoUnlocked(socket.room) &&
+  isSamePunishUnlocked(socket.room) &&
   !zecchoUnlockedByRoom[socket.room]
 ){
   zecchoUnlockedByRoom[socket.room] = true;
@@ -2292,10 +2321,12 @@ saveLogs();
 
 io.to(socket.room).emit("message", msg);
 
-  addPunishCount(socket.room);
+  
+  addPunishTypeCount(socket.room,"苦痛罰");
+
 // ===== 絶頂解放判定 =====
 if (
-  isZecchoUnlocked(socket.room) &&
+  isSamePunishUnlocked(socket.room) &&
   !zecchoUnlockedByRoom[socket.room]
 ){
   zecchoUnlockedByRoom[socket.room] = true;
