@@ -2382,8 +2382,7 @@ if (text === "絶頂許可") {
 
   io.to(socket.room).emit("message", msg);
 
-  // ===== 累計リセット =====
-  punishCountByRoom[socket.room] = 0;
+ 
 
   // ===== 解放フラグOFF =====
   zecchoUnlockedByRoom[socket.room] = false;
