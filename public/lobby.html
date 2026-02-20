@@ -523,7 +523,15 @@ if (room === "room5") {
     }
     localStorage.setItem("chatRoom", room);
     localStorage.setItem("chatKey", key);
-    location.href = "/";
+    if (
+  room === "denki" ||
+  room === "denki1" ||
+  room === "denki2"
+){
+  location.href = "/denki.html";
+} else {
+  location.href = "/";
+}
   });
 }
 
