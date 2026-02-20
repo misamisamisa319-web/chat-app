@@ -166,6 +166,16 @@ input, button, select { padding: 10px; font-size: 16px; }
   z-index: 96;
   border-top: 1px solid #ccc;
 }
+#bottomUI {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  background: #fff;
+  z-index: 90;
+  border-top: 1px solid #ccc;
+}
 </style>
 </head>
 <body>
@@ -346,6 +356,8 @@ input, button, select { padding: 10px; font-size: 16px; }
 </div>
 
 <ul id="messages"></ul>
+
+<div id="bottomUI">
 
 <!-- ===== タイマー＋罰トグル横並び ===== -->
 <div id="timerPunishRow" style="
