@@ -1664,10 +1664,13 @@ function sendDice(cmd){
 window.addEventListener("load", () => {
 
   const punishToggleBtn =
-  document.getElementById("denkiPunishToggleBtn");
+  document.getElementById("denkiPunishToggleBtn")
+  || document.getElementById("punishToggleBtn");
 
 const punishWrap =
-  document.getElementById("denkiPunishWrap");
+  document.getElementById("denkiPunishWrap")
+  || document.getElementById("punishWrap");
+
 
   let punishOpen = false;
 
@@ -1685,10 +1688,12 @@ const punishWrap =
 
   // ===== タイマーボタン =====
   const timer3Btn =
-  document.getElementById("denkiTimer3Btn");
+  document.getElementById("denkiTimer3Btn")
+  || document.getElementById("timer3Btn");
 
 const timer5Btn =
-  document.getElementById("denkiTimer5Btn");
+  document.getElementById("denkiTimer5Btn")
+  || document.getElementById("timer5Btn");
 
   if (timer3Btn){
     timer3Btn.onclick = () => {
@@ -1706,10 +1711,12 @@ const timer5Btn =
     };
   }
 const timerCustomBtn =
-  document.getElementById("denkiTimerCustomBtn");
+  document.getElementById("denkiTimerCustomBtn")
+  || document.getElementById("timerCustomBtn");
 
 const timerCustomInput =
-  document.getElementById("denkiTimerCustomInput");
+  document.getElementById("denkiTimerCustomInput")
+  || document.getElementById("timerCustomInput");
 
 if (timerCustomBtn){
 
