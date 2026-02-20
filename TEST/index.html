@@ -59,7 +59,15 @@ input, button, select { padding: 10px; font-size: 16px; }
 #settings { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; padding: 5px; background: #f9f9f9; border-bottom: 1px solid #ccc; }
 #settings input, #settings button, #settings select { padding: 5px; font-size: 14px; }
 
-#messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; padding-bottom: 180px; /* ← これを追加 */ }
+#messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 10px;
+  list-style: none;
+  padding-bottom: 260px;
+}
 #messages li { margin-bottom: 5px; }
 .private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
 
@@ -97,11 +105,25 @@ input, button, select { padding: 10px; font-size: 16px; }
 }
 #denkiBoard button {
   width: 44px;
+  
 }
 #denkiScore {
   font-size: 14px;
   margin-bottom: 6px;
 }
+#bottomUI {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  background: #fff;
+  border-top: 1px solid #ccc;
+
+  padding: 8px;
+  z-index: 100;
+}
+
 </style>
 </head>
 <body>
@@ -264,6 +286,8 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 
 
+<div id="bottomUI">
+
 <!-- ===== タイマー＋罰トグル横並び ===== -->
 <div id="timerPunishRow" style="
   display:flex;
@@ -345,8 +369,6 @@ input, button, select { padding: 10px; font-size: 16px; }
     共通イベント
   </button>
 
-
-
 </div>
 
 <!-- ===== ダイスボタンRow ===== -->
@@ -363,6 +385,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 </div>
 
+</div>
 
 <div id="timerDisplay"
      style="
