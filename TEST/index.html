@@ -79,12 +79,6 @@ input, button, select { padding: 10px; font-size: 16px; }
   padding: 5px;
   list-style: none;
   align-items: center;
-
-  position: fixed;
-  bottom: 50px;
-  left: 0;
-  right: 0;
-  z-index: 95;
 }
 
 #userList li {
@@ -104,7 +98,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   overflow-y: auto;
   padding: 10px;
   list-style: none;
-  padding-bottom: 260px; /* ←ここ変更 */
+  padding-bottom: 360px; /* ←ここ変更 */
 }
 #messages li { margin-bottom: 5px; }
 .private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
@@ -151,7 +145,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 #timerPunishRow {
   position: fixed;
-  bottom: 100px;
+  bottom: 40px;  /* ←ダイスの上に合わせる */
   left: 0;
   right: 0;
 
@@ -161,9 +155,10 @@ input, button, select { padding: 10px; font-size: 16px; }
   z-index: 94;
   border-top: 1px solid #ccc;
 }
+
 #diceRow {
   position: fixed;
-  bottom: 50px;
+  bottom: 0;   /* ←最下段にする */
   left: 0;
   right: 0;
 
@@ -173,7 +168,6 @@ input, button, select { padding: 10px; font-size: 16px; }
   z-index: 96;
   border-top: 1px solid #ccc;
 }
-
 </style>
 </head>
 <body>
@@ -325,7 +319,6 @@ input, button, select { padding: 10px; font-size: 16px; }
 
   </div>
 
-<ul id="messages"></ul>
 
 
 <!-- ===== 参加者 ===== -->
@@ -354,6 +347,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   <button id="leaveBtn">退出</button>
 </div>
 
+<ul id="messages"></ul>
 
 <!-- ===== タイマー＋罰トグル横並び ===== -->
 <div id="timerPunishRow" style="
