@@ -1716,7 +1716,7 @@ if (denkiToggle && denkiWrap2){
 
   };
 
-  // ===== タイマーボタン =====
+  
   // ===== タイマーボタン（通常と電気分離） =====
 
 // 通常
@@ -1776,13 +1776,57 @@ const timer5Btn =
       });
     };
   }
-const timerCustomBtn =
-  document.getElementById("denkiTimerCustomBtn")
-  || document.getElementById("timerCustomBtn");
+// ===== 任意タイマー（通常） =====
+const normalTimerCustomBtn =
+  document.getElementById("timerCustomBtn");
 
-const timerCustomInput =
-  document.getElementById("denkiTimerCustomInput")
-  || document.getElementById("timerCustomInput");
+const normalTimerCustomInput =
+  document.getElementById("timerCustomInput");
+
+if (normalTimerCustomBtn){
+
+  normalTimerCustomBtn.onclick = () => {
+
+    const min =
+      parseInt(normalTimerCustomInput.value);
+
+    if (!min || min <= 0) return;
+
+    socket.emit("timerStart", {
+      seconds: min * 60
+    });
+
+    normalTimerCustomInput.value = "";
+
+  };
+
+}
+
+// ===== 任意タイマー（電気椅子） =====
+const denkiTimerCustomBtn =
+  document.getElementById("denkiTimerCustomBtn");
+
+const denkiTimerCustomInput =
+  document.getElementById("denkiTimerCustomInput");
+
+if (denkiTimerCustomBtn){
+
+  denkiTimerCustomBtn.onclick = () => {
+
+    const min =
+      parseInt(denkiTimerCustomInput.value);
+
+    if (!min || min <= 0) return;
+
+    socket.emit("timerStart", {
+      seconds: min * 60
+    });
+
+    denkiTimerCustomInput.value = "";
+
+  };
+
+}
 
 if (timerCustomBtn){
 
