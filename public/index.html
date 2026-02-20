@@ -221,6 +221,63 @@ input, button, select { padding: 10px; font-size: 16px; }
 
   <!-- ⚡ 電気椅子（denki ルームのみ表示） -->
   <div id="denkiWrap">
+   
+  <!-- ===== 罰＋タイマー（電気椅子用） ===== -->
+<div id="denkiPunishArea" style="margin-bottom:10px;">
+
+  <!-- トグル＋タイマー -->
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <button id="denkiPunishToggleBtn">罰メニュー</button>
+
+    <button id="denkiTimer3Btn">3分</button>
+    <button id="denkiTimer5Btn">5分</button>
+
+    <input id="denkiTimerCustomInput"
+      type="number"
+      min="1"
+      step="1"
+      placeholder="分"
+      style="width:60px;">
+
+    <button id="denkiTimerCustomBtn">任意</button>
+  </div>
+
+  <!-- 罰ボタン -->
+  <div id="denkiPunishWrap" style="
+  display:none;
+  gap:7px;
+  flex-wrap:wrap;
+  padding:6px 0;
+">
+
+    <button onclick="sendPunish('女子罰')">女子罰</button>
+
+    <button id="boyPunishBtn"
+      onclick="sendPunish('男子罰')">
+      男子罰
+    </button>
+
+    <button onclick="sendPunish('命令女')">女オナ</button>
+
+    <button id="boyOnaBtn"
+      onclick="sendPunish('命令男')">
+      男オナ
+    </button>
+
+    <button id="painPunishBtn"
+      onclick="sendPunish('苦痛罰')">
+      苦痛罰
+    </button>
+
+    <button id="zecchoBtn"
+      onclick="sendPunish('絶頂許可')"
+      style="display:none;">
+      絶頂許可
+    </button>
+
+  </div>
+
+</div>  
     <!-- ===== 電気椅子 点数表 ===== -->
 <table id="denkiTable" style="
   width:100%;
@@ -694,13 +751,14 @@ const isDenki =
 
 if (isDenki) {
 
-  // ===== 罰メニューBOXを非表示 =====
+  // ===== 下の罰UIを非表示 =====
   const bottomUI =
     document.getElementById("bottomUI");
 
   if (bottomUI){
     bottomUI.style.display = "none";
   }
+
 
   descEl.innerHTML = `
 【電気椅子ルール】<br><br>
@@ -1606,10 +1664,10 @@ function sendDice(cmd){
 window.addEventListener("load", () => {
 
   const punishToggleBtn =
-    document.getElementById("punishToggleBtn");
+  document.getElementById("denkiPunishToggleBtn");
 
-  const punishWrap =
-    document.getElementById("punishWrap");
+const punishWrap =
+  document.getElementById("denkiPunishWrap");
 
   let punishOpen = false;
 
@@ -1627,10 +1685,10 @@ window.addEventListener("load", () => {
 
   // ===== タイマーボタン =====
   const timer3Btn =
-    document.getElementById("timer3Btn");
+  document.getElementById("denkiTimer3Btn");
 
-  const timer5Btn =
-    document.getElementById("timer5Btn");
+const timer5Btn =
+  document.getElementById("denkiTimer5Btn");
 
   if (timer3Btn){
     timer3Btn.onclick = () => {
@@ -1648,10 +1706,10 @@ window.addEventListener("load", () => {
     };
   }
 const timerCustomBtn =
-  document.getElementById("timerCustomBtn");
+  document.getElementById("denkiTimerCustomBtn");
 
 const timerCustomInput =
-  document.getElementById("timerCustomInput");
+  document.getElementById("denkiTimerCustomInput");
 
 if (timerCustomBtn){
 
