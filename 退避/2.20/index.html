@@ -28,37 +28,11 @@ body {
 .system.girl { color: red; font-weight: bold; }
 .system.boy { color: blue; font-weight: bold; }
 
-#controls {
-  display: flex;
-  gap: 5px;
-  padding: 8px;
-
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-
-  background: #fff;
-  z-index: 100;
-  border-top: 1px solid #ccc;
-}
+#controls { display: flex; gap: 5px; padding: 5px; position: sticky; top: 0; background: #fff; z-index: 10; }
 input, button, select { padding: 10px; font-size: 16px; }
-
 #punishWrap {
-  display: none;
-  gap: 7px;
-  flex-wrap: wrap;
-  padding: 6px 0;
-
-  position: fixed;
-  bottom: 140px; /* timerの上 */
-  left: 0;
-  right: 0;
-
-  background: #fff;
-  z-index: 93;
+  gap: 20px;   /* ボタン同士の間隔 */
 }
-
 #punishWrap button {
   padding: 6px 12px;  /* ボタンの中の余白 */
   font-size: 16px;   /* 文字サイズ */
@@ -73,12 +47,6 @@ input, button, select { padding: 10px; font-size: 16px; }
   padding: 5px;
   list-style: none;
   align-items: center;
-
-  position: fixed;
-  bottom: 50px;
-  left: 0;
-  right: 0;
-  z-index: 95;
 }
 
 #userList li {
@@ -91,15 +59,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 #settings { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; padding: 5px; background: #f9f9f9; border-bottom: 1px solid #ccc; }
 #settings input, #settings button, #settings select { padding: 5px; font-size: 14px; }
 
-#messages {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  padding: 10px;
-  list-style: none;
-  padding-bottom: 260px; /* ←ここ変更 */
-}
+#messages { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; list-style: none; padding-bottom: 180px; /* ← これを追加 */ }
 #messages li { margin-bottom: 5px; }
 .private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
 
@@ -142,32 +102,6 @@ input, button, select { padding: 10px; font-size: 16px; }
   font-size: 14px;
   margin-bottom: 6px;
 }
-
-#timerPunishRow {
-  position: fixed;
-  bottom: 100px;
-  left: 0;
-  right: 0;
-
-  background: #fff;
-  padding: 5px;
-
-  z-index: 94;
-  border-top: 1px solid #ccc;
-}
-#diceRow {
-  position: fixed;
-  bottom: 50px;
-  left: 0;
-  right: 0;
-
-  background: #fff;
-  padding: 5px;
-
-  z-index: 96;
-  border-top: 1px solid #ccc;
-}
-
 </style>
 </head>
 <body>
@@ -328,25 +262,6 @@ input, button, select { padding: 10px; font-size: 16px; }
   <ul id="userList"></ul>
 </div>
 
-<div id="settings">
-
-  <label>色: <input type="color" id="colorSelect" value="#000000"></label>
-  <label>内緒:
-    <select id="privateTarget">
-      <option value="">なし</option>
-    </select>
-  </label>
-  <label>
-    音:
-    <select id="soundSelect">
-      <option value="off">OFF</option>
-      <option value="small">小</option>
-      <option value="medium">中</option>
-      <option value="large">大</option>
-    </select>
-  </label>
-  <button id="leaveBtn">退出</button>
-</div>
 
 
 <!-- ===== タイマー＋罰トグル横並び ===== -->
@@ -457,7 +372,28 @@ input, button, select { padding: 10px; font-size: 16px; }
   ⏱ 00:00
 </div>
 
-<ul id="messages"></ul>
+<div id="settings">
+
+    <label>色: <input type="color" id="colorSelect" value="#000000"></label>
+    <label>内緒:
+      <select id="privateTarget">
+        <option value="">なし</option>
+      </select>
+    </label>
+    <label>
+      音:
+      <select id="soundSelect">
+        <option value="off">OFF</option>
+        <option value="small">小</option>
+        <option value="medium">中</option>
+        <option value="large">大</option>
+      </select>
+    </label>
+    <button id="leaveBtn">退出</button>
+  </div>
+
+  <ul id="messages"></ul>
+</div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
@@ -692,8 +628,6 @@ M → 2d4
 ここのチャット以外の外部連れ出し禁止
 （ルブルの別部屋、ラブルのツーショ、ライン、カカオなどなど）
 命令が被った際は勝利者による自由命令とする
-持続型の自由命令は進行に支障をきたすので極力行わないようにしましょう
-自由命令が思い浮かばない場合は「男オナ」「女オナ」で代わりもできます。
 自由命令とありますが、個人情報、写真の要求やNG行為の強要はしない
 自分の写真を晒す行為なども禁止します
 罰ではありますが敗者も遠慮なくお断りしてください
@@ -774,7 +708,6 @@ if (isDenki) {
 （ルブルの別部屋、ラブルのツーショ、ライン、カカオなどなど）<br>
 命令が被った際は勝利者による自由命令とする<br>
 自由命令が思い浮かばない場合は「男オナ」「女オナ」で代わりもできます。<br>
-持続型の自由命令は進行に支障をきたすので極力行わないようにしましょう<br>
 自由命令とありますが、個人情報、写真の要求やNG行為の強要はしない<br>
 自分の写真を晒す行為なども禁止します<br>
 罰ではありますが敗者も遠慮なくお断りしてください<br>
