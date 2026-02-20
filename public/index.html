@@ -1717,9 +1717,45 @@ if (denkiToggle && denkiWrap2){
   };
 
   // ===== タイマーボタン =====
-  const timer3Btn =
-  document.getElementById("denkiTimer3Btn")
-  || document.getElementById("timer3Btn");
+  // ===== タイマーボタン（通常と電気分離） =====
+
+// 通常
+const normalTimer3Btn =
+  document.getElementById("timer3Btn");
+
+const normalTimer5Btn =
+  document.getElementById("timer5Btn");
+
+if (normalTimer3Btn){
+  normalTimer3Btn.onclick = () => {
+    socket.emit("timerStart", { seconds: 180 });
+  };
+}
+
+if (normalTimer5Btn){
+  normalTimer5Btn.onclick = () => {
+    socket.emit("timerStart", { seconds: 300 });
+  };
+}
+
+// 電気椅子
+const denkiTimer3Btn =
+  document.getElementById("denkiTimer3Btn");
+
+const denkiTimer5Btn =
+  document.getElementById("denkiTimer5Btn");
+
+if (denkiTimer3Btn){
+  denkiTimer3Btn.onclick = () => {
+    socket.emit("timerStart", { seconds: 180 });
+  };
+}
+
+if (denkiTimer5Btn){
+  denkiTimer5Btn.onclick = () => {
+    socket.emit("timerStart", { seconds: 300 });
+  };
+}
 
 const timer5Btn =
   document.getElementById("denkiTimer5Btn")
