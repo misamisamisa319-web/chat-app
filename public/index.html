@@ -1663,14 +1663,44 @@ function sendDice(cmd){
 
 window.addEventListener("load", () => {
 
-  const punishToggleBtn =
-  document.getElementById("denkiPunishToggleBtn")
-  || document.getElementById("punishToggleBtn");
+ // ===== 罰トグル（通常） =====
+const normalToggle =
+  document.getElementById("punishToggleBtn");
 
-const punishWrap =
-  document.getElementById("denkiPunishWrap")
-  || document.getElementById("punishWrap");
+const normalWrap =
+  document.getElementById("punishWrap");
 
+if (normalToggle && normalWrap){
+
+  let open = false;
+
+  normalToggle.onclick = () => {
+    open = !open;
+    normalWrap.style.display =
+      open ? "flex" : "none";
+  };
+
+}
+
+
+// ===== 罰トグル（電気椅子） =====
+const denkiToggle =
+  document.getElementById("denkiPunishToggleBtn");
+
+const denkiWrap2 =
+  document.getElementById("denkiPunishWrap");
+
+if (denkiToggle && denkiWrap2){
+
+  let open2 = false;
+
+  denkiToggle.onclick = () => {
+    open2 = !open2;
+    denkiWrap2.style.display =
+      open2 ? "flex" : "none";
+  };
+
+}
 
   let punishOpen = false;
 
