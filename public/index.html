@@ -667,6 +667,7 @@ messages.prepend(li);
 }
 
 /* ===== 受信 ===== */
+let myId; // 初期化追加
 socket.on("connect", () => {
 
   myId = socket.id;
