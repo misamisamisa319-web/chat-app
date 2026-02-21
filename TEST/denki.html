@@ -718,32 +718,15 @@ if (roomLabel && room) {
   roomLabel.textContent = `${roomNames[room] || room}`;
 }
 
-// ===== 女子部屋制御 =====
-if (room === "room5") {
 
-  const boyPunishBtn =
-    document.getElementById("boyPunishBtn");
-
-  const boyOnaBtn =
-    document.getElementById("boyOnaBtn");
-
-  if (boyPunishBtn){
-    boyPunishBtn.style.display = "none";
-  }
-
-  if (boyOnaBtn){
-    boyOnaBtn.style.display = "none";
-  }
-
-}
 // ===== 苦痛罰表示制御 =====
+
 const painPunishBtn =
-  document.getElementById("painPunishBtn");
+  document.getElementById("denkiPainPunishBtn");
 
 if (painPunishBtn){
 
   if (
-    room === "special" ||
     room === "denki"  ||
     room === "denki1" ||
     room === "denki2"
@@ -758,62 +741,6 @@ if (painPunishBtn){
 
 }
 
-
-// ===== ルーム6制御（イベントボタン表示） =====
-if (room === "room6") {
-
-  const punishWrap =
-    document.getElementById("punishWrap");
-
-  const maleEventBtn =
-    document.getElementById("maleEventBtn");
-
-  const femaleEventBtn =
-    document.getElementById("femaleEventBtn");
-
-  const commonEventBtn =
-  document.getElementById("commonEventBtn");
-
-
-  if (punishWrap){
-    punishWrap.style.display = "flex";
-  }
-
-  if (maleEventBtn){
-    maleEventBtn.style.display = "inline-block";
-  }
-
-  if (femaleEventBtn){
-    femaleEventBtn.style.display = "inline-block";
-  }
-
-  if (commonEventBtn){
-  commonEventBtn.style.display = "inline-block";
-}
-
-  const girlPunishBtn =
-  document.querySelector("button[onclick=\"sendPunish('女子罰')\"]");
-
-const boyPunishBtn =
-  document.getElementById("boyPunishBtn");
-
-const girlOnaBtn =
-  document.querySelector("button[onclick=\"sendPunish('命令女')\"]");
-
-const boyOnaBtn =
-  document.getElementById("boyOnaBtn");
-
-const painBtn =
-  document.querySelector("button[onclick=\"sendPunish('苦痛罰')\"]");
-
-if (girlPunishBtn) girlPunishBtn.style.display = "none";
-if (boyPunishBtn) boyPunishBtn.style.display = "none";
-if (girlOnaBtn)   girlOnaBtn.style.display = "none";
-if (boyOnaBtn)    boyOnaBtn.style.display = "none";
-if (painBtn)      painBtn.style.display = "none";
-
-
-}
 
 
 
@@ -882,15 +809,15 @@ socket.on("pastMessages", logs => {
   messages.innerHTML = "";
   logs.forEach(renderMsg);
 
-  // ===== 絶頂解放ログ判定 =====
-  const unlocked = logs.some(m =>
-    m.text?.includes("絶頂許可が解放されました")
-  );
+ // ===== 絶頂解放ログ判定 =====
+const unlocked = logs.some(m =>
+  m.text?.includes("絶頂許可が解放されました")
+);
 
-  if (unlocked){
-    const btn = document.getElementById("zecchoBtn");
-    if (btn) btn.style.display = "inline-block";
-  }
+if (unlocked){
+  const btn = document.getElementById("denkiZecchoBtn");
+  if (btn) btn.style.display = "inline-block";
+}
 
 });
 
@@ -934,11 +861,12 @@ if (d.name && myMutes.includes(d.name)) {
 
 socket.on("zecchoUnlock", () => {
 
-  const btn = document.getElementById("zecchoBtn");
+  const btn = document.getElementById("denkiZecchoBtn");
 
   if (btn){
     btn.style.display = "inline-block";
   }
+
 
 });
 // ===== タイマー同期 =====
@@ -1003,7 +931,7 @@ socket.on("timerEnd", () => {
 socket.on("zecchoHide", () => {
 
   const btn =
-    document.getElementById("zecchoBtn");
+    document.getElementById("denkiZecchoBtn");
 
   if (btn){
     btn.style.display = "none";
