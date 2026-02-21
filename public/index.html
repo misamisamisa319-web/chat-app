@@ -582,6 +582,27 @@ if (room === "room5") {
   }
 
 }
+// ===== 苦痛罰表示制御 =====
+const painPunishBtn =
+  document.getElementById("painPunishBtn");
+
+if (painPunishBtn){
+
+  if (
+    room === "special" ||
+    room === "denki"  ||
+    room === "denki1" ||
+    room === "denki2"
+  ){
+    painPunishBtn.style.display =
+      "inline-block";
+  }
+  else{
+    painPunishBtn.style.display =
+      "none";
+  }
+
+}
 
 
 // ===== ルーム6制御（イベントボタン表示） =====
@@ -1046,6 +1067,40 @@ if (normalToggle && normalWrap){
   };
 
 }
+
+
+// ===== 罰トグル（電気椅子） =====
+const denkiToggle =
+  document.getElementById("denkiPunishToggleBtn");
+
+const denkiWrap2 =
+  document.getElementById("denkiPunishWrap");
+
+if (denkiToggle && denkiWrap2){
+
+  let open2 = false;
+
+  denkiToggle.onclick = () => {
+    open2 = !open2;
+    denkiWrap2.style.display =
+      open2 ? "flex" : "none";
+  };
+
+}
+
+  let punishOpen = false;
+
+  punishToggleBtn.onclick = () => {
+
+    punishOpen = !punishOpen;
+
+    if (punishOpen){
+      punishWrap.style.display = "flex";
+    } else {
+      punishWrap.style.display = "none";
+    }
+
+  };
 
   
   // ===== タイマーボタン（通常と電気分離） =====
