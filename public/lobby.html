@@ -569,12 +569,20 @@ if (room === "room5") {
     }
     localStorage.setItem("chatRoom", room);
     localStorage.setItem("chatKey", key);
-    if (
+   if (
   room === "denki" ||
   room === "denki1" ||
   room === "denki2"
 ){
   location.href = "/denki.html";
+
+} else if (
+  room === "sugoroku1" ||
+  room === "sugoroku2" ||
+  room === "sugoroku3"
+){
+  location.href = "/sugoroku.html";
+
 } else {
   location.href = "/";
 }
