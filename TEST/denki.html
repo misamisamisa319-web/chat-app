@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Chat v2</title>
+<title>Chat v2 - denki</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -538,34 +538,6 @@ const room = localStorage.getItem("chatRoom");
 
 const descEl =
   document.getElementById("roomDesc");
-
-// ===== ダイス表示制御 =====
-const diceRow =
-  document.getElementById("diceRow");
-
-const showDiceRooms = [
-  "room1",
-  "room2",
-  "room3",
-  "room4",
-  "room5",
-  "room6"
-];
-
-if (diceRow){
-
-  if (
-    showDiceRooms.includes(room)
-  ){
-    diceRow.style.display =
-      "flex";
-  }
-  else{
-    diceRow.style.display =
-      "none";
-  }
-
-}
 
 
 /* ===== 全部屋共通：文字色 ===== */

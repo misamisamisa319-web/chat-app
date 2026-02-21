@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Chat v2 - index</title>
+<title>Chat v2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -81,20 +81,6 @@ input, button, select { padding: 10px; font-size: 16px; }
 .private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
 
 .time { opacity: .6; margin-right: 4px; }
-
-
-#bottomUI {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-
-  background: #fff;
-  border-top: 1px solid #ccc;
-
-  padding: 8px;
-  z-index: 100;
-}
 
 </style>
 </head>
@@ -190,107 +176,6 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 
 
-<div id="bottomUI">
-
-<!-- ===== タイマー＋罰トグル横並び ===== -->
-<div id="timerPunishRow" style="
-  display:flex;
-  gap:8px;
-  padding:4px 0;
-  flex-wrap:wrap;
-">
-
-  <!-- 罰トグル -->
-  <button id="punishToggleBtn">
-    罰メニュー
-  </button>
-
-  <!-- タイマー -->
-  <button id="timer3Btn">3分</button>
-  <button id="timer5Btn">5分</button>
-  <input id="timerCustomInput"
-  type="number"
-  min="1"
-  step="1"
-  placeholder="分"
-  style="width:60px;">
-
-<button id="timerCustomBtn">
-  任意
-</button>
-
-
-</div>
-
-<!-- ===== 罰ボタン本体 ===== -->
-<div id="punishWrap" style="
-  display:none;
-  gap:7px;
-  flex-wrap:wrap;
-  padding:6px 0;
-">
-
-  <button onclick="sendPunish('女子罰')">女子罰</button>
-
-  <button id="boyPunishBtn"
-    onclick="sendPunish('男子罰')">
-    男子罰
-  </button>
-
-  <button onclick="sendPunish('命令女')">女オナ</button>
-
-  <button id="boyOnaBtn"
-    onclick="sendPunish('命令男')">
-    男オナ
-  </button>
-
-  <button id="painPunishBtn"
-    onclick="sendPunish('苦痛罰')">
-    苦痛罰
-  </button>
-
-  <button id="zecchoBtn"
-    onclick="sendPunish('絶頂許可')"
-    style="display:none;">
-    絶頂許可
-  </button>
-
-  <button id="maleEventBtn"
-    style="display:none;"
-    onclick="sendPunish('男イベント')">
-    男イベント
-  </button>
-
-  <button id="femaleEventBtn"
-    style="display:none;"
-    onclick="sendPunish('女イベント')">
-    女イベント
-  </button>
-
-  <button id="commonEventBtn"
-    style="display:none;"
-    onclick="sendPunish('共通イベント')">
-    共通イベント
-  </button>
-
-</div>
-
-<!-- ===== ダイスボタンRow ===== -->
-<div id="diceRow" style="
-  display:flex;
-  gap:8px;
-  padding:4px 0;
-  flex-wrap:wrap;
-">
-
-  <button onclick="sendDice('2d6')">S</button>
-  <button onclick="sendDice('2d5')">N</button>
-  <button onclick="sendDice('2d4')">M</button>
-
-</div>
-
-</div>
-
 <div id="timerDisplay"
      style="
        font-weight:bold;
@@ -352,6 +237,10 @@ let privateTo = "";
 let joined = false;
 
 
+
+
+
+
 window.addEventListener("load", () => {
   const savedName  = localStorage.getItem("chatName");
   const savedRoom  = localStorage.getItem("chatRoom");
@@ -361,15 +250,14 @@ window.addEventListener("load", () => {
     username = savedName;
     myColor = savedColor;
     colorSelect.value = myColor;
-
-    socket.emit("join", {
-      name: username,
-      color: myColor,
-      room: savedRoom
-    });
-
+      socket.emit("join", {
+    name: username,
+    color: myColor,
+    room: savedRoom
+  });
 
     joined = true;
+    
 
         // ===== 初回確認済みならチェック非表示 =====
     const confirmed =
@@ -398,44 +286,15 @@ const room = localStorage.getItem("chatRoom");
 const descEl =
   document.getElementById("roomDesc");
 
-// ===== ダイス表示制御 =====
-const diceRow =
-  document.getElementById("diceRow");
-
-const showDiceRooms = [
-  "room1",
-  "room2",
-  "room3",
-  "room4",
-  "room5",
-  "room6"
-];
-
-if (diceRow){
-
-  if (
-    showDiceRooms.includes(room)
-  ){
-    diceRow.style.display =
-      "flex";
-  }
-  else{
-    diceRow.style.display =
-      "none";
-  }
-
-}
 
 
 /* ===== 全部屋共通：文字色 ===== */
 descEl.style.color = "black";
-
-
-/* ===== 1〜4 ルール ===== */
 const isRoom1to4 =
   ["room1","room2","room3","room4"]
     .includes(room);
 
+/* ===== 1〜4 ルール ===== */
 if (isRoom1to4) {
 
 descEl.innerHTML =
@@ -502,7 +361,6 @@ M → 2d4
 }
 
 
-
 const roomNames = {
   room1: "ルーム1",
   room2: "ルーム2",
@@ -545,84 +403,7 @@ if (room === "room5") {
   }
 
 }
-// ===== 苦痛罰表示制御 =====
-const painPunishBtn =
-  document.getElementById("painPunishBtn");
 
-if (painPunishBtn){
-
-  if (
-    room === "special" ||
-    room === "denki"  ||
-    room === "denki1" ||
-    room === "denki2"
-  ){
-    painPunishBtn.style.display =
-      "inline-block";
-  }
-  else{
-    painPunishBtn.style.display =
-      "none";
-  }
-
-}
-
-
-// ===== ルーム6制御（イベントボタン表示） =====
-if (room === "room6") {
-
-  const punishWrap =
-    document.getElementById("punishWrap");
-
-  const maleEventBtn =
-    document.getElementById("maleEventBtn");
-
-  const femaleEventBtn =
-    document.getElementById("femaleEventBtn");
-
-  const commonEventBtn =
-  document.getElementById("commonEventBtn");
-
-
-  if (punishWrap){
-    punishWrap.style.display = "flex";
-  }
-
-  if (maleEventBtn){
-    maleEventBtn.style.display = "inline-block";
-  }
-
-  if (femaleEventBtn){
-    femaleEventBtn.style.display = "inline-block";
-  }
-
-  if (commonEventBtn){
-  commonEventBtn.style.display = "inline-block";
-}
-
-  const girlPunishBtn =
-  document.querySelector("button[onclick=\"sendPunish('女子罰')\"]");
-
-const boyPunishBtn =
-  document.getElementById("boyPunishBtn");
-
-const girlOnaBtn =
-  document.querySelector("button[onclick=\"sendPunish('命令女')\"]");
-
-const boyOnaBtn =
-  document.getElementById("boyOnaBtn");
-
-const painBtn =
-  document.querySelector("button[onclick=\"sendPunish('苦痛罰')\"]");
-
-if (girlPunishBtn) girlPunishBtn.style.display = "none";
-if (boyPunishBtn) boyPunishBtn.style.display = "none";
-if (girlOnaBtn)   girlOnaBtn.style.display = "none";
-if (boyOnaBtn)    boyOnaBtn.style.display = "none";
-if (painBtn)      painBtn.style.display = "none";
-
-
-}
 
 
 
@@ -631,7 +412,17 @@ const key = localStorage.getItem("chatKey");
 
 if (!room && !joined) {
   alert("ロビーから入室してください");
-  location.href = "/lobby.html";
+  
+if (
+  room === "denki" ||
+  room === "denki1" ||
+  room === "denki2"
+){
+  location.href = "/denki.html";
+} else {
+  location.href = "/index.html";
+}
+
 }
 if (room) roomInfo.textContent = `入室先：${room}`;
 
@@ -679,15 +470,6 @@ socket.on("pastMessages", logs => {
   messages.innerHTML = "";
   logs.forEach(renderMsg);
 
-  // ===== 絶頂解放ログ判定 =====
-  const unlocked = logs.some(m =>
-    m.text?.includes("絶頂許可が解放されました")
-  );
-
-  if (unlocked){
-    const btn = document.getElementById("zecchoBtn");
-    if (btn) btn.style.display = "inline-block";
-  }
 
 });
 
@@ -884,8 +666,6 @@ muteBtn.onclick = () => {
 });
 
 
-
-
 // ===== 接続キー生成 =====
 let connectKey =
   localStorage.getItem("connectKey");
@@ -905,6 +685,14 @@ if (!connectKey){
 
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
+
+const room = localStorage.getItem("chatRoom");
+
+if (!room) {
+  alert("ロビーから入室してください");
+  return;
+}
+
   if (joined || !nameInput.value.trim()) return;
 
     // ===== 確認チェック判定 =====
@@ -1031,7 +819,27 @@ if (normalToggle && normalWrap){
 
 }
 
-  
+
+// ===== 罰トグル（電気椅子） =====
+const denkiToggle =
+  document.getElementById("denkiPunishToggleBtn");
+
+const denkiWrap2 =
+  document.getElementById("denkiPunishWrap");
+
+if (denkiToggle && denkiWrap2){
+
+  let open2 = false;
+
+  denkiToggle.onclick = () => {
+    open2 = !open2;
+    denkiWrap2.style.display =
+      open2 ? "flex" : "none";
+  };
+
+}
+
+
   
   // ===== タイマーボタン（通常と電気分離） =====
 
@@ -1054,6 +862,95 @@ if (normalTimer5Btn){
   };
 }
 
+// 電気椅子
+const denkiTimer3Btn =
+  document.getElementById("denkiTimer3Btn");
+
+const denkiTimer5Btn =
+  document.getElementById("denkiTimer5Btn");
+
+if (denkiTimer3Btn){
+  denkiTimer3Btn.onclick = () => {
+    socket.emit("timerStart", { seconds: 180 });
+  };
+}
+
+if (denkiTimer5Btn){
+  denkiTimer5Btn.onclick = () => {
+    socket.emit("timerStart", { seconds: 300 });
+  };
+}
+
+// ===== 任意タイマー（通常） =====
+const normalTimerCustomBtn =
+  document.getElementById("timerCustomBtn");
+
+const normalTimerCustomInput =
+  document.getElementById("timerCustomInput");
+
+if (normalTimerCustomBtn){
+
+  normalTimerCustomBtn.onclick = () => {
+
+    const min =
+      parseInt(normalTimerCustomInput.value);
+
+    if (!min || min <= 0) return;
+
+    socket.emit("timerStart", {
+      seconds: min * 60
+    });
+
+    normalTimerCustomInput.value = "";
+
+  };
+
+}
+
+// ===== 任意タイマー（電気椅子） =====
+const denkiTimerCustomBtn =
+  document.getElementById("denkiTimerCustomBtn");
+
+const denkiTimerCustomInput =
+  document.getElementById("denkiTimerCustomInput");
+
+if (denkiTimerCustomBtn){
+
+  denkiTimerCustomBtn.onclick = () => {
+
+    const min =
+      parseInt(denkiTimerCustomInput.value);
+
+    if (!min || min <= 0) return;
+
+    socket.emit("timerStart", {
+      seconds: min * 60
+    });
+
+    denkiTimerCustomInput.value = "";
+
+  };
+
+}
+
+if (timerCustomBtn){
+
+  timerCustomBtn.onclick = () => {
+
+    const min =
+      parseInt(timerCustomInput.value);
+
+    if (!min || min <= 0) return;
+
+    socket.emit("timerStart", {
+      seconds: min * 60
+    });
+
+    timerCustomInput.value = "";
+
+  };
+
+}
 
 
 

@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Chat v2</title>
+<title>Chat v2 - index</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -82,44 +82,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 .time { opacity: .6; margin-right: 4px; }
 
-/* ===== 電気椅子UI ===== */
-#denkiWrap {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
 
-  margin: 0;
-  padding: 10px;
-  background: #e8f5fb;
-  border-radius: 8px 8px 0 0;
-
-  display: none;
-  z-index: 50;
-}
-
-
-#denkiHeader {
-  font-weight: bold;
-  margin-bottom: 6px;
-}
-#denkiStatus {
-  margin-bottom: 6px;
-}
-#denkiBoard {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-#denkiBoard button {
-  width: 44px;
-  
-}
-#denkiScore {
-  font-size: 14px;
-  margin-bottom: 6px;
-}
 #bottomUI {
   position: fixed;
   bottom: 0;
@@ -704,6 +667,7 @@ messages.prepend(li);
 }
 
 /* ===== 受信 ===== */
+let myId; // 初期化追加
 socket.on("connect", () => {
 
   myId = socket.id;
@@ -1068,26 +1032,6 @@ if (normalToggle && normalWrap){
 
 }
 
-
-// ===== 罰トグル（電気椅子） =====
-const denkiToggle =
-  document.getElementById("denkiPunishToggleBtn");
-
-const denkiWrap2 =
-  document.getElementById("denkiPunishWrap");
-
-if (denkiToggle && denkiWrap2){
-
-  let open2 = false;
-
-  denkiToggle.onclick = () => {
-    open2 = !open2;
-    denkiWrap2.style.display =
-      open2 ? "flex" : "none";
-  };
-
-}
-
   
   
   // ===== タイマーボタン（通常と電気分離） =====
@@ -1111,77 +1055,7 @@ if (normalTimer5Btn){
   };
 }
 
-// 電気椅子
-const denkiTimer3Btn =
-  document.getElementById("denkiTimer3Btn");
 
-const denkiTimer5Btn =
-  document.getElementById("denkiTimer5Btn");
-
-if (denkiTimer3Btn){
-  denkiTimer3Btn.onclick = () => {
-    socket.emit("timerStart", { seconds: 180 });
-  };
-}
-
-if (denkiTimer5Btn){
-  denkiTimer5Btn.onclick = () => {
-    socket.emit("timerStart", { seconds: 300 });
-  };
-}
-
-
-// ===== 任意タイマー（通常） =====
-const normalTimerCustomBtn =
-  document.getElementById("timerCustomBtn");
-
-const normalTimerCustomInput =
-  document.getElementById("timerCustomInput");
-
-if (normalTimerCustomBtn){
-
-  normalTimerCustomBtn.onclick = () => {
-
-    const min =
-      parseInt(normalTimerCustomInput.value);
-
-    if (!min || min <= 0) return;
-
-    socket.emit("timerStart", {
-      seconds: min * 60
-    });
-
-    normalTimerCustomInput.value = "";
-
-  };
-
-}
-
-// ===== 任意タイマー（電気椅子） =====
-const denkiTimerCustomBtn =
-  document.getElementById("denkiTimerCustomBtn");
-
-const denkiTimerCustomInput =
-  document.getElementById("denkiTimerCustomInput");
-
-if (denkiTimerCustomBtn){
-
-  denkiTimerCustomBtn.onclick = () => {
-
-    const min =
-      parseInt(denkiTimerCustomInput.value);
-
-    if (!min || min <= 0) return;
-
-    socket.emit("timerStart", {
-      seconds: min * 60
-    });
-
-    denkiTimerCustomInput.value = "";
-
-  };
-
-}
 
 
 });
