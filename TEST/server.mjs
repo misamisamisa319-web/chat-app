@@ -2611,6 +2611,40 @@ delete zecchoUnlockedByRoom[leftRoom];
 }, 100);
 
   });   // ← disconnect 閉じ
+
+// ===== すごろく通常ダイス =====
+socket.on("sugorokuRoll", ({ sides }) => {
+
+  const user =
+    users.find(u => u.id === socket.id);
+
+  if (!user) return;
+
+  // 初期位置なければ作る
+  if (user.position == null){
+    user.position = 1;
+  }
+
+  const roll =
+    Math.floor(Math.random() * sides) + 1;
+
+  user.position += roll;
+
+  // 仮：40超えたら40止まり
+  if (user.position > 40){
+    user.position = 40;
+  }
+
+  io.to(user.room).emit("message", {
+    name: "system",
+    text:
+      `🎲 ${user.name} は ${roll} を出した！ → ${user.position} マス目へ`,
+    color: "#000",
+    bold: true
+  });
+
+});
+
 });     // ← io.on("connection") 閉じ
 
 

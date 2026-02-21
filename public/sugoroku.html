@@ -167,6 +167,15 @@ input, button, select { padding: 10px; font-size: 16px; }
   </span>
 </div>
 
+<!-- ===== すごろくダイス ===== -->
+<div id="sugorokuDice" style="padding:8px; display:none;">
+  <button onclick="rollDice(6)">1d6</button>
+  <button onclick="rollDice(5)">1d5</button>
+  <button onclick="rollDice(4)">1d4</button>
+  <button onclick="rollDice(3)">1d3</button>
+  <button onclick="rollDice(2)">1d2</button>
+</div>
+
 
 <!-- ===== 参加者 ===== -->
 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -673,6 +682,15 @@ leaveBtn.onclick = () => {
   localStorage.removeItem("chatKey");
   location.href = "/lobby.html";
 };
+
+// ===== すごろく通常ダイス送信 =====
+function rollDice(sides){
+
+  socket.emit("sugorokuRoll", {
+    sides
+  });
+
+}
 
 window.addEventListener("load", () => {
 
