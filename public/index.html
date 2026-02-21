@@ -1088,20 +1088,7 @@ if (denkiToggle && denkiWrap2){
 
 }
 
-  let punishOpen = false;
-
-  punishToggleBtn.onclick = () => {
-
-    punishOpen = !punishOpen;
-
-    if (punishOpen){
-      punishWrap.style.display = "flex";
-    } else {
-      punishWrap.style.display = "none";
-    }
-
-  };
-
+  
   
   // ===== タイマーボタン（通常と電気分離） =====
 
@@ -1143,9 +1130,6 @@ if (denkiTimer5Btn){
   };
 }
 
-const timer5Btn =
-  document.getElementById("denkiTimer5Btn")
-  || document.getElementById("timer5Btn");
 
 // ===== 任意タイマー（通常） =====
 const normalTimerCustomBtn =
