@@ -168,7 +168,12 @@ input, button, select { padding: 10px; font-size: 16px; }
 </div>
 
 <!-- ===== すごろくダイス ===== -->
-<div id="sugorokuDice" style="padding:8px;"></div>
+<div id="sugorokuDice" style="
+  padding:8px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+">
   <button onclick="rollDice(6)">1d6</button>
   <button onclick="rollDice(5)">1d5</button>
   <button onclick="rollDice(4)">1d4</button>
