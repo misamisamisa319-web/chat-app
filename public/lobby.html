@@ -382,6 +382,66 @@ input[type="password"] {
   <button onclick="enterRoom('denki2')">入室</button>
 </div>
 
+<!-- ===== sugoroku1 ===== -->
+<div class="room">
+  <div class="room-title-row">
+    <span class="room-title">すごろく1</span>
+    <span class="room-desc">進行補助ツール</span>
+  </div>
+
+  <div class="room-info">
+    人数（<span id="count-sugoroku1">0</span>人）
+    <span id="names-sugoroku1">なし</span>
+  </div>
+
+  <button onclick="enterRoom('sugoroku1')">入室</button>
+</div>
+
+<!-- ===== sugoroku2 ===== -->
+<div class="room">
+  <div class="room-title-row">
+    <span class="room-title">すごろく2</span>
+    <span class="room-desc">進行補助ツール</span>
+  </div>
+
+  <div class="room-info">
+    人数（<span id="count-sugoroku2">0</span>人）
+    <span id="names-sugoroku2">なし</span>
+  </div>
+
+  <button onclick="enterRoom('sugoroku2')">入室</button>
+</div>
+
+<!-- ===== sugoroku3 ===== -->
+<div class="room">
+  <div class="room-title-row">
+    <span class="room-title">すごろく3</span>
+    <span class="room-desc">進行補助ツール</span>
+  </div>
+
+  <div class="room-info">
+    人数（<span id="count-sugoroku3">0</span>人）
+    <span id="names-sugoroku3">なし</span>
+  </div>
+
+  <button onclick="enterRoom('sugoroku3')">入室</button>
+</div>
+
+<!-- ===== sugoroku4 ===== -->
+<div class="room">
+  <div class="room-title-row">
+    <span class="room-title">すごろく4</span>
+    <span class="room-desc">進行補助ツール</span>
+  </div>
+
+  <div class="room-info">
+    人数（<span id="count-sugoroku4">0</span>人）
+    <span id="names-sugoroku4">なし</span>
+  </div>
+
+  <button onclick="enterRoom('sugoroku4')">入室</button>
+</div>
+
 <!-- ===== special ===== -->
 <div class="room special">
   <div class="room-title-row">
@@ -458,10 +518,14 @@ const allRooms = [
   "room3",
   "room4",
   "room5",
-  "room6",  
+  "room6", 
   "denki",
   "denki1",
   "denki2",
+  "sugoroku1",
+  "sugoroku2",
+  "sugoroku3", 
+  "sugoroku4",
   "special",
   "privateA",
   "privateB",
@@ -523,15 +587,27 @@ if (room === "room5") {
     }
     localStorage.setItem("chatRoom", room);
     localStorage.setItem("chatKey", key);
-    if (
+  
+
+if (
   room === "denki" ||
   room === "denki1" ||
   room === "denki2"
 ){
   location.href = "/denki.html";
+
+} else if (
+  room === "sugoroku1" ||
+  room === "sugoroku2" ||
+  room === "sugoroku3" ||
+  room === "sugoroku4"
+){
+  location.href = "/sugoroku.html";
+
 } else {
   location.href = "/";
 }
+
   });
 }
 
