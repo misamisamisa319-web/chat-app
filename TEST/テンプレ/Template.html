@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Chat v2</title>
+<title>Chat v2 - Template</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -290,121 +290,14 @@ const descEl =
 
 /* ===== 全部屋共通：文字色 ===== */
 descEl.style.color = "black";
-const isRoom1to4 =
-  ["room1","room2","room3","room4"]
-    .includes(room);
 
-/* ===== 1〜4 ルール ===== */
-if (isRoom1to4) {
-
-descEl.innerHTML =
-`〈ルール〉
-説明はちゃんと読む事
-1-2ルームはサイコロ対決部屋です
-埋まってた場合のみ
-3-4オナニー部屋を使ってもいいです
-
-ここは制作者ミサのオリジナルチャットです
-ミサが知識0から作り
-ミサがサバをお金を出して借りてるので
-ルールを守れない人は遊ばないで結構ですので帰ってください
-部屋に入れない方はブロックされてる方だと思うので黙って帰ってください
----サイコロ対決ルール---
-参加者は名前+♂or♀+SorNorMで入室ください
-使用するサイコロは
-S → 2d6
-N → 2d5
-M → 2d4
-先に3勝で勝利です。勝者の前で罰を受けてください
-負けた場合Sだからといって罰は受けない、内緒で行うなど言う方ははじめからやめてください
-勝ったので満足と止める人もはじめからしないでください
-時間や体力的な問題で途中で止めるのは仕方ないと思いますが。
-上記のを確認した場合ブロックします
-ルールも守れなかった場合もブロックします
-罰回数は基本10回
-勝者はボタンを押す前に1/10とその時のカウントを入れること
-勝者が「女子罰」「男子罰」のどちらかの罰ボタンを押してください。
-敗者は罰を実行してください
-時間を計る必要がある場合は敗者が時間ボタン使ってください
-パスの回数は敗者の勝利数
-罰が終わったあとに 敗者が望めば、絶頂コマンドが使えます
-絶頂コマンドは1度のみなので注意してください
-(オナ系多め､写真公開はなし)
-罰の引き直しはカウントがずれるのでしないこと推奨
-ここのチャット以外の外部連れ出し禁止
-（ルブルの別部屋、ラブルのツーショ、ライン、カカオなどなど）
-命令が被った際は勝利者による自由命令とする
-自由命令とありますが、個人情報、写真の要求やNG行為の強要はしない
-自分の写真を晒す行為なども禁止します
-罰ではありますが敗者も遠慮なくお断りしてください
-内緒機能追加しましたが、邪魔にならないように敗者にはしないでください
-勝利者がいない場合は15分待って終了
-見学者に命令出す権利はありません、煽る程度にしてください
-ひどい人はミュートしてください。
-下の部屋まで問題ある人は報告くれればブロック対象か考えます
----オナニー部屋ルール---
-チャット内上部にある「女オナ」「男オナ」のボタンを押すと指示が出てきます
-基本10回
-パスは1回までとしてます
-見学者は適度な煽りや見守りのみ許可します。過度な言葉責めや要求、指示はしないでください
-プレイヤーがイヤな見学者は遠慮なく退出させてください
-内緒機能がありますが、邪魔にならないようにプレイヤーには使用しないでください
-ルール守れない方は来ないでね
-
-何かあったさいは↓まで<br>
-<a href="https://chat.luvul.net/ChatRoom?room_id=424208" target="_blank">
-連絡用ルームはこちら
-</a>
-
-`;
-
-}
-
-
-const roomNames = {
-  room1: "ルーム1",
-  room2: "ルーム2",
-  room3: "ルーム3",
-  room4: "ルーム4",
-  room5: "女子部屋",
-  room6: "巻き込み",   // ← 追加
-  denki: "電気1",
-  denki1: "電気椅2",
-  denki2: "電気3",
-  special: "スペシャル",
-  privateA: "個室A",
-  privateB: "個室B",
-  privateC: "個室C",
-  privateD: "個室D"
-};
 
 
 const roomLabel = document.getElementById("roomLabel");
 
 if (roomLabel && room) {
-  roomLabel.textContent = `${roomNames[room] || room}`;
+  roomLabel.textContent = room;
 }
-
-// ===== 女子部屋制御 =====
-if (room === "room5") {
-
-  const boyPunishBtn =
-    document.getElementById("boyPunishBtn");
-
-  const boyOnaBtn =
-    document.getElementById("boyOnaBtn");
-
-  if (boyPunishBtn){
-    boyPunishBtn.style.display = "none";
-  }
-
-  if (boyOnaBtn){
-    boyOnaBtn.style.display = "none";
-  }
-
-}
-
-
 
 
 const key = localStorage.getItem("chatKey");
@@ -412,16 +305,6 @@ const key = localStorage.getItem("chatKey");
 
 if (!room && !joined) {
   alert("ロビーから入室してください");
-  
-if (
-  room === "denki" ||
-  room === "denki1" ||
-  room === "denki2"
-){
-  location.href = "/denki.html";
-} else {
-  location.href = "/index.html";
-}
 
 }
 if (room) roomInfo.textContent = `入室先：${room}`;
@@ -790,54 +673,10 @@ leaveBtn.onclick = () => {
   localStorage.removeItem("chatKey");
   location.href = "/lobby.html";
 };
-function sendPunish(cmd){
-  socket.emit("message",{ text: cmd });
-}
-function sendDice(cmd){
-  socket.emit("message",{ text: cmd });
-}
-
 
 window.addEventListener("load", () => {
 
- // ===== 罰トグル（通常） =====
-const normalToggle =
-  document.getElementById("punishToggleBtn");
 
-const normalWrap =
-  document.getElementById("punishWrap");
-
-if (normalToggle && normalWrap){
-
-  let open = false;
-
-  normalToggle.onclick = () => {
-    open = !open;
-    normalWrap.style.display =
-      open ? "flex" : "none";
-  };
-
-}
-
-
-// ===== 罰トグル（電気椅子） =====
-const denkiToggle =
-  document.getElementById("denkiPunishToggleBtn");
-
-const denkiWrap2 =
-  document.getElementById("denkiPunishWrap");
-
-if (denkiToggle && denkiWrap2){
-
-  let open2 = false;
-
-  denkiToggle.onclick = () => {
-    open2 = !open2;
-    denkiWrap2.style.display =
-      open2 ? "flex" : "none";
-  };
-
-}
 
 
   
@@ -862,24 +701,7 @@ if (normalTimer5Btn){
   };
 }
 
-// 電気椅子
-const denkiTimer3Btn =
-  document.getElementById("denkiTimer3Btn");
 
-const denkiTimer5Btn =
-  document.getElementById("denkiTimer5Btn");
-
-if (denkiTimer3Btn){
-  denkiTimer3Btn.onclick = () => {
-    socket.emit("timerStart", { seconds: 180 });
-  };
-}
-
-if (denkiTimer5Btn){
-  denkiTimer5Btn.onclick = () => {
-    socket.emit("timerStart", { seconds: 300 });
-  };
-}
 
 // ===== 任意タイマー（通常） =====
 const normalTimerCustomBtn =
@@ -907,31 +729,6 @@ if (normalTimerCustomBtn){
 
 }
 
-// ===== 任意タイマー（電気椅子） =====
-const denkiTimerCustomBtn =
-  document.getElementById("denkiTimerCustomBtn");
-
-const denkiTimerCustomInput =
-  document.getElementById("denkiTimerCustomInput");
-
-if (denkiTimerCustomBtn){
-
-  denkiTimerCustomBtn.onclick = () => {
-
-    const min =
-      parseInt(denkiTimerCustomInput.value);
-
-    if (!min || min <= 0) return;
-
-    socket.emit("timerStart", {
-      seconds: min * 60
-    });
-
-    denkiTimerCustomInput.value = "";
-
-  };
-
-}
 
 if (timerCustomBtn){
 

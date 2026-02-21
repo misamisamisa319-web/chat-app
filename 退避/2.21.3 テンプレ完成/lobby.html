@@ -74,10 +74,6 @@
   background: #ffddee;
 }
 
-.room.sugoroku {
-  background: #e6f7ff;
-}
-
 .room-title {
   font-weight: bold;
   margin-bottom: 4px;
@@ -386,45 +382,6 @@ input[type="password"] {
   <button onclick="enterRoom('denki2')">入室</button>
 </div>
 
-<!-- ===== sugoroku1 ===== -->
-<div class="room sugoroku">
-  <div class="room-title-row">
-    <span class="room-title">🎲 すごろく1</span>
-    <span class="room-desc">すごろく部屋</span>
-  </div>
-  <div class="room-info">
-    人数（<span id="count-sugoroku1">0</span>人）
-    <span id="names-sugoroku1">なし</span>
-  </div>
-  <button onclick="enterRoom('sugoroku1')">入室</button>
-</div>
-
-<!-- ===== sugoroku2 ===== -->
-<div class="room sugoroku">
-  <div class="room-title-row">
-    <span class="room-title">🎲 すごろく2</span>
-    <span class="room-desc">すごろく部屋</span>
-  </div>
-  <div class="room-info">
-    人数（<span id="count-sugoroku2">0</span>人）
-    <span id="names-sugoroku2">なし</span>
-  </div>
-  <button onclick="enterRoom('sugoroku2')">入室</button>
-</div>
-
-<!-- ===== sugoroku3 ===== -->
-<div class="room sugoroku">
-  <div class="room-title-row">
-    <span class="room-title">🎲 すごろく3</span>
-    <span class="room-desc">すごろく部屋</span>
-  </div>
-  <div class="room-info">
-    人数（<span id="count-sugoroku3">0</span>人）
-    <span id="names-sugoroku3">なし</span>
-  </div>
-  <button onclick="enterRoom('sugoroku3')">入室</button>
-</div>
-
 <!-- ===== special ===== -->
 <div class="room special">
   <div class="room-title-row">
@@ -505,9 +462,6 @@ const allRooms = [
   "denki",
   "denki1",
   "denki2",
-  "sugoroku1",
-  "sugoroku2",
-  "sugoroku3",
   "special",
   "privateA",
   "privateB",
