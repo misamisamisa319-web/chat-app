@@ -2740,7 +2740,7 @@ if (sugorokuCooldownByRoom[room] && now - sugorokuCooldownByRoom[room] < SUGOROK
 
   socket.emit("message", {
     name: "system",
-    text: "サイコロは20秒に1回まで",
+    text: "サイコロは5秒に1回まで",
     room: room,
     time: getTimeString()
   });
