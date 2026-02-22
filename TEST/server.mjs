@@ -2860,6 +2860,10 @@ io.to(user.room).emit("message", {
 }
    return;
 }
+
+const squareText =
+  sugorokuMap[user.position] || "";
+  
 io.to(user.room).emit("message", {
   name: "system",
   text: `🎲 ${user.name} は ${(rolls && rolls.length > 1) ? rolls.join(",") + " → " : ""}${roll} → ${user.position}マス ${squareText ? `(${squareText})` : ""}`,
