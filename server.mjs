@@ -2773,59 +2773,24 @@ if (user.position === 40){
 
 
 
-// ===== 14マス到達通知 =====
-if (user.position === 14 && user.position !== 0) {
-
-  io.to(socket.id).emit("sugorokuEvent", {
-    type: "14"
-  });
-
-}
-
-if (user.position === 24) {
-
-  io.to(socket.id).emit("sugorokuEvent", {
-    type: "24"
-  });
-
-}
-if (user.position === 34) {
-
-  io.to(socket.id).emit("sugorokuEvent", {
-    type: "2d4"
-  });
-}
-if (user.position === 39) {
-
-  io.to(socket.id).emit("sugorokuEvent", {
-    type: "39"
-  });
-
-}
-
- const squareText =
-  sugorokuMap[user.position] || "";
-
-// ===== 強制ストップ判定 =====
-const stopSquares = [15, 25, 35, 39];
-
-if (stopSquares.includes(user.position)) {
-
-io.to(user.room).emit("message", {
-  name: "system",
-  text: `🛑【強制ストップ】\n\n${squareText}`,
-  color: "red",
-  bold: true
-});
-io.to(user.room).emit("sugorokuEvent", {
-  type: String(user.position)
-});
-}
    return;
 }
 
 const squareText =
   sugorokuMap[user.position] || "";
+
+// ===== イベント発火（通常） =====
+if ([14,24,34,39].includes(user.position)) {
+
+  io.to(socket.id).emit("sugorokuEvent", {
+    type:
+      user.position === 34
+        ? "2d4"
+        : String(user.position)
+  });
+
+}
+
 
 io.to(user.room).emit("message", {
   name: "system",
