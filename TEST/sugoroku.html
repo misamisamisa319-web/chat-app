@@ -802,18 +802,24 @@ if (type === "39") {
   // ピンゾロ
   if (d1 === 1 && d2 === 1) {
     socket.emit("sugorokuMoveTo", { pos: 1 });
+    btn.style.display = "none";
     return;
   }
 
-  // ゾロ目
+  // ゾロ目（1マス進む）
   if (d1 === d2) {
-    socket.emit("sugorokuMoveTo", { pos: 40 });
+    socket.emit("sugorokuRoll", { sides: 1 });
+    btn.style.display = "none";
     return;
   }
 
-  // それ以外（何もしない＝続行）
-}
+  // 失敗
+  socket.emit("message", {
+    text: "寸止め1回"
+  });
 
+  return;
+}
 
   btn.style.display = "none";
 
