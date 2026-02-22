@@ -2604,8 +2604,7 @@ delete zecchoUnlockedByRoom[leftRoom];
   }
 
 }
-
-
+ 
   io.emit("lobbyUpdate", getLobbyInfo());
 
 }, 100);

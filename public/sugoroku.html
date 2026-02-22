@@ -754,24 +754,7 @@ if (normalTimerCustomBtn){
 }
 
 
-if (timerCustomBtn){
 
-  timerCustomBtn.onclick = () => {
-
-    const min =
-      parseInt(timerCustomInput.value);
-
-    if (!min || min <= 0) return;
-
-    socket.emit("timerStart", {
-      seconds: min * 60
-    });
-
-    timerCustomInput.value = "";
-
-  };
-
-}
 
 
 

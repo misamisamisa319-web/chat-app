@@ -21,6 +21,7 @@ body {
   flex-direction: column;
 }
 
+
 #login, #chat { flex: 1; display: flex; flex-direction: column; }
 #chat { display: none; }
 
@@ -378,12 +379,7 @@ socket.on("muteSync", list => {
   myMutes = list || [];
 });
 
-socket.on("system", d => {
-  renderMsg({
-    name: "system",
-    text: d.text
-  });
-});
+socket.on("message", d => {
 
 // ===== ミュート遮断 =====
 if (d.name && myMutes.includes(d.name)) {
@@ -693,9 +689,6 @@ leaveBtn.onclick = () => {
   location.href = "/lobby.html";
 };
 
-// ===== すごろくプレイヤーposition =====
-let position = 0;  // 0マススタート
-
 // ===== すごろく通常ダイス送信 =====
 function rollDice(sides){
 
@@ -761,24 +754,7 @@ if (normalTimerCustomBtn){
 }
 
 
-if (timerCustomBtn){
 
-  timerCustomBtn.onclick = () => {
-
-    const min =
-      parseInt(timerCustomInput.value);
-
-    if (!min || min <= 0) return;
-
-    socket.emit("timerStart", {
-      seconds: min * 60
-    });
-
-    timerCustomInput.value = "";
-
-  };
-
-}
 
 
 
