@@ -652,7 +652,13 @@ function renderMsg(d) {
   const text = document.createElement("span");
 if (d.private) {
   const toName = d.toName || "相手";
-  text.textContent = `【内緒】${d.name} ▶ ${toName}: ${d.text}`;
+
+  const formattedText =
+    d.text.replace(/\n/g, "<br>");
+
+  text.innerHTML =
+    `【内緒】${d.name} ▶ ${toName}: ${formattedText}`;
+
   li.classList.add("private");
 } else {
   const formattedText =
