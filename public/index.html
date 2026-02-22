@@ -77,7 +77,10 @@ input, button, select { padding: 10px; font-size: 16px; }
   list-style: none;
   padding-bottom: 260px;
 }
-#messages li { margin-bottom: 5px; }
+#messages li {
+  margin-bottom: 5px;
+  white-space: pre-wrap;
+}
 .private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
 
 .time { opacity: .6; margin-right: 4px; }
@@ -647,13 +650,13 @@ function renderMsg(d) {
   }
 
   const text = document.createElement("span");
-  if (d.private) {
-    const toName = d.toName || "相手";
-    text.textContent = `【内緒】${d.name} ▶ ${toName}: ${d.text}`;
-    li.classList.add("private");
-  } else {
-    text.textContent = `${d.name}: ${d.text}`;
-  }
+if (d.private) {
+  const toName = d.toName || "相手";
+  text.innerText = `【内緒】${d.name} ▶ ${toName}: ${d.text}`;
+  li.classList.add("private");
+} else {
+  text.innerText = `${d.name}: ${d.text}`;
+}
 
  li.appendChild(text);
 li.style.color = d.color || "#000";
