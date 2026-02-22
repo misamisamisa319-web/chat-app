@@ -2646,8 +2646,8 @@ socket.on("sugorokuRoll", ({ sides }) => {
     user.position = 40;
   }
 
-  const squareText =
-  squares[user.position] || "ゴール！";
+ const squareText =
+  sugorokuMap[user.position] || "ゴール！";
 
 io.to(user.room).emit("message", {
   name: "system",
