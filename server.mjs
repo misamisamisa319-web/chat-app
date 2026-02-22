@@ -2866,6 +2866,20 @@ socket.on("sugorokuBack", ({ steps }) => {
     bold: true
   });
 
+  // ↓追加
+if ([14,24,34].includes(user.position)) {
+
+  io.to(socket.id).emit("sugorokuEvent", {
+    type:
+      user.position === 34
+        ? "2d4"
+        : user.position === 14
+        ? "14"
+        : "24"
+  });
+
+}
+
 });
 
 
