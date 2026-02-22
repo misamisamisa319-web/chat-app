@@ -732,13 +732,11 @@ if (climaxBtn){
 }
 
 // 👇この下に追加
-socket.on("sugorokuEvent", ({ type }) => {
-
-  const diceWrap = document.getElementById("sugorokuDice");
-
-// 全ボタン非表示
+// 全ボタン非表示（specialは残す）
 diceWrap.querySelectorAll("button").forEach(b => {
-  b.style.display = "none";
+  if (b.id !== "specialDiceBtn") {
+    b.style.display = "none";
+  }
 });
 
   const btn =
