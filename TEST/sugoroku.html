@@ -821,14 +821,18 @@ if (type === "39") {
   return;
 }
 
+  // 成功時だけ復帰
+if (type !== "39") {
+
   btn.style.display = "none";
 
-  // ===== ここ追加 =====
   const diceWrap = document.getElementById("sugorokuDice");
 
   diceWrap.querySelectorAll("button").forEach(b => {
     b.style.display = "inline-block";
   });
+
+}
 };
 
 });
