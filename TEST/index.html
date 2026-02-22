@@ -655,7 +655,11 @@ if (d.private) {
   text.textContent = `【内緒】${d.name} ▶ ${toName}: ${d.text}`;
   li.classList.add("private");
 } else {
-  text.textContent = `${d.name}: ${d.text}`;
+  const formattedText =
+  d.text.replace(/\n/g, "<br>");
+
+text.innerHTML =
+  `${d.name}: ${formattedText}`;
 }
 
  li.appendChild(text);
