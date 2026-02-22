@@ -2757,14 +2757,23 @@ for (let i = prevPos + 1; i <= user.position; i++) {
 }
 if (user.position >= 40){
 
-  io.to(user.room).emit("message", {
+    io.to(user.room).emit("message", {
     name: "system",
-    text: `${user.name} さん、🏁 ゴールしました！お疲れさまです！`,
+    text: `40,【ゴール】
+AコースとBコースを選べる
+Aコース
+ゴール時に見学者の数×2+3+途中で絶頂した数×2回連続絶頂する。
+（例:見学者3人で1回罰ゲームの場合
+3×2+3+1×2=11回
+11回連続絶頂するまで手を止めてはいけない)
+Bコース
+1番気持ちいいオナニーのやり方を披露し
+そのオナニーを行ない限界まで寸止めした後絶頂する。`,
     color: "#000",
     bold: true
   });
 
-  user.position = 0;
+  user.position = 40;
   return;
 }
  
