@@ -2741,21 +2741,25 @@ user.position += roll;
 for (let i = prevPos + 1; i <= user.position; i++) {
 
 
-  if ([15,25,35,39].includes(i)) {
+ if ([15,25,35,39].includes(i)) {
 
-    user.position = i;
+  user.position = i;
 
-    const squareText = sugorokuMap[i];
+  const squareText = sugorokuMap[i];
 
-    io.to(user.room).emit("message", {
-      name: "system",
-      text: `🛑【強制ストップ】\n\n${squareText}`,
-      color: "red",
-      bold: true
-    });
+  io.to(user.room).emit("message", {
+    name: "system",
+    text: `🛑【強制ストップ】\n\n${squareText}`,
+    color: "red",
+    bold: true
+  });
 
-    return;
-  }
+  io.to(socket.id).emit("sugorokuEvent", {
+    type: String(i)
+  });
+
+  return;
+}
 
 }
 if (user.position === 40){
@@ -2812,6 +2816,9 @@ io.to(user.room).emit("message", {
   text: `🛑【強制ストップ】\n\n${squareText}`,
   color: "red",
   bold: true
+});
+io.to(user.room).emit("sugorokuEvent", {
+  type: String(user.position)
 });
 }
    return;
