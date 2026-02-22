@@ -2741,20 +2741,6 @@ socket.on("sugorokuRoll", ({ sides }) => {
  const squareText =
   sugorokuMap[user.position] || "ゴール！";
 
-// ===== 強制ストップ判定 =====
-const stopSquares = [15, 25, 35, 39];
-
-if (stopSquares.includes(user.position)) {
-
-  io.to(user.room).emit("message", {
-    name: "system",
-    text: `🛑 【強制ストップ】\n${squareText}`,
-    color: "red",
-    bold: true
-  });
-
-  return; // ここで終了（通常メッセージ出さない）
-}
 io.to(user.room).emit("message", {
   name: "system",
   text:
