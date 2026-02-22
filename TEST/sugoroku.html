@@ -180,6 +180,23 @@ input, button, select { padding: 10px; font-size: 16px; }
   <button onclick="rollDice(4)">1d4</button>
   <button onclick="rollDice(3)">1d3</button>
   <button onclick="rollDice(2)">1d2</button>
+  <button id="specialDiceBtn" style="display:none;">
+  2d6
+</button>
+
+if (type === "2d6") {
+
+  const btn =
+    document.getElementById("specialDiceBtn");
+
+  if (btn){
+    btn.style.display = "inline-block";
+
+    // 表示テキスト統一
+    btn.textContent = "2d6";
+  }
+
+}
 </div>
 
 
@@ -690,6 +707,8 @@ leaveBtn.onclick = () => {
 };
 
 // ===== すごろく通常ダイス送信 =====
+
+
 function rollDice(sides){
 
   socket.emit("sugorokuRoll", {
@@ -697,6 +716,66 @@ function rollDice(sides){
   });
 
 }
+
+// 👇この下に追加
+socket.on("sugorokuEvent", ({ type }) => {
+
+  const btn =
+    document.getElementById("specialDiceBtn");
+
+  if (!btn) return;
+
+  btn.style.display = "inline-block";
+  btn.textContent = type;
+
+  btn.onclick = () => {
+
+    let d1 = 0;
+    let d2 = 0;
+    let total = 0;
+
+    if (type === "2d6") {
+      d1 = Math.floor(Math.random()*6)+1;
+      d2 = Math.floor(Math.random()*6)+1;
+      total = d1 + d2;
+
+      socket.emit("message", {
+        text: `🎲 2d6 → ${d1},${d2} = ${total}`
+      });
+
+      if (d1 === d2) {
+        
+        if (d1 === d2) {
+
+  if (total === 2) {
+    socket.emit("sugorokuMoveTo", { pos: 1 });
+  } else {
+    socket.emit("sugorokuMoveTo", { pos: 16 });
+  }
+
+}
+
+      }
+    }
+
+    if (type === "2d4") {
+      d1 = Math.floor(Math.random()*4)+1;
+      d2 = Math.floor(Math.random()*4)+1;
+      total = d1 + d2;
+
+      socket.emit("message", {
+        text: `🎲 2d4 → ${d1},${d2} = ${total}`
+      });
+
+      socket.emit("sugorokuBack", {
+        steps: total
+      });
+    }
+
+    btn.style.display = "none";
+  };
+
+});
 
 window.addEventListener("load", () => {
 

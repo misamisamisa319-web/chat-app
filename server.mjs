@@ -2702,7 +2702,7 @@ delete zecchoUnlockedByRoom[leftRoom];
 
   
 // ===== すごろく通常ダイス送信 =====
-socket.on("sugorokuRoll", ({ sides }) => {
+socket.on("sugorokuRoll", ({ sides, count }) => {
 
   if (!sides || isNaN(sides)) return;
 
@@ -2716,9 +2716,19 @@ socket.on("sugorokuRoll", ({ sides }) => {
 if (user.position == null){
   user.position = 0;
 }
+const diceCount = count || 1;
 
-const roll =
-  Math.floor(Math.random() * sides) + 1;
+let rolls = [];
+
+for (let i = 0; i < diceCount; i++){
+  rolls.push(
+    Math.floor(Math.random() * sides) + 1
+  );
+}
+
+const roll = rolls.reduce((a,b)=>a+b,0);
+
+  if (roll < 1) return;
 
 const prevPos = user.position;
 
@@ -2726,6 +2736,7 @@ user.position += roll;
 
 // 通過チェック（強制ストップ踏み越し防止）
 for (let i = prevPos + 1; i <= user.position; i++) {
+
 
   if ([15,25,35,39].includes(i)) {
 
@@ -2744,24 +2755,49 @@ for (let i = prevPos + 1; i <= user.position; i++) {
   }
 
 }
-  // ゴール判定追加
-  if (user.position >= 40){
+if (user.position >= 40){
+
   io.to(user.room).emit("message", {
     name: "system",
     text: `${user.name} さん、🏁 ゴールしました！お疲れさまです！`,
     color: "#000",
     bold: true
   });
-  user.position = 0; // ゴール後0マスに戻す
+
+  user.position = 0;
+  return;
+}
+ 
+
+
+
+// ===== 14マス到達通知 =====
+if (user.position === 14 && user.position !== 0) {
+
+  io.to(socket.id).emit("sugorokuEvent", {
+    type: "2d6"
+  });
+
 }
 
-  // 仮：40超えたら40止まり
-  if (user.position > 40){
-    user.position = 40;
-  }
+if (user.position === 24) {
+
+  io.to(socket.id).emit("sugorokuEvent", {
+    type: "2d6"
+  });
+
+}
+
+if (user.position === 34) {
+
+  io.to(socket.id).emit("sugorokuEvent", {
+    type: "2d4"
+  });
+
+}
 
  const squareText =
-  sugorokuMap[user.position] || "ゴール！";
+  sugorokuMap[user.position] || "";
 
 // ===== 強制ストップ判定 =====
 const stopSquares = [15, 25, 35, 39];
@@ -2779,11 +2815,44 @@ io.to(user.room).emit("message", {
 }
 io.to(user.room).emit("message", {
   name: "system",
-  text:
-    `🎲 ${user.name} は ${roll} → ${user.position}マス (${squareText})`,
+  text: `🎲 ${user.name} は ${(rolls && rolls.length > 1) ? rolls.join(",") + " → " : ""}${roll} → ${user.position}マス ${squareText ? `(${squareText})` : ""}`,
   color: "#000",
   bold: true
 });
+
+});
+
+socket.on("sugorokuMoveTo", ({ pos }) => {
+
+  const user =
+    users.find(u => u.id === socket.id);
+
+  if (!user) return;
+
+  user.position = pos;
+
+  const squareText =
+    sugorokuMap[user.position] || "";
+
+  io.to(user.room).emit("message", {
+    name: "system",
+    text: `💀 ${user.name} は ${pos}マスに戻された\n${squareText}`,
+    color: "red",
+    bold: true
+  });
+
+// ===== 命令実行 =====
+if ([15,25,35,39].includes(user.position)) {
+
+  io.to(user.room).emit("message", {
+    name: "system",
+    text: `🛑【強制ストップ】\n\n${squareText}`,
+    color: "red",
+    bold: true
+  });
+
+  return;
+}
 
 });
 
