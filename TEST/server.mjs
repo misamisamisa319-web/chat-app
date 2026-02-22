@@ -887,7 +887,7 @@ let punishCooldownByRoom = {};
 const PUNISH_COOLDOWN = 20 * 1000; // 20秒
 
 let sugorokuCooldownByRoom = {};
-const SUGOROKU_COOLDOWN = 20 * 1000;
+const SUGOROKU_COOLDOWN = 5 * 1000;
 
 
 function canUsePunish(room){
@@ -2863,7 +2863,7 @@ io.to(user.room).emit("message", {
 
 const squareText =
   sugorokuMap[user.position] || "";
-  
+
 io.to(user.room).emit("message", {
   name: "system",
   text: `🎲 ${user.name} は ${(rolls && rolls.length > 1) ? rolls.join(",") + " → " : ""}${roll} → ${user.position}マス ${squareText ? `(${squareText})` : ""}`,
