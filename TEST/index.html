@@ -652,10 +652,10 @@ function renderMsg(d) {
   const text = document.createElement("span");
 if (d.private) {
   const toName = d.toName || "相手";
-  text.innerText = `【内緒】${d.name} ▶ ${toName}: ${d.text}`;
+  text.textContent = `【内緒】${d.name} ▶ ${toName}: ${d.text}`;
   li.classList.add("private");
 } else {
-  text.innerText = `${d.name}: ${d.text}`;
+  text.textContent = `${d.name}: ${d.text}`;
 }
 
  li.appendChild(text);

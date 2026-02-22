@@ -2713,15 +2713,37 @@ socket.on("sugorokuRoll", ({ sides }) => {
   if (!user) return;
 
   // 初期位置なければ作る
-  if (user.position == null){
-    user.position = 1;
+if (user.position == null){
+  user.position = 0;
+}
+
+const roll =
+  Math.floor(Math.random() * sides) + 1;
+
+const prevPos = user.position;
+
+user.position += roll;
+
+// 通過チェック（強制ストップ踏み越し防止）
+for (let i = prevPos + 1; i <= user.position; i++) {
+
+  if ([15,25,35,39].includes(i)) {
+
+    user.position = i;
+
+    const squareText = sugorokuMap[i];
+
+    io.to(user.room).emit("message", {
+      name: "system",
+      text: `🛑【強制ストップ】\n\n${squareText}`,
+      color: "red",
+      bold: true
+    });
+
+    return;
   }
 
-  const roll =
-    Math.floor(Math.random() * sides) + 1;
-
-  user.position += roll;
-
+}
   // ゴール判定追加
   if (user.position >= 40){
   io.to(user.room).emit("message", {
