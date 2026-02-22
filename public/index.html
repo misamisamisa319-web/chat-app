@@ -354,13 +354,39 @@ let myColor = "#000000";
 let privateTo = "";
 let joined = false;
 
-
 window.addEventListener("load", () => {
+
   const savedName  = localStorage.getItem("chatName");
   const savedRoom  = localStorage.getItem("chatRoom");
   const savedColor = localStorage.getItem("chatColor") || "#000000";
 
+  const normalTimerCustomBtn =
+    document.getElementById("timerCustomBtn");
+
+  const normalTimerCustomInput =
+    document.getElementById("timerCustomInput");
+
+  if (normalTimerCustomBtn){
+
+    normalTimerCustomBtn.onclick = () => {
+
+      const min =
+        parseInt(normalTimerCustomInput.value);
+
+      if (!min || min <= 0) return;
+
+      socket.emit("timerStart", {
+        seconds: min * 60
+      });
+
+      normalTimerCustomInput.value = "";
+
+    };
+
+  }
+
   if (savedName && savedRoom) {
+ 
     username = savedName;
     myColor = savedColor;
     colorSelect.value = myColor;
@@ -1024,7 +1050,6 @@ function sendDice(cmd){
 }
 
 
-window.addEventListener("load", () => {
 
  // ===== 罰トグル（通常） =====
 const normalToggle =
@@ -1068,10 +1093,6 @@ if (normalTimer5Btn){
   };
 }
 
-
-
-
-});
 
 
 
