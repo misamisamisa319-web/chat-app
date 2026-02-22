@@ -2775,7 +2775,7 @@ if (user.position >= 40){
 if (user.position === 14 && user.position !== 0) {
 
   io.to(socket.id).emit("sugorokuEvent", {
-    type: "2d6"
+    type: "14"
   });
 
 }
@@ -2783,11 +2783,10 @@ if (user.position === 14 && user.position !== 0) {
 if (user.position === 24) {
 
   io.to(socket.id).emit("sugorokuEvent", {
-    type: "2d6"
+    type: "24"
   });
 
 }
-
 if (user.position === 34) {
 
   io.to(socket.id).emit("sugorokuEvent", {
@@ -2841,23 +2840,39 @@ socket.on("sugorokuMoveTo", ({ pos }) => {
     bold: true
   });
 
-// ===== 命令実行 =====
-if ([15,25,35,39].includes(user.position)) {
+});
+
+
+socket.on("sugorokuBack", ({ steps }) => {
+
+  const user =
+    users.find(u => u.id === socket.id);
+
+  if (!user) return;
+
+  user.position -= steps;
+
+  if (user.position < 1){
+    user.position = 1;
+  }
+
+  const squareText =
+    sugorokuMap[user.position] || "";
 
   io.to(user.room).emit("message", {
     name: "system",
-    text: `🛑【強制ストップ】\n\n${squareText}`,
+    text: `⬅ ${steps}戻る → ${user.position}マス\n${squareText}`,
     color: "red",
     bold: true
   });
 
-  return;
-}
+});
+
+
 
 });
 
-});     // ← io.on("connection") 閉じ
-
+   // ← io.on("connection") 閉じ
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

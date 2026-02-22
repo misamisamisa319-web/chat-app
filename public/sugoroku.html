@@ -721,8 +721,7 @@ socket.on("sugorokuEvent", ({ type }) => {
     let d1 = 0;
     let d2 = 0;
     let total = 0;
-
-    if (type === "2d6") {
+if (type === "14" || type === "24") {
       d1 = Math.floor(Math.random()*6)+1;
       d2 = Math.floor(Math.random()*6)+1;
       total = d1 + d2;
@@ -731,20 +730,20 @@ socket.on("sugorokuEvent", ({ type }) => {
         text: `🎲 2d6 → ${d1},${d2} = ${total}`
       });
 
-      if (d1 === d2) {
-        
-        if (d1 === d2) {
+if (d1 === d2) {
 
-  if (total === 2) {
+  if (type === "14") {
     socket.emit("sugorokuMoveTo", { pos: 1 });
-  } else {
-    socket.emit("sugorokuMoveTo", { pos: 16 });
   }
 
-}
+  if (type === "24") {
+    socket.emit("sugorokuMoveTo", { pos: 16 });
 
-      }
-    }
+       }
+
+  }
+}
+  
 
     if (type === "2d4") {
       d1 = Math.floor(Math.random()*4)+1;
@@ -756,8 +755,9 @@ socket.on("sugorokuEvent", ({ type }) => {
       });
 
       socket.emit("sugorokuBack", {
-        steps: total
-      });
+  steps: total
+});
+socket.emit("sugorokuMoveTo", { pos: null });
     }
 
     btn.style.display = "none";
