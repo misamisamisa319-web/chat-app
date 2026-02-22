@@ -2612,9 +2612,8 @@ delete zecchoUnlockedByRoom[leftRoom];
 
   });   // ← disconnect 閉じ
 
-// ===== すごろく通常ダイス送信 =====
+// ===== すごろく通常ダイス =====
 socket.on("sugorokuRoll", ({ sides }) => {
-
 
   const user =
     users.find(u => u.id === socket.id);
@@ -2631,32 +2630,18 @@ socket.on("sugorokuRoll", ({ sides }) => {
 
   user.position += roll;
 
-  // ゴール判定追加
-  if (user.position >= 40){
-  io.to(user.room).emit("message", {
-    name: "system",
-    text: `${user.name} さん、🏁 ゴールしました！お疲れさまです！`,
-    color: "#000",
-    bold: true
-  });
-  user.position = 0; // ゴール後0マスに戻す
-}
-
   // 仮：40超えたら40止まり
   if (user.position > 40){
     user.position = 40;
   }
 
-  const squareText =
-  squares[user.position] || "ゴール！";
-
-io.to(user.room).emit("message", {
-  name: "system",
-  text:
-    `🎲 ${user.name} は ${roll} → ${user.position}マス (${squareText})`,
-  color: "#000",
-  bold: true
-});
+  io.to(user.room).emit("message", {
+    name: "system",
+    text:
+      `🎲 ${user.name} は ${roll} を出した！ → ${user.position} マス目へ`,
+    color: "#000",
+    bold: true
+  });
 
 });
 
