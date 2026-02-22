@@ -2770,9 +2770,7 @@ if (stopSquares.includes(user.position)) {
 
 io.to(user.room).emit("message", {
   name: "system",
-  text: `🛑【強制ストップ】
-
-${squareText}`,
+  text: `🛑【強制ストップ】\n\n${squareText}`,
   color: "red",
   bold: true
 });
