@@ -100,8 +100,6 @@ input[type="password"] {
 
 <h2>ロビー</h2>
 
-<input id="connectKeyInput" placeholder="接続キー">
-
 <div id="features" style="
   border:1px solid #ccc;
   padding:12px;
@@ -571,10 +569,6 @@ if (room === "room5") {
     }
     localStorage.setItem("chatRoom", room);
     localStorage.setItem("chatKey", key);
-
-const ck = document.getElementById("connectKeyInput")?.value || "";
-localStorage.setItem("connectKey", ck);
-
    if (
   room === "denki" ||
   room === "denki1" ||

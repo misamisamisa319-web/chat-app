@@ -10,12 +10,6 @@ const io = new Server(server);
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 let users = [];
-// ===== 管理人IP =====
-const ADMIN_IPS = [
-  "222.226.71.6",
-  "49.105.95.196"
-];
-
 // ===== 部屋空ログ削除タイマー =====
 let emptyRoomTimers = {};
 
@@ -1229,8 +1223,8 @@ socket.emit("lobbyUpdate", getLobbyInfo());
 // ===== IP取得 =====
 const rawIp =
   socket.handshake.headers["x-forwarded-for"] ||
-  socket.conn.remoteAddress ||
   socket.handshake.address ||
+  socket.conn.remoteAddress ||
   "unknown";
 
 const ip =
@@ -1410,16 +1404,9 @@ socket.on("muteUser", targetId => {
     u.color = color;
 
     io.to(u.room).emit(
-  "userList",
-  users
-    .filter(x => x.room === u.room)
-    .map(x => ({
-      id: x.id,
-      name: x.name,
-      color: x.color,
-      isAdmin: x.isAdmin
-    }))
-);
+      "userList",
+      users.filter(x => x.room === u.room)
+    );
   });
 
 socket.on("denkiSitConfirm", () => {
@@ -1588,15 +1575,14 @@ if (existingUser) {
 } else {
 
   users.push({
-  id: socket.id,
-  name,
-  color,
-  room,
-  connectKey,
-  ip,
-  isAdmin: connectKey === "misa123",
-  lastActive: Date.now()
-});
+    id: socket.id,
+    name,
+    color,
+    room,
+    connectKey,
+    ip,
+    lastActive: Date.now()
+  });
 
 }
 
@@ -1622,16 +1608,9 @@ if (emptyRoomTimers[room]){
 
 
   io.to(room).emit(
-  "userList",
-  users
-    .filter(u=>u.room===room)
-    .map(u => ({
-      id: u.id,
-      name: u.name,
-      color: u.color,
-      isAdmin: u.isAdmin
-    }))
-);
+    "userList",
+    users.filter(u=>u.room===room)
+  );
 io.emit("lobbyUpdate", getLobbyInfo());
 
 
