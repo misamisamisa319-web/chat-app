@@ -744,55 +744,71 @@ socket.on("sugorokuEvent", ({ type }) => {
 
   if (!btn) return;
 
-  btn.style.display = "inline-block";
-  btn.textContent = type;
-
-  btn.onclick = () => {
-
-    let d1 = 0;
-    let d2 = 0;
-    let total = 0;
-if (type === "14" || type === "24") {
-      d1 = Math.floor(Math.random()*6)+1;
-      d2 = Math.floor(Math.random()*6)+1;
-      total = d1 + d2;
-
-      socket.emit("message", {
-        text: `🎲 2d6 → ${d1},${d2} = ${total}`
-      });
-
-if (d1 === d2) {
-
-  if (type === "14") {
-    socket.emit("sugorokuMoveTo", { pos: 1 });
+  // 👇追加（ここ重要）
+  if (type === "39") {
+    btn.style.display = "inline-block";
+    btn.textContent = "2d6";
   }
 
-  if (type === "24") {
-    socket.emit("sugorokuMoveTo", { pos: 16 });
+ btn.onclick = () => {
 
-       }
+  let d1 = 0;
+  let d2 = 0;
+  let total = 0;
 
-  }
-}
-  
+  // ===== 2d6（14 / 24 / 39）=====
+  if (type === "14" || type === "24" || type === "39") {
 
-    if (type === "2d4") {
-      d1 = Math.floor(Math.random()*4)+1;
-      d2 = Math.floor(Math.random()*4)+1;
-      total = d1 + d2;
+    d1 = Math.floor(Math.random()*6)+1;
+    d2 = Math.floor(Math.random()*6)+1;
+    total = d1 + d2;
 
-      socket.emit("message", {
-        text: `🎲 2d4 → ${d1},${d2} = ${total}`
-      });
+    socket.emit("message", {
+      text: `🎲 2d6 → ${d1},${d2} = ${total}`
+    });
 
-      socket.emit("sugorokuBack", {
-  steps: total
-});
+    // 39だけ進む
+    if (type === "39") {
+      socket.emit("sugorokuMove", { steps: total });
+    }
+
+    // 14 / 24
+    if (d1 === d2) {
+
+      if (type === "14") {
+        socket.emit("sugorokuMoveTo", { pos: 1 });
+      }
+
+      if (type === "24") {
+        socket.emit("sugorokuMoveTo", { pos: 16 });
+      }
 
     }
 
     btn.style.display = "none";
-  };
+    return;
+  }
+
+  // ===== 2d4 =====
+  if (type === "2d4") {
+
+    d1 = Math.floor(Math.random()*4)+1;
+    d2 = Math.floor(Math.random()*4)+1;
+    total = d1 + d2;
+
+    socket.emit("message", {
+      text: `🎲 2d4 → ${d1},${d2} = ${total}`
+    });
+
+    socket.emit("sugorokuBack", {
+      steps: total
+    });
+
+    btn.style.display = "none";
+    return;
+  }
+
+};
 
 });
 
