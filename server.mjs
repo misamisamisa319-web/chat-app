@@ -1595,6 +1595,11 @@ users.push({
   socket.username = name;
   socket.room = room;
   socket.join(room);
+  
+  // 👑同期
+if (kingByRoom && kingByRoom[room]) {
+  socket.emit("king", kingByRoom[room]);
+}
   // ===== 空室削除タイマー停止 =====
 if (emptyRoomTimers[room]){
 

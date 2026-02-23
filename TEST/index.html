@@ -354,6 +354,22 @@ let myColor = "#000000";
 let privateTo = "";
 let joined = false;
 
+let connectKey =
+  localStorage.getItem("connectKey");
+
+if (!connectKey){
+
+  connectKey =
+    Math.random().toString(36).slice(2) +
+    Date.now().toString(36);
+
+  localStorage.setItem(
+    "connectKey",
+    connectKey
+  );
+}
+
+
 window.addEventListener("load", () => {
 
   const savedName  = localStorage.getItem("chatName");
@@ -392,10 +408,11 @@ window.addEventListener("load", () => {
     colorSelect.value = myColor;
 
     socket.emit("join", {
-      name: username,
-      color: myColor,
-      room: savedRoom
-    });
+  name: username,
+  color: myColor,
+  room: savedRoom,
+  connectKey: localStorage.getItem("connectKey")
+});
 
 
     joined = true;
@@ -862,8 +879,11 @@ socket.on("userList", list => {
    const li = document.createElement("li");
 const nameSpan = document.createElement("span");
 
-nameSpan.textContent =
-  (u.isAdmin ? "👑" : "") + u.name;
+nameSpan.textContent = u.name;
+
+if (u.king) {
+  nameSpan.textContent = "👑" + u.name;
+}
 
 nameSpan.style.color =
   u.color || "#000";
@@ -923,24 +943,6 @@ muteBtn.onclick = () => {
 });
 
 
-
-
-// ===== 接続キー生成 =====
-let connectKey =
-  localStorage.getItem("connectKey");
-
-if (!connectKey){
-
-  connectKey =
-    Math.random().toString(36).slice(2) +
-    Date.now().toString(36);
-
-  localStorage.setItem(
-    "connectKey",
-    connectKey
-  );
-
-}
 
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
