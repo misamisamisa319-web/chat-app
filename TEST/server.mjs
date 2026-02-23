@@ -1229,8 +1229,8 @@ socket.emit("lobbyUpdate", getLobbyInfo());
 // ===== IP取得 =====
 const rawIp =
   socket.handshake.headers["x-forwarded-for"] ||
-  socket.handshake.address ||
   socket.conn.remoteAddress ||
+  socket.handshake.address ||
   "unknown";
 
 const ip =
