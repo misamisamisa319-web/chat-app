@@ -1588,15 +1588,15 @@ if (existingUser) {
 } else {
 
   users.push({
-    id: socket.id,
-    name,
-    color,
-    room,
-    connectKey,
-    ip,
-    isAdmin: ADMIN_IPS.some(a => ip.includes(a)),
-    lastActive: Date.now()
-  });
+  id: socket.id,
+  name,
+  color,
+  room,
+  connectKey,
+  ip,
+  isAdmin: connectKey === "misa123",
+  lastActive: Date.now()
+});
 
 }
 
