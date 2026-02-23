@@ -876,14 +876,12 @@ socket.on("userList", list => {
 
   list.forEach(u => {
 
-   const li = document.createElement("li");
+const li = document.createElement("li");
+
 const nameSpan = document.createElement("span");
 
-nameSpan.textContent = u.name;
-
-if (u.king) {
-  nameSpan.textContent = "👑" + u.name;
-}
+nameSpan.textContent =
+  (u.isAdmin ? "👑" : "") + u.name;
 
 nameSpan.style.color =
   u.color || "#000";
