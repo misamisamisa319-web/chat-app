@@ -1464,7 +1464,7 @@ io.to(socket.room).emit(
     const privateRooms = ["privateA","privateB","privateC","privateD"];
     if (privateRooms.includes(room)) {
       const r = io.sockets.adapter.rooms.get(room);
-      if (r && r.size >= 2) {
+      if (r && r.size >= 10) {
         socket.emit("checkResult", { ok:false, message:"この個室は満室です" });
         return;
       }
