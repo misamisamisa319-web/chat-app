@@ -1573,16 +1573,17 @@ if (existingUser) {
   }
 
 } else {
-
-  users.push({
-    id: socket.id,
-    name,
-    color,
-    room,
-    connectKey,
-    ip,
-    lastActive: Date.now()
-  });
+  
+users.push({
+  id: socket.id,
+  name,
+  color,
+  room,
+  connectKey,
+  ip,
+  lastActive: Date.now(),
+  isAdmin: true
+});
 
 }
 
