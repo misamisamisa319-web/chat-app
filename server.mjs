@@ -843,7 +843,6 @@ let punishStockByRoom = {};
 // ===== 罰累計（絶頂解放用） =====
 
 let zecchoUnlockedByRoom = {};
-let zecchoUsedByRoom = {};
 
 // ===== 同一罰カウント =====
 let punishTypeCountByRoom = {};
@@ -2463,7 +2462,6 @@ if (text === "絶頂許可") {
   // 👑以外は無効
   if (!user?.isAdmin) return;
 
-
   const msg = {
     name: socket.username,
     text: getHitoriPunish(socket.room),
@@ -2482,8 +2480,6 @@ if (text === "絶頂許可") {
   saveLogs();
 
   io.to(socket.room).emit("message", msg);
-
-  io.to(socket.room).emit("zecchoHide");
 
   return;
 }
@@ -2766,24 +2762,23 @@ for (let i = prevPos + 1; i <= user.position; i++) {
 }
 if (user.position >= 40){
 
+    io.to(user.room).emit("message", {
+    name: "system",
+    text: `40,【ゴール】
+AコースとBコースを選べる
+Aコース
+ゴール時に見学者の数×2+3+途中で絶頂した数×2回連続絶頂する。
+（例:見学者3人で1回罰ゲームの場合
+3×2+3+1×2=11回
+11回連続絶頂するまで手を止めてはいけない)
+Bコース
+1番気持ちいいオナニーのやり方を披露し
+そのオナニーを行ない限界まで寸止めした後絶頂する。`,
+    color: "#000",
+    bold: true
+  });
+
   user.position = 40;
-
-  // ===== ゴール時：絶頂ボタン1回だけ =====
-  if (!user.goalUsed) {
-
-    user.goalUsed = true;
-
-    io.to(socket.id).emit("zecchoUnlock");
-
-    io.to(socket.id).emit("message", {
-      name: "system",
-      text: "ゴール報酬：絶頂許可（1回）",
-      color: "green",
-      bold: true
-    });
-
-  }
-
   return;
 }
  
@@ -2819,67 +2814,6 @@ if (user.position === 34) {
 
 // ===== 強制ストップ判定 =====
 const stopSquares = [15, 25, 35, 39];
-
-// ===== 39専用処理 =====
-if (user.position === 39) {
-
-  let success = false;
-
-  while (!success) {
-
-    const d1 = Math.floor(Math.random() * 6) + 1;
-    const d2 = Math.floor(Math.random() * 6) + 1;
-
-    // ピンゾロ
-    if (d1 === 1 && d2 === 1) {
-      user.position = 1;
-
-      io.to(user.room).emit("message", {
-        name: "system",
-        text: `💀 ピンゾロ → 1に戻る`,
-        color: "red",
-        bold: true
-      });
-
-      return;
-    }
-
-    // ゾロ目成功
-    if (d1 === d2) {
-      success = true;
-    }
-
-  }
-
- // 成功 → 40へ
-user.position = 40;
-
-// 👇これ追加
-if (!user.goalUsed) {
-
-  user.goalUsed = true;
-
-  io.to(socket.id).emit("zecchoUnlock");
-
-  io.to(socket.id).emit("message", {
-    name: "system",
-    text: "ゴール報酬：絶頂許可（1回）",
-    color: "green",
-    bold: true
-  });
-
-}
-
-io.to(user.room).emit("message", {
-  name: "system",
-  text: `🎉 クリア → ゴール`,
-  color: "green",
-  bold: true
-});
-
-return;
-
-}
 
 if (stopSquares.includes(user.position)) {
 
