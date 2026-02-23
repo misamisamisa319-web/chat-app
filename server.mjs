@@ -2453,12 +2453,14 @@ io.to(socket.room).emit("message", sysMsg);
   return;
 }
 
+
 if (text === "絶頂許可") {
 
-  // ===== 解放中じゃなければ無効 =====
-  if (!zecchoUnlockedByRoom[socket.room]) {
-    return;
-  }
+  const user =
+    users.find(u => u.id === socket.id);
+
+  // 👑以外は無効
+  if (!user?.isAdmin) return;
 
   const msg = {
     name: socket.username,
@@ -2479,16 +2481,11 @@ if (text === "絶頂許可") {
 
   io.to(socket.room).emit("message", msg);
 
- 
-
-  // ===== 解放フラグOFF =====
-  zecchoUnlockedByRoom[socket.room] = false;
-
-  // ===== ボタン非表示送信 =====
-  io.to(socket.room).emit("zecchoHide");
-
   return;
 }
+
+  
+
 
 // ===== 男イベント =====
 if (text === "男イベント") {
