@@ -859,17 +859,16 @@ socket.on("userList", list => {
 
   list.forEach(u => {
 
-    const li = document.createElement("li");
+   const li = document.createElement("li");
+const nameSpan = document.createElement("span");
 
-    // ===== 名前表示 =====
-    const nameSpan =
-      document.createElement("span");
+nameSpan.textContent =
+  (u.isAdmin ? "👑" : "") + u.name;
 
-    nameSpan.textContent = u.name;
-    nameSpan.style.color =
-      u.color || "#000";
+nameSpan.style.color =
+  u.color || "#000";
 
-    li.appendChild(nameSpan);
+li.appendChild(nameSpan);
 
     // ===== 自分以外のみ操作ボタン =====
     if (u.id !== myId) {

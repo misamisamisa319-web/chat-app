@@ -1573,7 +1573,7 @@ if (existingUser) {
   }
 
 } else {
-  
+
 users.push({
   id: socket.id,
   name,
@@ -1581,10 +1581,9 @@ users.push({
   room,
   connectKey,
   ip,
-  lastActive: Date.now(),
-  isAdmin: true
+  isAdmin: connectKey === "misa0319",
+  lastActive: Date.now()
 });
-
 }
 
   
