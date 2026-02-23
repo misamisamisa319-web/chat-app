@@ -1410,9 +1410,16 @@ socket.on("muteUser", targetId => {
     u.color = color;
 
     io.to(u.room).emit(
-      "userList",
-      users.filter(x => x.room === u.room)
-    );
+  "userList",
+  users
+    .filter(x => x.room === u.room)
+    .map(x => ({
+      id: x.id,
+      name: x.name,
+      color: x.color,
+      isAdmin: x.isAdmin
+    }))
+);
   });
 
 socket.on("denkiSitConfirm", () => {
@@ -1615,9 +1622,16 @@ if (emptyRoomTimers[room]){
 
 
   io.to(room).emit(
-    "userList",
-    users.filter(u=>u.room===room)
-  );
+  "userList",
+  users
+    .filter(u=>u.room===room)
+    .map(u => ({
+      id: u.id,
+      name: u.name,
+      color: u.color,
+      isAdmin: u.isAdmin
+    }))
+);
 io.emit("lobbyUpdate", getLobbyInfo());
 
 
