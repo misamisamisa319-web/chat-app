@@ -445,6 +445,11 @@ socket.on("zecchoUnlock", () => {
   }
 
 });
+
+socket.on("zecchoHide", () => {
+  const btn = document.getElementById("zecchoBtn");
+  if (btn) btn.style.display = "none";
+});
 // ===== タイマー同期 =====
 let timerInterval = null;
 
