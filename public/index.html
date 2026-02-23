@@ -862,10 +862,11 @@ socket.on("userList", list => {
     const li = document.createElement("li");
 
     // ===== 名前表示 =====
-    nameSpan.textContent =
-  (u.isAdmin ? "👑" : "") + u.name;
+    const nameSpan =
+  document.createElement("span");
 
-    li.appendChild(nameSpan);
+nameSpan.textContent =
+  (u.isAdmin ? "👑" : "") + u.name;
 
     // ===== 自分以外のみ操作ボタン =====
     if (u.id !== myId) {
@@ -987,7 +988,7 @@ joinBtn.onclick = () => {
   color: myColor,
   room,
   key,
-  connectKey: "misa123"
+  connectKey: connectKey
 });
 
 
