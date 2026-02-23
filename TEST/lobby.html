@@ -438,13 +438,35 @@ input[type="password"] {
   </span>
 
 </div>
-
   <div class="room-info">
     人数（<span id="count-special">0</span>人）
     <span id="names-special">なし</span>
   </div>
   <input type="password" id="key-special" placeholder="鍵">
   <button onclick="enterRoom('special')">入室</button>
+</div>
+
+<!-- ===== specia2 ===== -->
+
+<div class="room special">
+  <div class="room-title-row">
+
+  <span class="room-title">
+    スペシャル鍵無し
+  </span>
+
+  <span class="room-desc">
+    身内用ルーム
+  </span>
+
+</div>
+
+  <div class="room-info">
+    人数（<span id="count-specialFree">0</span>人）
+    <span id="names-specialFree">なし</span>
+  </div>
+
+  <button onclick="enterRoom('specialFree')">入室</button>
 </div>
 
 <!-- ===== private ===== -->
@@ -509,6 +531,7 @@ const allRooms = [
   "sugoroku2",
   "sugoroku3",
   "special",
+  "specialFree",
   "privateA",
   "privateB",
   "privateC",

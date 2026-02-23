@@ -547,6 +547,7 @@ function getLobbyInfo() {
 /* ===== 個室鍵 ===== */
 const roomKeys = {
   special: "12345678",
+  specialFree: "",
   privateA: "1234a",
   privateB: "1234b",
   privateC: "1234c",
@@ -1450,27 +1451,33 @@ io.to(socket.room).emit(
   denkiStateRoom(socket.room)
 );
 
-
 });
 
+socket.on("checkRoomKey", ({ room, key }) => {
 
 
+  if (room === "specialFree") {
+    socket.emit("checkResult", { ok:true });
+    return;
+  }
 
-  socket.on("checkRoomKey", ({ room, key }) => {
-    if (roomKeys[room] && key !== roomKeys[room]) {
-      socket.emit("checkResult", { ok:false, message:"鍵が違います" });
+  if (roomKeys[room] && key !== roomKeys[room]) {
+    socket.emit("checkResult", { ok:false, message:"鍵が違います" });
+    return;
+  }
+
+  const privateRooms = ["privateA","privateB","privateC","privateD"];
+  if (privateRooms.includes(room)) {
+    const r = io.sockets.adapter.rooms.get(room);
+    if (r && r.size >= 10) {
+      socket.emit("checkResult", { ok:false, message:"この個室は満室です" });
       return;
     }
-    const privateRooms = ["privateA","privateB","privateC","privateD"];
-    if (privateRooms.includes(room)) {
-      const r = io.sockets.adapter.rooms.get(room);
-      if (r && r.size >= 10) {
-        socket.emit("checkResult", { ok:false, message:"この個室は満室です" });
-        return;
-      }
-    }
-    socket.emit("checkResult", { ok:true });
-  });
+  }
+
+  socket.emit("checkResult", { ok:true });
+});
+
 socket.on("join", ({
   name,
   color="black",
