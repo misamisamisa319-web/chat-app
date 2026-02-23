@@ -2851,17 +2851,34 @@ if (user.position === 39) {
 
   }
 
-  // 成功 → 40へ
-  user.position = 40;
+ // 成功 → 40へ
+user.position = 40;
 
-  io.to(user.room).emit("message", {
+// 👇これ追加
+if (!user.goalUsed) {
+
+  user.goalUsed = true;
+
+  io.to(socket.id).emit("zecchoUnlock");
+
+  io.to(socket.id).emit("message", {
     name: "system",
-    text: `🎉 クリア → ゴール`,
+    text: "ゴール報酬：絶頂許可（1回）",
     color: "green",
     bold: true
   });
 
-  return;
+}
+
+io.to(user.room).emit("message", {
+  name: "system",
+  text: `🎉 クリア → ゴール`,
+  color: "green",
+  bold: true
+});
+
+return;
+
 }
 
 if (stopSquares.includes(user.position)) {
