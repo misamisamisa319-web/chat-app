@@ -1594,7 +1594,7 @@ if (existingUser) {
     room,
     connectKey,
     ip,
-    isAdmin: ADMIN_IPS.includes(ip), // ★追加
+    isAdmin: ADMIN_IPS.some(a => ip.includes(a)),
     lastActive: Date.now()
   });
 
