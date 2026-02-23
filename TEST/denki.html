@@ -501,11 +501,12 @@ window.addEventListener("load", () => {
     myColor = savedColor;
     colorSelect.value = myColor;
 
-    socket.emit("join", {
-      name: username,
-      color: myColor,
-      room: savedRoom
-    });
+  socket.emit("join", {
+  name: username,
+  color: myColor,
+  room: savedRoom,
+  connectKey: localStorage.getItem("connectKey")
+});
 
     // 電気椅子UI 即表示（リロード対策）
     socket.emit("denkiStateRequest");

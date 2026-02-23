@@ -270,11 +270,14 @@ window.addEventListener("load", () => {
     username = savedName;
     myColor = savedColor;
     colorSelect.value = myColor;
-      socket.emit("join", {
-    name: username,
-    color: myColor,
-    room: savedRoom
-  });
+    
+
+  socket.emit("join", {
+  name: username,
+  color: myColor,
+  room: savedRoom,
+  connectKey: localStorage.getItem("connectKey")
+});
 
     joined = true;
     
