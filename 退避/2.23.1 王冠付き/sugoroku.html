@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Chat v2 - Template</title>
+<title>Chat v2 - sugoroku</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -20,6 +20,7 @@ body {
   display: flex;
   flex-direction: column;
 }
+
 
 #login, #chat { flex: 1; display: flex; flex-direction: column; }
 #chat { display: none; }
@@ -167,6 +168,25 @@ input, button, select { padding: 10px; font-size: 16px; }
   </span>
 </div>
 
+<!-- ===== すごろくダイス ===== -->
+<div id="sugorokuDice" style="
+  padding:8px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+">
+  <button onclick="rollDice(6)">1d6</button>
+  <button onclick="rollDice(5)">1d5</button>
+  <button onclick="rollDice(4)">1d4</button>
+  <button onclick="rollDice(3)">1d3</button>
+  <button onclick="rollDice(2)">1d2</button>
+  <button id="specialDiceBtn" style="display:none;">
+  2d6
+</button>
+
+
+</div>
+
 
 <!-- ===== 参加者 ===== -->
 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -236,19 +256,6 @@ let myColor = "#000000";
 let privateTo = "";
 let joined = false;
 
-let connectKey =
-  localStorage.getItem("connectKey");
-
-if (!connectKey){
-  connectKey =
-    Math.random().toString(36).slice(2) +
-    Date.now().toString(36);
-
-  localStorage.setItem(
-    "connectKey",
-    connectKey
-  );
-}
 
 
 
@@ -263,12 +270,13 @@ window.addEventListener("load", () => {
     username = savedName;
     myColor = savedColor;
     colorSelect.value = myColor;
-   
+    
+
   socket.emit("join", {
   name: username,
   color: myColor,
   room: savedRoom,
-  connectKey
+  connectKey: localStorage.getItem("connectKey")
 });
 
     joined = true;
@@ -499,10 +507,9 @@ socket.on("userList", list => {
 
   list.forEach(u => {
 
-const li = document.createElement("li");
+    const li = document.createElement("li");
 
-const nameSpan =
-  document.createElement("span");
+const nameSpan = document.createElement("span");
 
 nameSpan.textContent =
   (u.isAdmin ? "👑" : "") + u.name;
@@ -565,6 +572,22 @@ muteBtn.onclick = () => {
 });
 
 
+// ===== 接続キー生成 =====
+let connectKey =
+  localStorage.getItem("connectKey");
+
+if (!connectKey){
+
+  connectKey =
+    Math.random().toString(36).slice(2) +
+    Date.now().toString(36);
+
+  localStorage.setItem(
+    "connectKey",
+    connectKey
+  );
+
+}
 
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
@@ -674,6 +697,77 @@ leaveBtn.onclick = () => {
   location.href = "/lobby.html";
 };
 
+// ===== すごろく通常ダイス送信 =====
+
+
+function rollDice(sides){
+
+  socket.emit("sugorokuRoll", {
+    sides
+  });
+
+}
+
+// 👇この下に追加
+socket.on("sugorokuEvent", ({ type }) => {
+
+  const btn =
+    document.getElementById("specialDiceBtn");
+
+  if (!btn) return;
+
+  btn.style.display = "inline-block";
+  btn.textContent = type;
+
+  btn.onclick = () => {
+
+    let d1 = 0;
+    let d2 = 0;
+    let total = 0;
+if (type === "14" || type === "24") {
+      d1 = Math.floor(Math.random()*6)+1;
+      d2 = Math.floor(Math.random()*6)+1;
+      total = d1 + d2;
+
+      socket.emit("message", {
+        text: `🎲 2d6 → ${d1},${d2} = ${total}`
+      });
+
+if (d1 === d2) {
+
+  if (type === "14") {
+    socket.emit("sugorokuMoveTo", { pos: 1 });
+  }
+
+  if (type === "24") {
+    socket.emit("sugorokuMoveTo", { pos: 16 });
+
+       }
+
+  }
+}
+  
+
+    if (type === "2d4") {
+      d1 = Math.floor(Math.random()*4)+1;
+      d2 = Math.floor(Math.random()*4)+1;
+      total = d1 + d2;
+
+      socket.emit("message", {
+        text: `🎲 2d4 → ${d1},${d2} = ${total}`
+      });
+
+      socket.emit("sugorokuBack", {
+  steps: total
+});
+
+    }
+
+    btn.style.display = "none";
+  };
+
+});
+
 window.addEventListener("load", () => {
 
 
@@ -728,6 +822,8 @@ if (normalTimerCustomBtn){
   };
 
 }
+
+
 
 
 

@@ -181,11 +181,30 @@ input, button, select { padding: 10px; font-size: 16px; }
   <button onclick="rollDice(3)">1d3</button>
   <button onclick="rollDice(2)">1d2</button>
   <button id="specialDiceBtn" style="display:none;">
-  2d6
-</button>
+    2d6
+  </button>
+</div>
 
+<!-- ===== タイマー ===== -->
+<div id="timerBox" style="
+  padding:8px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  border-top:1px solid #ccc;
+">
+
+  <button id="timer3Btn">3分</button>
+  <button id="timer5Btn">5分</button>
+
+  <input id="timerCustomInput"
+    placeholder="分"
+    style="width:60px;">
+
+  <button id="timerCustomBtn">任意</button>
 
 </div>
+
 
 
 <!-- ===== 参加者 ===== -->
