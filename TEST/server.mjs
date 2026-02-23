@@ -10,6 +10,12 @@ const io = new Server(server);
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 let users = [];
+// ===== 管理人IP =====
+const ADMIN_IPS = [
+  "222.226.71.6",
+  "49.105.95.196"
+];
+
 // ===== 部屋空ログ削除タイマー =====
 let emptyRoomTimers = {};
 
@@ -1581,6 +1587,7 @@ if (existingUser) {
     room,
     connectKey,
     ip,
+    isAdmin: ADMIN_IPS.includes(ip), // ★追加
     lastActive: Date.now()
   });
 
