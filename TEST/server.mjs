@@ -841,8 +841,10 @@ const commonEventItems = [
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 let punishStockByRoom = {};
 // ===== 罰累計（絶頂解放用） =====
-
 let zecchoUnlockedByRoom = {};
+
+// ★ここ追加
+let orgasmUsedByRoom = {};
 
 // ===== 同一罰カウント =====
 let punishTypeCountByRoom = {};
@@ -1602,6 +1604,12 @@ users.push({
   socket.username = name;
   socket.room = room;
   socket.join(room);
+
+  if (!orgasmUsedByRoom[room]) {
+  orgasmUsedByRoom[room] = false;
+}
+
+socket.emit("orgasmState", orgasmUsedByRoom[room]);
 
   // ===== 空室削除タイマー停止 =====
 if (emptyRoomTimers[room]){
@@ -2457,9 +2465,20 @@ io.to(socket.room).emit("message", sysMsg);
 if (text === "絶頂許可") {
 
   const user =
-  users.find(u => u.id === socket.id);
+    users.find(u => u.id === socket.id);
 
-if (!user?.isAdmin && !zecchoUnlockedByRoom[socket.room]) return;
+  if (!user?.isAdmin && !zecchoUnlockedByRoom[socket.room]) return;
+
+  // ★ここ（既存）
+  if (orgasmUsedByRoom[socket.room]) return;
+
+  orgasmUsedByRoom[socket.room] = true;
+  io.to(socket.room).emit("orgasmUsed");
+
+  // ★ここ追加（直下）
+  zecchoUnlockedByRoom[socket.room] = false;
+  punishTypeCountByRoom[socket.room] = {};
+  orgasmUsedByRoom[socket.room] = false;
 
   const msg = {
     name: socket.username,
@@ -2470,7 +2489,6 @@ if (!user?.isAdmin && !zecchoUnlockedByRoom[socket.room]) return;
     time: getTimeString(),
     from: socket.id
   };
-  
 
   const log = normalizeLog(msg);
 
@@ -2679,6 +2697,7 @@ delete punishStockByRoom[leftRoom];
 delete punishCooldownByRoom[leftRoom];
 delete punishTypeCountByRoom[leftRoom];
 delete zecchoUnlockedByRoom[leftRoom];
+delete orgasmUsedByRoom[leftRoom];
 
 
           // ===== 電気椅子リセット =====

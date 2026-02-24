@@ -864,10 +864,11 @@ socket.on("zecchoUnlock", () => {
 
   const btn = document.getElementById("denkiZecchoBtn");
 
+  if (btn && btn.style.display === "none") return;
+
   if (btn){
     btn.style.display = "inline-block";
   }
-
 
 });
 // ===== タイマー同期 =====
