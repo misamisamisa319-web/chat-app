@@ -2456,12 +2456,6 @@ io.to(socket.room).emit("message", sysMsg);
 
 if (text === "絶頂許可") {
 
-  const user =
-    users.find(u => u.id === socket.id);
-
-  // 👑以外は無効
-  if (!user?.isAdmin) return;
-
   const msg = {
     name: socket.username,
     text: getHitoriPunish(socket.room),
@@ -2471,6 +2465,7 @@ if (text === "絶頂許可") {
     time: getTimeString(),
     from: socket.id
   };
+  
 
   const log = normalizeLog(msg);
 
