@@ -2170,6 +2170,8 @@ if (
 ){
   zecchoUnlockedByRoom[socket.room] = true;
 
+  orgasmUsedByRoom[socket.room] = false;
+
   const sysMsg = {
     name: "system",
     text: "絶頂許可が解放されました",
@@ -2478,7 +2480,7 @@ if (text === "絶頂許可") {
   // ★ここ追加（直下）
   zecchoUnlockedByRoom[socket.room] = false;
   punishTypeCountByRoom[socket.room] = {};
-  orgasmUsedByRoom[socket.room] = false;
+  
 
   const msg = {
     name: socket.username,
