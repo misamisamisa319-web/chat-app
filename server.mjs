@@ -596,7 +596,7 @@ const punishItems = [
 "女子罰27.実況しながら寸止めオナニー（保留可）",
 "女子罰28.【地獄】玄関のドアを少し開けて勝利者の指定した方法で一回寸止めオナニーする。家族が居て出来ない場合は部屋のドアを少し開けて行う。",
 "女子罰29.【地獄】カーテンを全開の窓際に立ち、勝利者の指定した方法で一回寸止めオナニーする。",
-"女子罰30.【地獄】男性化。勝者に男性としての名前、名前の色をつけてもらう。一人称は「オレ」で女言葉使用禁止、男になりきってチャットすること。罰終了後、トイレは男性のようにガニ股で立って行い。ブラは付けない。期間は次に勝負に勝つまでとする。次回勝負前にルブルにて感想を書いてから行うこと。",
+"女子罰30.【地獄】男性化。勝者に男性としての名前、名前の色をつけてもらう。一人称は「オレ」で女言葉使用禁止、男になりきってチャットすること。罰終了後、トイレは男性のようにガニ股で立って行い。ブラは付けない。期間は次に勝負にするまで。次回勝負前にルブルにて感想を書いてから行うこと。",
 ];
 
 // 男子罰30個
@@ -2238,6 +2238,7 @@ if (
   !zecchoUnlockedByRoom[socket.room]
 ){
   zecchoUnlockedByRoom[socket.room] = true;
+   orgasmUsedByRoom[socket.room] = false; 
 
   const sysMsg = {
     name: "system",
@@ -2305,6 +2306,7 @@ if (
   !zecchoUnlockedByRoom[socket.room]
 ){
   zecchoUnlockedByRoom[socket.room] = true;
+   orgasmUsedByRoom[socket.room] = false; 
 
   const sysMsg = {
     name: "system",
@@ -2372,6 +2374,7 @@ if (
   !zecchoUnlockedByRoom[socket.room]
 ){
   zecchoUnlockedByRoom[socket.room] = true;
+   orgasmUsedByRoom[socket.room] = false; 
 
   const sysMsg = {
     name: "system",
@@ -2437,6 +2440,7 @@ if (
   !zecchoUnlockedByRoom[socket.room]
 ){
   zecchoUnlockedByRoom[socket.room] = true;
+   orgasmUsedByRoom[socket.room] = false; 
 
   const sysMsg = {
     name: "system",

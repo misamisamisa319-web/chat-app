@@ -796,15 +796,14 @@ socket.on("zecchoUnlock", () => {
 
 });
 
+socket.on("orgasmUsed", () => {
+  const btn = document.getElementById("zecchoBtn");
+  if (btn) btn.style.display = "none";
+});
+
 socket.on("zecchoHide", () => {
-
-  const btn =
-    document.getElementById("zecchoBtn");
-
-  if (btn){
-    btn.style.display = "none";
-  }
-
+  const btn = document.getElementById("zecchoBtn");
+  if (btn) btn.style.display = "none";
 });
 
 // ===== タイマー同期 =====

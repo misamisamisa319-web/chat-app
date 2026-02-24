@@ -930,18 +930,15 @@ socket.on("timerEnd", () => {
 
 });
 
-socket.on("zecchoHide", () => {
-
-  const btn =
-    document.getElementById("denkiZecchoBtn");
-
-  if (btn){
-    btn.style.display = "none";
-  }
-
+socket.on("orgasmUsed", () => {
+  const btn = document.getElementById("zecchoBtn");
+  if (btn) btn.style.display = "none";
 });
 
-
+socket.on("zecchoHide", () => {
+  const btn = document.getElementById("zecchoBtn");
+  if (btn) btn.style.display = "none";
+});
 
 
 socket.on("userList", list => {
