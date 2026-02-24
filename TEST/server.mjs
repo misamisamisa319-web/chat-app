@@ -2456,6 +2456,11 @@ io.to(socket.room).emit("message", sysMsg);
 
 if (text === "絶頂許可") {
 
+  const user =
+  users.find(u => u.id === socket.id);
+
+if (!user?.isAdmin && !zecchoUnlockedByRoom[socket.room]) return;
+
   const msg = {
     name: socket.username,
     text: getHitoriPunish(socket.room),
