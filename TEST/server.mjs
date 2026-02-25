@@ -887,7 +887,7 @@ function isSamePunishUnlocked(room){
 
 // ===== 罰クールタイム（部屋単位） =====
 let punishCooldownByRoom = {};
-const PUNISH_COOLDOWN = 2 * 1000; // 20秒
+const PUNISH_COOLDOWN = 20 * 1000; // 20秒
 
 function canUsePunish(room){
 

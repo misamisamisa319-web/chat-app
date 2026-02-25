@@ -832,7 +832,6 @@ socket.on("muteSync", list => {
 
 socket.on("message", d => {
 
-
 // ===== ミュート遮断 =====
 if (d.name && myMutes.includes(d.name)) {
   return;
@@ -865,12 +864,13 @@ socket.on("zecchoUnlock", () => {
 
   const btn = document.getElementById("denkiZecchoBtn");
 
+  if (btn && btn.style.display === "none") return;
+
   if (btn){
     btn.style.display = "inline-block";
   }
 
 });
-
 // ===== タイマー同期 =====
 let timerInterval = null;
 
@@ -931,12 +931,12 @@ socket.on("timerEnd", () => {
 });
 
 socket.on("orgasmUsed", () => {
-  const btn = document.getElementById("denkiZecchoBtn");
+  const btn = document.getElementById("zecchoBtn");
   if (btn) btn.style.display = "none";
 });
 
 socket.on("zecchoHide", () => {
-  const btn = document.getElementById("denkiZecchoBtn");
+  const btn = document.getElementById("zecchoBtn");
   if (btn) btn.style.display = "none";
 });
 
