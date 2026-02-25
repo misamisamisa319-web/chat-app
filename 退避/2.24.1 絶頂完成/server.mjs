@@ -1611,10 +1611,6 @@ users.push({
 
 socket.emit("orgasmState", orgasmUsedByRoom[room]);
 
-if (orgasmUsedByRoom[room]) {
-  socket.emit("orgasmUsed");
-}
-
   // ===== 空室削除タイマー停止 =====
 if (emptyRoomTimers[room]){
 
@@ -2488,7 +2484,7 @@ if (text === "絶頂許可") {
   // ★ここ追加（直下）
   zecchoUnlockedByRoom[socket.room] = false;
   punishTypeCountByRoom[socket.room] = {};
-  orgasmUsedByRoom[socket.room] = false;
+  
 
   const msg = {
     name: socket.username,
