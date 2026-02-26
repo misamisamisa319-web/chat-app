@@ -9,7 +9,11 @@ const io = new Server(server);
 
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
+
 let users = [];
+
+// ===== すごろく状態 =====
+let sugorokuState = {};
 // ===== 部屋空ログ削除タイマー =====
 let emptyRoomTimers = {};
 
