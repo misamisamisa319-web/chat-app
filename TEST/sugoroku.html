@@ -180,7 +180,6 @@ input, button, select { padding: 10px; font-size: 16px; }
   <button onclick="rollDice(4)">1d4</button>
   <button onclick="rollDice(3)">1d3</button>
   <button onclick="rollDice(2)">1d2</button>
-  <button onclick="rollDice(10)">1d10</button>
 
   <button id="luckBtn" onclick="tryLuck()" style="display:none;">
     運試し
@@ -727,6 +726,9 @@ leaveBtn.onclick = () => {
 };
 
 // ===== すごろく通常ダイス送信 =====
+function rollDice(sides){
+  socket.emit("sugorokuRoll", { sides });
+}
 function tryLuck(){
 
   socket.emit("sugorokuRoll", {
@@ -741,14 +743,31 @@ function tryLuck(){
   }
 
 }
-
 socket.on("sugorokuEvent", ({ type }) => {
 
- 
   const btn =
     document.getElementById("specialDiceBtn");
 
-  if (!btn) return;
+  if (type === "luck") {
+
+    if (!btn) return;
+
+  btn.style.display = "inline-block";
+  btn.textContent = "1d10";
+
+  btn.onclick = () => {
+
+    const n = Math.floor(Math.random()*10)+1;
+
+    socket.emit("message", {
+      text: `🎲 1d10 → ${n}`
+    });
+
+  };
+  return;
+}
+
+
 
   btn.style.display = "inline-block";
 
