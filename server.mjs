@@ -1605,6 +1605,29 @@ users.push({
   socket.room = room;
   socket.join(room);
 
+  // ===== すごろく復元 =====
+if (
+  sugorokuState[room] &&
+  sugorokuState[room].players[connectKey] != null
+) {
+  const pos =
+    sugorokuState[room].players[connectKey];
+
+  const user =
+    users.find(u => u.id === socket.id);
+
+  if (user) {
+    user.position = pos;
+  }
+
+  socket.emit("message", {
+    name: "system",
+    text: `📍 続きから再開：${pos}マス`,
+    room: room,
+    time: getTimeString()
+  });
+}
+
   if (!orgasmUsedByRoom[room]) {
   orgasmUsedByRoom[room] = false;
 }
@@ -2767,6 +2790,18 @@ const roll = rolls.reduce((a,b)=>a+b,0);
 const prevPos = user.position;
 
 user.position += roll;
+
+
+// ===== 位置保存 =====
+if (!sugorokuState[user.room]) {
+  sugorokuState[user.room] = {
+    players: {},
+    lastUpdate: Date.now()
+  };
+}
+
+sugorokuState[user.room].players[user.connectKey] = user.position;
+sugorokuState[user.room].lastUpdate = Date.now();
 
 // 通過チェック（強制ストップ踏み越し防止）
 for (let i = prevPos + 1; i <= user.position; i++) {
