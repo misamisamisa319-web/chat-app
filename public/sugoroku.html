@@ -735,17 +735,8 @@ socket.on("sugorokuEvent", ({ type }) => {
 
   if (!btn) return;
 
-
- btn.style.display = "inline-block";
-
-if (type === "14" || type === "24" || type === "39") {
-  btn.textContent = "2d6";
-}
-else if (type === "2d4") {
-  btn.textContent = "2d4";
-}
-  btn.style.backgroundColor = "red";
-  btn.style.color = "white";
+  btn.style.display = "inline-block";
+  btn.textContent = type;
 
   btn.onclick = () => {
 
@@ -791,41 +782,7 @@ if (d1 === d2) {
 
     }
 
-if (type === "39") {
-
-  let d1 = Math.floor(Math.random()*6)+1;
-  let d2 = Math.floor(Math.random()*6)+1;
-  let total = d1 + d2;
-
-  socket.emit("message", {
-    text: `🎲 2d6 → ${d1},${d2} = ${total}`
-  });
-
-  // ピンゾロ
-  if (d1 === 1 && d2 === 1) {
-
-    socket.emit("sugorokuMoveTo", {
-      pos: 1
-    });
-
-  }
-
-  // ゾロ目（ゴール）
-  else if (d1 === d2) {
-
-    socket.emit("sugorokuMoveTo", {
-      pos: 40
-    });
-
-  }
-
-  // それ以外 → 何もしない（39継続）
-}
-
-
-if (type !== "39") {
-  btn.style.display = "none";
-}
+    btn.style.display = "none";
   };
 
 });

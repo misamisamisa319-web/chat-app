@@ -2912,13 +2912,6 @@ io.to(user.room).emit("message", {
 
   return; // ここで終了（通常メッセージ出さない）
 }
-
-if (i === 39) {
-  io.to(socket.id).emit("sugorokuEvent", {
-    type: "39"
-  });
-}
-
 io.to(user.room).emit("message", {
   name: "system",
   text: `🎲 ${user.name} は ${(rolls && rolls.length > 1) ? rolls.join(",") + " → " : ""}${roll} → ${user.position}マス ${squareText ? `(${squareText})` : ""}`,
