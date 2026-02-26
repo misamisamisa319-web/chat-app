@@ -767,6 +767,7 @@ socket.on("sugorokuEvent", ({ type }) => {
 
       if (d1 === d2) {
 
+
         if (type === "14") {
           socket.emit("sugorokuMoveTo", { pos: 1 });
         }
@@ -789,19 +790,25 @@ socket.on("sugorokuEvent", ({ type }) => {
         text: `🎲 2d6 → ${d1},${d2} = ${total}`
       });
 
-      if (d1 === d2) {
+  if (d1 === d2) {
 
-        socket.emit("message", {
-          text: "🎉 ゴール！"
-        });
+  if (type === "40") {
 
-      } else {
+    socket.emit("message", {
+      text: "🏁 ゴール！絶頂解放"
+    });
 
-        socket.emit("message", {
-          text: "⚠ 寸止め1回"
-        });
+    socket.emit("zecchoUnlock");
 
-      }
+  }
+
+} else {
+
+  socket.emit("message", {
+    text: "⚠ 寸止め1回"
+  });
+
+}
     }
 
     // ===== 2d4 =====
@@ -820,9 +827,7 @@ socket.on("sugorokuEvent", ({ type }) => {
       });
 
     }
-  if (type !== "40") {
-  btn.style.display = "none";
-}
+
   };
 
 });
