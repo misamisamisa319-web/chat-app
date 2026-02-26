@@ -792,9 +792,13 @@ socket.on("zecchoUnlock", () => {
 
   if (btn){
     btn.style.display = "inline-block";
+
+    btn.style.backgroundColor = "black";
+    btn.style.color = "white";
   }
 
 });
+
 
 socket.on("orgasmUsed", () => {
   const btn = document.getElementById("zecchoBtn");
