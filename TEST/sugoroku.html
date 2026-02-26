@@ -225,6 +225,10 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 <div id="settings">
 
+  <button id="zecchoBtn" style="display:none; background:black; color:white; padding:8px 12px; border-radius:6px;">
+  絶頂許可
+</button>
+
     <label>色: <input type="color" id="colorSelect" value="#000000"></label>
     <label>内緒:
       <select id="privateTarget">
@@ -798,7 +802,8 @@ socket.on("sugorokuEvent", ({ type }) => {
       text: "🏁 ゴール！絶頂解放"
     });
 
-    socket.emit("zecchoUnlock");
+  const btn = document.getElementById("zecchoBtn");
+if (btn) btn.style.display = "inline-block";
 
   }
 

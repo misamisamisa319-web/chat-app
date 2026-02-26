@@ -2891,21 +2891,50 @@ const stopSquares = [15, 25, 35];
 
 if (stopSquares.includes(user.position)) {
 
-io.to(user.room).emit("message", {
-  name: "system",
+const msg = {
+  name: "🎲すごろく",
   text: `🛑【強制ストップ】\n\n${squareText}`,
   color: "red",
-  bold: true
-});
+  bold: true,
+  room: user.room,
+  time: getTimeString()
+};
+
+const log = normalizeLog(msg);
+
+adminLogs.push(log);
+roomLogs.push(log);
+saveLogs();
+
+io.to(user.room).emit("message", msg);  
 
   return; // ここで終了（通常メッセージ出さない）
 }
 io.to(user.room).emit("message", {
   name: "system",
-  text: `🎲 ${user.name} は ${(rolls && rolls.length > 1) ? rolls.join(",") + " → " : ""}${roll} → ${user.position}マス ${squareText ? `(${squareText})` : ""}`,
+  text: `🎲 ${user.name} は ${(rolls && rolls.length > 1) ? rolls.join(",") + " → " : ""}${roll} → ${user.position}マス`,
   color: "#000",
   bold: true
 });
+if (squareText) {
+
+  const msg = {
+    name: "🎲すごろく",
+    text: squareText,
+    room: user.room,
+    time: getTimeString(),
+    bold: true
+  };
+
+  const log = normalizeLog(msg);
+
+  adminLogs.push(log);
+  roomLogs.push(log);
+  saveLogs();
+
+  io.to(user.room).emit("message", msg);
+
+}
 
 });
 
