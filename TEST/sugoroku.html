@@ -736,7 +736,17 @@ socket.on("sugorokuEvent", ({ type }) => {
   if (!btn) return;
 
   btn.style.display = "inline-block";
-  btn.textContent = type;
+  if (type === "14" || type === "24") {
+  btn.textContent = "2d6";
+}
+else if (type === "2d4") {
+  btn.textContent = "2d4";
+}
+btn.style.backgroundColor = "red";
+btn.style.color = "white";
+
+btn.style.padding = "8px 12px";
+btn.style.borderRadius = "6px";
 
   btn.onclick = () => {
 
