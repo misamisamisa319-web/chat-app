@@ -2732,6 +2732,9 @@ delete punishTypeCountByRoom[leftRoom];
 delete zecchoUnlockedByRoom[leftRoom];
 delete orgasmUsedByRoom[leftRoom];
 
+// ===== すごろく削除（10分後） =====
+delete sugorokuState[leftRoom];
+
 
           // ===== 電気椅子リセット =====
           if (
@@ -2802,6 +2805,21 @@ if (!sugorokuState[user.room]) {
 
 sugorokuState[user.room].players[user.connectKey] = user.position;
 sugorokuState[user.room].lastUpdate = Date.now();
+
+// ===== すごろく保存 =====
+if (!sugorokuState[user.room]) {
+  sugorokuState[user.room] = {
+    players: {},
+    updatedAt: Date.now()
+  };
+}
+
+sugorokuState[user.room].players[
+  user.connectKey
+] = user.position;
+
+sugorokuState[user.room].updatedAt =
+  Date.now();
 
 // 通過チェック（強制ストップ踏み越し防止）
 for (let i = prevPos + 1; i <= user.position; i++) {
