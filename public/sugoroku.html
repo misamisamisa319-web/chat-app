@@ -736,7 +736,7 @@ socket.on("sugorokuEvent", ({ type }) => {
   if (!btn) return;
 
   btn.style.display = "inline-block";
-  if (type === "14" || type === "24") {
+  if (type === "14" || type === "24" || type === "40") {
   btn.textContent = "2d6";
 }
 else if (type === "2d4") {
@@ -753,7 +753,7 @@ btn.style.borderRadius = "6px";
     let d1 = 0;
     let d2 = 0;
     let total = 0;
-if (type === "14" || type === "24") {
+  if (type === "14" || type === "24" || type === "40") {
       d1 = Math.floor(Math.random()*6)+1;
       d2 = Math.floor(Math.random()*6)+1;
       total = d1 + d2;
