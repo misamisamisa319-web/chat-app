@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ログイン</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  font-family:sans-serif;
+  padding:20px;
+}
+
+input,button{
+  padding:10px;
+  font-size:16px;
+  margin-top:10px;
+}
+</style>
+</head>
+<body>
+
+<h2>接続キー入力</h2>
+
+<input id="keyInput" placeholder="接続キー">
+<br>
+<button id="saveBtn">保存してロビーへ</button>
+
+<script>
+const input = document.getElementById("keyInput");
+const btn = document.getElementById("saveBtn");
+
+// 既存あれば表示
+const saved = localStorage.getItem("connectKey");
+if (saved){
+  input.value = saved;
+}
+
+btn.onclick = () => {
+
+  const key = input.value.trim();
+
+  if (!key){
+    alert("キーを入力してください");
+    return;
+  }
+
+  localStorage.setItem("connectKey", key);
+
+  location.href = "/lobby.html";
+};
+</script>
+
+</body>
+</html>
