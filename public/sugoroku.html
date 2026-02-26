@@ -820,8 +820,9 @@ socket.on("sugorokuEvent", ({ type }) => {
       });
 
     }
-
-    btn.style.display = "none";
+  if (type !== "40") {
+  btn.style.display = "none";
+}
   };
 
 });
