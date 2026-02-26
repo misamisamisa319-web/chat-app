@@ -180,6 +180,12 @@ input, button, select { padding: 10px; font-size: 16px; }
   <button onclick="rollDice(4)">1d4</button>
   <button onclick="rollDice(3)">1d3</button>
   <button onclick="rollDice(2)">1d2</button>
+  <button onclick="rollDice(10)">1d10</button>
+
+  <button id="luckBtn" onclick="tryLuck()" style="display:none;">
+    運試し
+  </button>
+
   <button id="specialDiceBtn" style="display:none;">
     2d6
   </button>
@@ -721,18 +727,24 @@ leaveBtn.onclick = () => {
 };
 
 // ===== すごろく通常ダイス送信 =====
-
-
-function rollDice(sides){
+function tryLuck(){
 
   socket.emit("sugorokuRoll", {
-    sides
+    sides: 10
   });
+
+  const btn =
+    document.getElementById("luckBtn");
+
+  if (btn){
+    btn.style.display = "none";
+  }
 
 }
 
 socket.on("sugorokuEvent", ({ type }) => {
 
+ 
   const btn =
     document.getElementById("specialDiceBtn");
 
@@ -834,6 +846,17 @@ if (btn) btn.style.display = "inline-block";
     }
 
   };
+
+});
+
+socket.on("showLuckBtn", () => {
+
+  const btn =
+    document.getElementById("luckBtn");
+
+  if (btn){
+    btn.style.display = "inline-block";
+  }
 
 });
 
