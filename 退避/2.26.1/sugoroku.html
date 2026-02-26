@@ -727,6 +727,7 @@ function rollDice(sides){
 
 }
 
+// 👇この下に追加
 socket.on("sugorokuEvent", ({ type }) => {
 
   const btn =
@@ -735,28 +736,24 @@ socket.on("sugorokuEvent", ({ type }) => {
   if (!btn) return;
 
   btn.style.display = "inline-block";
-
   if (type === "14" || type === "24" || type === "40") {
-    btn.textContent = "2d6";
-  }
-  else if (type === "2d4") {
-    btn.textContent = "2d4";
-  }
+  btn.textContent = "2d6";
+}
+else if (type === "2d4") {
+  btn.textContent = "2d4";
+}
+btn.style.backgroundColor = "red";
+btn.style.color = "white";
 
-  btn.style.backgroundColor = "red";
-  btn.style.color = "white";
-  btn.style.padding = "8px 12px";
-  btn.style.borderRadius = "6px";
+btn.style.padding = "8px 12px";
+btn.style.borderRadius = "6px";
 
   btn.onclick = () => {
 
     let d1 = 0;
     let d2 = 0;
     let total = 0;
-
-    // ===== 14 / 24 =====
-    if (type === "14" || type === "24") {
-
+  if (type === "14" || type === "24" || type === "40") {
       d1 = Math.floor(Math.random()*6)+1;
       d2 = Math.floor(Math.random()*6)+1;
       total = d1 + d2;
@@ -765,48 +762,22 @@ socket.on("sugorokuEvent", ({ type }) => {
         text: `🎲 2d6 → ${d1},${d2} = ${total}`
       });
 
-      if (d1 === d2) {
+if (d1 === d2) {
 
-        if (type === "14") {
-          socket.emit("sugorokuMoveTo", { pos: 1 });
-        }
+  if (type === "14") {
+    socket.emit("sugorokuMoveTo", { pos: 1 });
+  }
 
-        if (type === "24") {
-          socket.emit("sugorokuMoveTo", { pos: 16 });
-        }
+  if (type === "24") {
+    socket.emit("sugorokuMoveTo", { pos: 16 });
 
-      }
-    }
+       }
 
-    // ===== 40（ゴール用）=====
-    if (type === "40") {
+  }
+}
+  
 
-      d1 = Math.floor(Math.random()*6)+1;
-      d2 = Math.floor(Math.random()*6)+1;
-      total = d1 + d2;
-
-      socket.emit("message", {
-        text: `🎲 2d6 → ${d1},${d2} = ${total}`
-      });
-
-      if (d1 === d2) {
-
-        socket.emit("message", {
-          text: "🎉 ゴール！"
-        });
-
-      } else {
-
-        socket.emit("message", {
-          text: "⚠ 寸止め1回"
-        });
-
-      }
-    }
-
-    // ===== 2d4 =====
     if (type === "2d4") {
-
       d1 = Math.floor(Math.random()*4)+1;
       d2 = Math.floor(Math.random()*4)+1;
       total = d1 + d2;
@@ -816,8 +787,8 @@ socket.on("sugorokuEvent", ({ type }) => {
       });
 
       socket.emit("sugorokuBack", {
-        steps: total
-      });
+  steps: total
+});
 
     }
 
