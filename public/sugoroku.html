@@ -731,8 +731,10 @@ function rollDice(sides){
 }
 function tryLuck(){
 
-  socket.emit("sugorokuRoll", {
-    sides: 10
+  const n = Math.floor(Math.random()*10)+1;
+
+  socket.emit("message", {
+    text: `🎲 運試し → ${n}`
   });
 
   const btn =
@@ -741,6 +743,7 @@ function tryLuck(){
   if (btn){
     btn.style.display = "none";
   }
+
 
 }
 socket.on("sugorokuEvent", ({ type }) => {
