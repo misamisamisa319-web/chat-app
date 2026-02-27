@@ -781,6 +781,14 @@ socket.on("sugorokuEvent", ({ type }) => {
     btn.textContent = "2d4";
   }
 
+  socket.emit("sugorokuBack", {
+  steps: total
+});
+
+// ↓これ追加
+btn.style.display = "none";
+
+
   btn.style.backgroundColor = "red";
   btn.style.color = "white";
   btn.style.padding = "8px 12px";
@@ -815,7 +823,38 @@ socket.on("sugorokuEvent", ({ type }) => {
         }
 
       }
+
+      
+    // ===== 14 / 24 =====
+    if (type === "14" || type === "24") {
+
+      d1 = Math.floor(Math.random()*6)+1;
+      d2 = Math.floor(Math.random()*6)+1;
+      total = d1 + d2;
+
+      socket.emit("message", {
+        text: `🎲 2d6 → ${d1},${d2} = ${total}`
+      });
+
+      if (d1 === d2) {
+
+
+        if (type === "14") {
+          socket.emit("sugorokuMoveTo", { pos: 1 });
+        }
+
+        if (type === "24") {
+          socket.emit("sugorokuMoveTo", { pos: 16 });
+        }
+
+      }
     }
+  // ↓追加
+btn.style.display = "none";
+
+
+    }
+
 
     // ===== 40（ゴール用）=====
     if (type === "40") {
