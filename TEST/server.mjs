@@ -3,6 +3,14 @@ import http from "http";
 import { Server } from "socket.io";
 import fs from "fs";
 
+let ipBans = {};
+
+try {
+  ipBans = JSON.parse(fs.readFileSync("banList.json", "utf-8"));
+} catch {
+  ipBans = {};
+}
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
@@ -38,7 +46,7 @@ let adminLogs = [];
 let messagesLog = [];
 
 let bans = {}; // { name: expireTime }
-let ipBans = {}; // { ip: expireTime }
+
 
 
 const LOG_LIFETIME = 3 * 24 * 60 * 60 * 1000; // 3日
@@ -385,6 +393,11 @@ app.post("/admin/ipban24", (req, res) => {
   ipBans[ip] =
     Date.now() + (24 * 60 * 60 * 1000);
 
+  fs.writeFileSync(
+  "banList.json",
+  JSON.stringify(ipBans, null, 2)
+);  
+
   // ===== 接続中IP切断 =====
   users
     .filter(u => u.ip === ip)
@@ -479,6 +492,11 @@ app.post("/admin/ipbanPermanent", (req, res) => {
   // ===== 永久BAN =====
   ipBans[ip] = Infinity;
 
+  fs.writeFileSync(
+  "banList.json",
+  JSON.stringify(ipBans, null, 2)
+);
+
   // ===== 接続中IP切断 =====
   users
     .filter(u => u.ip === ip)
@@ -506,6 +524,11 @@ app.post("/admin/ipbanRemove", (req, res) => {
 
   // ===== BAN解除 =====
   delete ipBans[ip];
+
+  fs.writeFileSync(
+  "banList.json",
+  JSON.stringify(ipBans, null, 2)
+);
 
   res.redirect("/admin?key=" + process.env.ADMIN_KEY);
 });
