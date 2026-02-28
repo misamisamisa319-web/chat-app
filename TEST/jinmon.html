@@ -83,7 +83,6 @@ input, button, select { padding: 10px; font-size: 16px; }
 .time { opacity: .6; margin-right: 4px; }
 
 </style>
-</head>
 <body>
 
 <div id="login">
@@ -212,6 +211,9 @@ input, button, select { padding: 10px; font-size: 16px; }
 <script>
 const socket = io();
 
+/* ===== ロビーからの情報 ===== */
+const room = localStorage.getItem("chatRoom");
+
 const login = document.getElementById("login");
 const chat = document.getElementById("chat");
 const joinBtn = document.getElementById("joinBtn");
@@ -272,7 +274,7 @@ if (room === "jinmon" && descEl) {
 ②A.本当に、いいえの場合「いいえ、違います」
 B.本当は、はいの場合「いいえ....」
 Bの場合は、尋問官がサイコロを振り、玩具をスタートさせる
-玩具がない場合は手でオナニーする。時間はMが計る。
+玩具がない場合は手でオナニーする。
 ③時間が終わり次第「はぁはぁ...///」と言う。
 待ってる間は質問、煽りなどをしてもよい。被告人は質問には答えても答えなくてもいい。個人情報の特定される質問はNG。
 質問数は10問、途中で絶頂しても10問まで続けること。尋問官は被告人が絶頂しても知らないフリをする。
@@ -331,16 +333,17 @@ https://chat.luvul.net/ChatRoom?room_id=428529`;
   }
 });
 
-/* ===== ロビーからの情報 ===== */
-const room = localStorage.getItem("chatRoom");
 
-const descEl =
-  document.getElementById("roomDesc");
 
+
+
+
+const descEl = document.getElementById("roomDesc");
 
 /* ===== 全部屋共通：文字色 ===== */
-descEl.style.color = "black";
-
+if (descEl){
+  descEl.style.color = "black";
+}
 
 
 const roomLabel = document.getElementById("roomLabel");
