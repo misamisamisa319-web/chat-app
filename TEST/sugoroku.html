@@ -767,6 +767,10 @@ sendBtn.onclick = () => {
   privateTarget.value = "";
 };
 
+document.getElementById("zecchoBtn").onclick = () => {
+  socket.emit("message", { text: "絶頂許可" });
+};
+
 input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
