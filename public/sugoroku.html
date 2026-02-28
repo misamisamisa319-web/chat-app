@@ -249,6 +249,7 @@ input, button, select { padding: 10px; font-size: 16px; }
         <option value="large">大</option>
       </select>
     </label>
+    <button id="ruleBtn">説明</button>
     <button id="leaveBtn">退出</button>
   </div>
 
@@ -790,6 +791,9 @@ leaveBtn.onclick = () => {
 function rollDice(sides){
   socket.emit("sugorokuRoll", { sides });
 }
+document.getElementById("ruleBtn").onclick = () => {
+  alert(document.getElementById("roomDesc").innerText);
+};
 function tryLuck(){
 
   const n = Math.floor(Math.random()*10)+1;
