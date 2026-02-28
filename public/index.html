@@ -319,6 +319,7 @@ input, button, select { padding: 10px; font-size: 16px; }
         <option value="large">大</option>
       </select>
     </label>
+    <button id="ruleBtn">説明</button>
     <button id="leaveBtn">退出</button>
   </div>
 
@@ -1061,7 +1062,9 @@ function sendPunish(cmd){
 function sendDice(cmd){
   socket.emit("message",{ text: cmd });
 }
-
+document.getElementById("ruleBtn").onclick = () => {
+  alert(document.getElementById("roomDesc").innerText);
+};
 
 
  // ===== 罰トグル（通常） =====
