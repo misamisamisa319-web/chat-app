@@ -14,6 +14,12 @@
   margin-bottom: 12px;
 }
 
+#roomContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
 .feature-title {
   margin-top: 14px;
   margin-bottom: 6px;
@@ -49,10 +55,10 @@
   background: #ffdddd;
 }
 .room.room2 {
-  background: #dde8ff;}
-.room.room3 { background:#ddffdd; }
+  background: #ffdddd;}
+.room.room3 { background:#dde8ff; }
 
-.room.room4 { background:#ffe4cc; }
+.room.room4 { background:#dde8ff;}
 
 .room.room5 {
   background: #ffb3d9;
@@ -181,6 +187,7 @@ input[type="password"] {
 
 <div id="error" style="color:red; margin-bottom:10px;"></div>
 
+<div id="roomContainer">
 <!-- ===== room1 ===== -->
 <div class="room room1">
   <div class="room-title-row">
@@ -509,10 +516,15 @@ input[type="password"] {
   <input type="password" id="key-privateD" placeholder="鍵">
   <button onclick="enterRoom('privateD')">入室</button>
 </div>
+</div>
 
 <script src="/socket.io/socket.io.js"></script>
+
+
 <script>
+  
 const socket = io();
+
 
 
 socket.on("lobbyUpdate", rooms => {
@@ -612,7 +624,8 @@ if (room === "room5") {
   });
 }
 
-</script>
 
+</script>
+</div>
 </body>
 </html>
