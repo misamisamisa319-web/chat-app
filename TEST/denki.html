@@ -1469,7 +1469,11 @@ function sendDice(cmd){
   socket.emit("message",{ text: cmd });
 }
 document.getElementById("ruleBtn").onclick = () => {
-  alert(document.getElementById("roomDesc").innerText);
+  const w = window.open("", "_blank");
+
+  w.document.write("<pre>" +
+    document.getElementById("roomDesc").innerText +
+    "</pre>");
 };
 
 window.addEventListener("load", () => {
