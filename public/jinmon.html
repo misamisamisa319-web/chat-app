@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Chat v2 - Template</title>
+<title>Chat v2 - jinmon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -272,40 +272,6 @@ window.addEventListener("load", () => {
   connectKey
 });
 
-const ruleBtn =
-  document.getElementById("ruleBtn");
-
-const ruleModal =
-  document.getElementById("ruleModal");
-
-const ruleContent =
-  document.getElementById("ruleContent");
-
-const ruleCloseBtn =
-  document.getElementById("ruleCloseBtn");
-
-// 表示
-if (ruleBtn){
-  ruleBtn.onclick = () => {
-
-    const desc =
-      document.getElementById("roomDesc");
-
-    if (desc){
-      ruleContent.textContent =
-        desc.textContent;
-    }
-
-    ruleModal.style.display = "flex";
-  };
-}
-
-// 閉じる
-if (ruleCloseBtn){
-  ruleCloseBtn.onclick = () => {
-    ruleModal.style.display = "none";
-  };
-}
 
     joined = true;
     
@@ -337,7 +303,36 @@ const room = localStorage.getItem("chatRoom");
 const descEl =
   document.getElementById("roomDesc");
 
+if (room === "jinmon") {
+  descEl.textContent = `被告人は名前+性別+NorS
+(SからM落ち、ドMの方のみ入室可能)
+攻める方は名前+性別+尋問官
 
+①質問する前に何問目か申告し、質問する 
+②A.本当に、いいえの場合「いいえ、違います」
+B.本当は、はいの場合「いいえ....」
+Bの場合は、尋問官がサイコロを振り、玩具をスタートさせる
+玩具がない場合は手でオナニーする。時間はMが計る。
+③時間が終わり次第「はぁはぁ...///」と言う。
+待ってる間は質問、煽りなどをしてもよい。被告人は質問には答えても答えなくてもいい。個人情報の特定される質問はNG。
+質問数は10問、途中で絶頂しても10問まで続けること。尋問官は被告人が絶頂しても知らないフリをする。
+最初の質問 (0問目)
+「ここに呼ばれた理由わかりますか?」
+弱で3分固定、この時間で残りの質問を考える
+1問目～3問目  弱で3分
+4問目～6問目  中で3分
+7問目～9問目  強で3分  
+10問目  最強で5分
+最後の質問(11問目)
+「最後の質問です絶頂しませんでしたか?正直に答えてください」
+A.絶頂していなければ「絶頂してません」釈放
+冤罪だった場合尋問官に1個お願いできる
+B.絶頂した場合「絶頂しました♡」有罪の場合
+1.罰はなし
+2.罰を１０回
+雑談・部屋まとめ
+https://chat.luvul.net/ChatRoom?room_id=428529`;
+}
 
 /* ===== 全部屋共通：文字色 ===== */
 descEl.style.color = "black";
@@ -770,6 +765,41 @@ if (normalTimerCustomBtn){
 
 
 });
+
+const ruleBtn =
+  document.getElementById("ruleBtn");
+
+const ruleModal =
+  document.getElementById("ruleModal");
+
+const ruleContent =
+  document.getElementById("ruleContent");
+
+const ruleCloseBtn =
+  document.getElementById("ruleCloseBtn");
+
+// 表示
+if (ruleBtn){
+  ruleBtn.onclick = () => {
+
+    const desc =
+      document.getElementById("roomDesc");
+
+    if (desc){
+      ruleContent.textContent =
+        desc.textContent;
+    }
+
+    ruleModal.style.display = "flex";
+  };
+}
+
+// 閉じる
+if (ruleCloseBtn){
+  ruleCloseBtn.onclick = () => {
+    ruleModal.style.display = "none";
+  };
+}
 
 
 

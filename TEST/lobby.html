@@ -432,6 +432,28 @@ input[type="password"] {
   <button onclick="enterRoom('sugoroku3')">入室</button>
 </div>
 
+<!-- ===== 尋問部屋 ===== -->
+<div class="room special">
+  <div class="room-title-row">
+
+  <span class="room-title">
+    尋問部屋
+  </span>
+
+  <span class="room-desc">
+    尋問・強制系
+  </span>
+
+</div>
+
+  <div class="room-info">
+    人数（<span id="count-jinmon">0</span>人）
+    <span id="names-jinmon">なし</span>
+  </div>
+
+  <button onclick="enterRoom('jinmon')">入室</button>
+</div>
+
 <!-- ===== special ===== -->
 <div class="room special">
   <div class="room-title-row">
@@ -542,6 +564,7 @@ const allRooms = [
   "sugoroku1",
   "sugoroku2",
   "sugoroku3",
+  "jinmon",
   "special",
   "specialFree",
   "privateA",
