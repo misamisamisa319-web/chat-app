@@ -791,9 +791,15 @@ leaveBtn.onclick = () => {
 function rollDice(sides){
   socket.emit("sugorokuRoll", { sides });
 }
+
 document.getElementById("ruleBtn").onclick = () => {
-  alert(document.getElementById("roomDesc").innerText);
+  const w = window.open("", "_blank");
+
+  w.document.write("<pre>" +
+    document.getElementById("roomDesc").innerText +
+    "</pre>");
 };
+
 function tryLuck(){
 
   const n = Math.floor(Math.random()*10)+1;
