@@ -52,26 +52,50 @@ body {
 </div>
 
 <script>
-
 let currentThread = null;
 
+fetch("/bbs")
+  .then(r => r.json())
+  .then(data => {
+
+    const list = document.getElementById("threadList");
+    list.innerHTML = "";
+
+    data.threads.forEach(t => {
+
+      const div = document.createElement("div");
+      div.className = "thread";
+      div.textContent = t.title;
+      div.onclick = ()=>openThread(t.id);
+
+      list.appendChild(div);
+
+    });
+
+});
+
 function loadThreads(){
+
   fetch("/bbs")
-    .then(r=>r.json())
-    .then(data=>{
+    .then(r => r.json())
+    .then(data => {
 
       const list = document.getElementById("threadList");
       list.innerHTML = "";
 
-      data.forEach(t=>{
+      data.threads.forEach(t => {
+
         const div = document.createElement("div");
         div.className = "thread";
         div.textContent = t.title;
         div.onclick = ()=>openThread(t.id);
+
         list.appendChild(div);
+
       });
 
     });
+
 }
 
 function openThread(id){
@@ -82,7 +106,7 @@ function openThread(id){
     .then(r=>r.json())
     .then(data=>{
 
-      const t = data.find(x=>x.id==id);
+     const t = data.threads.find(x => x.id === id);
       if (!t) return;
 
       document.getElementById("threadList").style.display="none";
