@@ -257,16 +257,22 @@ if (!connectKey){
 
 
 
-window.addEventListener("load", () => {
-  const savedName  = localStorage.getItem("chatName");
-  const savedRoom  = localStorage.getItem("chatRoom");
-  const savedColor = localStorage.getItem("chatColor") || "#000000";
+const roomLabel = document.getElementById("roomLabel");
 
-  const descEl =
+if (roomLabel && room) {
+  roomLabel.textContent = room;
+}
+
+
+const key = localStorage.getItem("chatKey");
+
+const descEl =
   document.getElementById("roomDesc");
 
-if (descEl) {
-  descEl.textContent = `被告人は名前+性別+NorS
+if (room === "jinmon") {
+
+descEl.innerHTML =
+`被告人は名前+性別+NorS
 (SからM落ち、ドMの方のみ入室可能)
 攻める方は名前+性別+尋問官
 
@@ -292,60 +298,16 @@ A.絶頂していなければ「絶頂してません」釈放
 B.絶頂した場合「絶頂しました♡」有罪の場合
 1.罰はなし
 2.罰を１０回
-雑談・部屋まとめ
-https://chat.luvul.net/ChatRoom?room_id=428529`;
+
+<br><br>
+雑談・部屋まとめ<br>
+<a href="https://chat.luvul.net/ChatRoom?room_id=428529" target="_blank">
+https://chat.luvul.net/ChatRoom?room_id=428529
+</a>
+`;
 }
 
-  if (savedName && savedRoom) {
-    username = savedName;
-    myColor = savedColor;
-    colorSelect.value = myColor;
-   
-  socket.emit("join", {
-  name: username,
-  color: myColor,
-  room: savedRoom,
-  connectKey
-});
-
-
-    joined = true;
-    
-
-        // ===== 初回確認済みならチェック非表示 =====
-    const confirmed =
-      localStorage.getItem(
-        "entryConfirmed"
-      );
-
-    if (confirmed){
-      const loginDiv =
-        document.getElementById("login");
-
-      if (loginDiv){
-        loginDiv.style.display =
-          "none";
-      }
-    }
-
-    login.style.display = "none";
-    chat.style.display = "flex";
-  }
-});
-
-
-
-
-
-
-const roomLabel = document.getElementById("roomLabel");
-
-if (roomLabel && room) {
-  roomLabel.textContent = room;
-}
-
-
-const key = localStorage.getItem("chatKey");
+descEl.style.color = "black";
 
 
 if (!room && !joined) {
