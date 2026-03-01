@@ -808,7 +808,7 @@ document.getElementById("ruleBtn").onclick = () => {
 
 function tryLuck(){
 
-  const n = Math.floor(Math.random()*10)+1;
+  const n = Math.floor(Math.random()*5)+1;
 
   socket.emit("message", {
     text: `🎲 運試し → ${n}`

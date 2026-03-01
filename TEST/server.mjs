@@ -5,8 +5,10 @@ import fs from "fs";
 
 let ipBans = {};
 
+const BAN_FILE = "/data/banList.json";
+
 try {
-  ipBans = JSON.parse(fs.readFileSync("banList.json", "utf-8"));
+  ipBans = JSON.parse(fs.readFileSync(BAN_FILE, "utf-8"));
 } catch {
   ipBans = {};
 }
@@ -44,7 +46,7 @@ let roomLogs = [];
 let adminLogs = [];
 
 // ===== 掲示板 =====
-const BBS_FILE = "data/bbs.json";
+const BBS_FILE = "/data/bbs.json";
 
 let bbsData = {
   threads: []
@@ -542,9 +544,9 @@ app.post("/admin/ipban24", (req, res) => {
     Date.now() + (24 * 60 * 60 * 1000);
 
   fs.writeFileSync(
-  "banList.json",
+  BAN_FILE,
   JSON.stringify(ipBans, null, 2)
-);  
+);
 
   // ===== 接続中IP切断 =====
   users
@@ -641,7 +643,7 @@ app.post("/admin/ipbanPermanent", (req, res) => {
   ipBans[ip] = Infinity;
 
   fs.writeFileSync(
-  "banList.json",
+  BAN_FILE,
   JSON.stringify(ipBans, null, 2)
 );
 
@@ -674,7 +676,7 @@ app.post("/admin/ipbanRemove", (req, res) => {
   delete ipBans[ip];
 
   fs.writeFileSync(
-  "banList.json",
+  BAN_FILE,
   JSON.stringify(ipBans, null, 2)
 );
 
@@ -915,102 +917,74 @@ const specialPainPunishItems = [
 "苦痛罰19.乳首とクリまたは亀頭に刺激物を塗る。",
 "苦痛罰20.おまんこまたはおちんぽに刺激物を塗る",
 ];
-const femaleEventItems = [
-"女イベント1.",
-"女イベント2.",
-"女イベント3.",
-"女イベント4.",
-"女イベント5.",
-"女イベント6.",
-"女イベント7.",
-"女イベント8.",
-"女イベント9.",
-"女イベント10.",
-"女イベント11.",
-"女イベント12.",
-"女イベント13.",
-"女イベント14.",
-"女イベント15.",
-"女イベント16.",
-"女イベント17.",
-"女イベント18.",
-"女イベント19.",
-"女イベント20.",
-"女イベント21.",
-"女イベント22.",
-"女イベント23.",
-"女イベント24.",
-"女イベント25.",
-"女イベント26.",
-"女イベント27.",
-"女イベント28.",
-"女イベント29.",
-"女イベント30.",
+
+const easyEventItems = [
+"イージー1.",
+"イージー2.",
+"イージー3.",
+"イージー4.",
+"イージー5.",
+"イージー6.",
+"イージー7.",
+"イージー8.",
+"イージー9.",
+"イージー10.",
+"イージー11.",
+"イージー12.",
+"イージー13.",
+"イージー14.",
+"イージー15.",
+"イージー16.",
+"イージー17.",
+"イージー18.",
+"イージー19.",
+"イージー20.",
 ];
 
-const maleEventItems = [
-"男イベント1.",
-"男イベント2.",
-"男イベント3.",
-"男イベント4.",
-"男イベント5.",
-"男イベント6.",
-"男イベント7.",
-"男イベント8.",
-"男イベント9.",
-"男イベント10.",
-"男イベント11.",
-"男イベント12.",
-"男イベント13.",
-"男イベント14.",
-"男イベント15.",
-"男イベント16.",
-"男イベント17.",
-"男イベント18.",
-"男イベント19.",
-"男イベント20.",
-"男イベント21.",
-"男イベント22.",
-"男イベント23.",
-"男イベント24.",
-"男イベント25.",
-"男イベント26.",
-"男イベント27.",
-"男イベント28.",
-"男イベント29.",
-"男イベント30.",
+const normalEventItems = [
+"ノーマル1.",
+"ノーマル2.",
+"ノーマル3.",
+"ノーマル4.",
+"ノーマル5.",
+"ノーマル6.",
+"ノーマル7.",
+"ノーマル8.",
+"ノーマル9.",
+"ノーマル10.",
+"ノーマル11.",
+"ノーマル12.",
+"ノーマル13.",
+"ノーマル14.",
+"ノーマル15.",
+"ノーマル16.",
+"ノーマル17.",
+"ノーマル18.",
+"ノーマル19.",
+"ノーマル20.",
 ];
-const commonEventItems = [ 
-"共通イベント1.", 
-"共通イベント2.", 
-"共通イベント3.", 
-"共通イベント4.", 
-"共通イベント5.", 
-"共通イベント6.", 
-"共通イベント7.", 
-"共通イベント8.", 
-"共通イベント9.", 
-"共通イベント10.", 
-"共通イベント11.", 
-"共通イベント12.", 
-"共通イベント13.", 
-"共通イベント14.", 
-"共通イベント15.", 
-"共通イベント16.", 
-"共通イベント17.", 
-"共通イベント18.", 
-"共通イベント19.", 
-"共通イベント20.", 
-"共通イベント21.", 
-"共通イベント22.", 
-"共通イベント23.", 
-"共通イベント24.", 
-"共通イベント25.", 
-"共通イベント26.", 
-"共通イベント27.", 
-"共通イベント28.", 
-"共通イベント29.", 
-"共通イベント30.", 
+
+const hardEventItems = [
+"ハード1.",
+"ハード2.",
+"ハード3.",
+"ハード4.",
+"ハード5.",
+"ハード6.",
+"ハード7.",
+"ハード8.",
+"ハード9.",
+"ハード10.",
+"ハード11.",
+"ハード12.",
+"ハード13.",
+"ハード14.",
+"ハード15.",
+"ハード16.",
+"ハード17.",
+"ハード18.",
+"ハード19.",
+"ハード20.",
 ];
 
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
@@ -1086,9 +1060,9 @@ function initPunishRoom(room){
       onaGirl: shuffle([...onaGirlPunishItems]),
       onaBoy: shuffle([...onaBoyPunishItems]),
       pain: shuffle([...specialPainPunishItems]),
-      maleEvent: shuffle([...maleEventItems]),
-      femaleEvent: shuffle([...femaleEventItems]),
-      commonEvent: shuffle([...commonEventItems]),
+      easyEvent: shuffle([...easyEventItems]),
+      normalEvent: shuffle([...normalEventItems]),
+      hardEvent: shuffle([...hardEventItems]),
 
     };
   }
@@ -1129,33 +1103,31 @@ function getPainPunish(room){
     punishStockByRoom[room].pain = shuffle([...specialPainPunishItems]);
   return punishStockByRoom[room].pain.shift();
 }
-function getMaleEvent(room){
+function getEasyEvent(room){
   initPunishRoom(room);
-  if (!punishStockByRoom[room].maleEvent.length){
-    punishStockByRoom[room].maleEvent =
-      shuffle([...maleEventItems]);
+  if (!punishStockByRoom[room].easyEvent.length){
+    punishStockByRoom[room].easyEvent =
+      shuffle([...easyEventItems]);
   }
-  return punishStockByRoom[room].maleEvent.shift();
+  return punishStockByRoom[room].easyEvent.shift();
 }
-function getFemaleEvent(room){
+
+function getNormalEvent(room){
   initPunishRoom(room);
-  if (!punishStockByRoom[room].femaleEvent.length){
-    punishStockByRoom[room].femaleEvent =
-      shuffle([...femaleEventItems]);
+  if (!punishStockByRoom[room].normalEvent.length){
+    punishStockByRoom[room].normalEvent =
+      shuffle([...normalEventItems]);
   }
-  return punishStockByRoom[room].femaleEvent.shift();
+  return punishStockByRoom[room].normalEvent.shift();
 }
-function getCommonEvent(room){
 
+function getHardEvent(room){
   initPunishRoom(room);
-
-  if (!punishStockByRoom[room].commonEvent.length){
-    punishStockByRoom[room].commonEvent =
-      shuffle([...commonEventItems]);
+  if (!punishStockByRoom[room].hardEvent.length){
+    punishStockByRoom[room].hardEvent =
+      shuffle([...hardEventItems]);
   }
-
-  return punishStockByRoom[room].commonEvent.shift();
-
+  return punishStockByRoom[room].hardEvent.shift();
 }
 
 
@@ -2699,81 +2671,68 @@ if (text === "絶頂許可") {
 }
 
   
+if (text === "easy") {
 
-
-// ===== 男イベント =====
-if (text === "男イベント") {
-
-  const item = getMaleEvent(socket.room);
+  const item = getEasyEvent(socket.room);
 
   const msg = {
-  name: socket.username,
-  text: item,
-  room: socket.room,
-  bold: true,
-  time: getTimeString()
-};
-
+    name: socket.username,
+    text: item,
+    room: socket.room,
+    bold: true,
+    time: getTimeString()
+  };
 
   const log = normalizeLog(msg);
-
-adminLogs.push(log);
-roomLogs.push(log);
-
-saveLogs();
-
-io.to(socket.room).emit("message", msg);
-
-  return;
-}
-
-// ===== 女イベント =====
-if (text === "女イベント") {
-
-  const item = getFemaleEvent(socket.room);
-
-  const msg = {
-  name: socket.username,
-  text: item,
-  room: socket.room,
-  bold: true,
-  time: getTimeString()
-};
-
-
-  io.to(socket.room).emit("message", msg);
-
-  messagesLog.push(normalizeLog(msg));
+  adminLogs.push(log);
+  roomLogs.push(log);
   saveLogs();
 
+  io.to(socket.room).emit("message", msg);
   return;
 }
-// ===== 共通イベント =====
-if (text === "共通イベント") {
 
-  const item =
-    getCommonEvent(socket.room);
+if (text === "normal") {
+
+  const item = getNormalEvent(socket.room);
 
   const msg = {
-  name: socket.username,
-  text: item,
-  room: socket.room,
-  bold: true,
-  time: getTimeString()
-};
+    name: socket.username,
+    text: item,
+    room: socket.room,
+    bold: true,
+    time: getTimeString()
+  };
 
-
-  io.to(socket.room).emit("message", msg);
-
-  messagesLog.push(
-    normalizeLog(msg)
-  );
-
+  const log = normalizeLog(msg);
+  adminLogs.push(log);
+  roomLogs.push(log);
   saveLogs();
 
+  io.to(socket.room).emit("message", msg);
   return;
 }
 
+if (text === "hard") {
+
+  const item = getHardEvent(socket.room);
+
+  const msg = {
+    name: socket.username,
+    text: item,
+    room: socket.room,
+    bold: true,
+    time: getTimeString()
+  };
+
+  const log = normalizeLog(msg);
+  adminLogs.push(log);
+  roomLogs.push(log);
+  saveLogs();
+
+  io.to(socket.room).emit("message", msg);
+  return;
+}
 
 
  
