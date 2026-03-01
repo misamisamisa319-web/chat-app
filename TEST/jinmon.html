@@ -765,42 +765,13 @@ if (normalTimerCustomBtn){
 
 });
 
-const ruleBtn =
-  document.getElementById("ruleBtn");
+document.getElementById("ruleBtn").onclick = () => {
+  const w = window.open("", "_blank");
 
-const ruleModal =
-  document.getElementById("ruleModal");
-
-const ruleContent =
-  document.getElementById("ruleContent");
-
-const ruleCloseBtn =
-  document.getElementById("ruleCloseBtn");
-
-// 表示
-if (ruleBtn){
-  ruleBtn.onclick = () => {
-
-    const desc =
-      document.getElementById("roomDesc");
-
-    if (desc){
-      ruleContent.textContent =
-        desc.textContent;
-    }
-
-    ruleModal.style.display = "flex";
-  };
-}
-
-// 閉じる
-if (ruleCloseBtn){
-  ruleCloseBtn.onclick = () => {
-    ruleModal.style.display = "none";
-  };
-}
-
-
+  w.document.write("<pre>" +
+    document.getElementById("roomDesc").innerText +
+    "</pre>");
+};
 
 </script>
 
