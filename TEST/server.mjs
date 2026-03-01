@@ -121,6 +121,29 @@ app.post("/bbs/delete", (req, res) => {
 
 });
 
+app.post("/bbs/deletePost", (req, res) => {
+
+  const { threadId, time, key } = req.body;
+
+  if (key !== process.env.ADMIN_KEY) {
+    return res.json({ ok:false });
+  }
+
+  const thread =
+    bbsData.threads.find(t => t.id == threadId);
+
+  if (!thread) {
+    return res.json({ ok:false });
+  }
+
+  thread.posts =
+    thread.posts.filter(p => p.time !== time);
+
+  saveBBS();
+
+  res.json({ ok:true });
+
+});
 
 app.post("/bbs/post", (req, res) => {
 
