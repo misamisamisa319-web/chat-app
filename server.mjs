@@ -17,6 +17,7 @@ const io = new Server(server);
 
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 let users = [];
 
@@ -41,6 +42,106 @@ let muteByRoom = {
 // ===== ログ分離（追加） =====
 let roomLogs = [];
 let adminLogs = [];
+
+// ===== 掲示板 =====
+const BBS_FILE = "data/bbs.json";
+
+let bbsData = {
+  threads: []
+};
+
+if (fs.existsSync(BBS_FILE)) {
+  try {
+    bbsData = JSON.parse(
+      fs.readFileSync(BBS_FILE, "utf8")
+    );
+  } catch {
+    bbsData = { threads: [] };
+  }
+}
+
+function saveBBS(){
+  fs.writeFileSync(
+    BBS_FILE,
+    JSON.stringify(bbsData, null, 2)
+  );
+}
+
+app.post("/bbs/thread", (req, res) => {
+
+  const { title, name, text } = req.body;
+
+  if (!title || !text) {
+    return res.json({ ok:false });
+  }
+
+  const thread = {
+    id: Date.now(),
+    title,
+    posts: [
+      {
+        name: name || "名無し",
+        text,
+        time: getDateTimeString()
+      }
+    ]
+  };
+
+  bbsData.threads.unshift(thread);
+  saveBBS();
+
+  res.json({ ok:true });
+
+});
+
+app.get("/bbs", (req, res) => {
+  res.json(bbsData);
+});
+
+app.post("/bbs/post", (req, res) => {
+
+  const { threadId, name, text } = req.body;
+
+  const thread =
+    bbsData.threads.find(t => t.id == threadId);
+
+  if (!thread || !text) {
+    return res.json({ ok:false });
+  }
+
+  thread.posts.push({
+    name: name || "名無し",
+    text,
+    time: getDateTimeString()
+  });
+
+  saveBBS();
+
+  res.json({ ok:true });
+
+});
+
+app.post("/bbs/create", (req, res) => {
+
+  const { title } = req.body;
+
+  if (!title) {
+    return res.json({ ok:false });
+  }
+
+  const newThread = {
+    id: Date.now(),
+    title,
+    posts: []
+  };
+
+  bbsData.threads.unshift(newThread);
+
+  saveBBS();
+
+  res.json({ ok:true });
+
+});
 
 // 既存互換（まだ使う）
 let messagesLog = [];

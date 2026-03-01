@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>掲示板</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  font-family: sans-serif;
+  padding: 10px;
+}
+
+.thread {
+  border:1px solid #ccc;
+  padding:10px;
+  margin-bottom:10px;
+  cursor:pointer;
+}
+
+.post {
+  border-bottom:1px solid #eee;
+  padding:4px 0;
+}
+
+#threadView {
+  display:none;
+}
+</style>
+</head>
+<body>
+
+<h2>掲示板</h2>
+
+<div>
+  <input id="newTitle" placeholder="スレタイトル">
+  <button onclick="createThread()">作成</button>
+</div>
+
+<hr>
+
+<div id="threadList"></div>
+
+<div id="threadView">
+  <button onclick="back()">←戻る</button>
+  <h3 id="threadTitle"></h3>
+
+  <div id="posts"></div>
+
+  <input id="name" placeholder="名前">
+  <input id="text" placeholder="内容">
+  <button onclick="post()">投稿</button>
+</div>
+
+<script>
+
+let currentThread = null;
+
+function loadThreads(){
+  fetch("/bbs")
+    .then(r=>r.json())
+    .then(data=>{
+
+      const list = document.getElementById("threadList");
+      list.innerHTML = "";
+
+      data.forEach(t=>{
+        const div = document.createElement("div");
+        div.className = "thread";
+        div.textContent = t.title;
+        div.onclick = ()=>openThread(t.id);
+        list.appendChild(div);
+      });
+
+    });
+}
+
+function openThread(id){
+
+  currentThread = id;
+
+  fetch("/bbs")
+    .then(r=>r.json())
+    .then(data=>{
+
+      const t = data.find(x=>x.id==id);
+      if (!t) return;
+
+      document.getElementById("threadList").style.display="none";
+      document.getElementById("threadView").style.display="block";
+      document.getElementById("threadTitle").textContent = t.title;
+
+      const posts = document.getElementById("posts");
+      posts.innerHTML = "";
+
+      t.posts.forEach(p=>{
+        const div = document.createElement("div");
+        div.className="post";
+        div.textContent = `[${p.time}] ${p.name}: ${p.text}`;
+        posts.appendChild(div);
+      });
+
+    });
+
+}
+
+function back(){
+  document.getElementById("threadList").style.display="block";
+  document.getElementById("threadView").style.display="none";
+}
+
+function post(){
+
+  const name = document.getElementById("name").value;
+  const text = document.getElementById("text").value;
+
+  fetch("/bbs/post",{
+    method:"POST",
+    headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+    body:`threadId=${currentThread}&name=${name}&text=${text}`
+  }).then(()=>{
+    openThread(currentThread);
+    document.getElementById("text").value="";
+  });
+
+}
+
+function createThread(){
+
+  const title = document.getElementById("newTitle").value;
+
+  fetch("/bbs/create",{
+    method:"POST",
+    headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+    body:`title=${title}`
+  }).then(()=>{
+    loadThreads();
+    document.getElementById("newTitle").value="";
+  });
+
+}
+
+loadThreads();
+
+</script>
+
+</body>
+</html>
