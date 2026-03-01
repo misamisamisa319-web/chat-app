@@ -63,14 +63,31 @@ fetch("/bbs")
 
     data.threads.forEach(t => {
 
-      const div = document.createElement("div");
-      div.className = "thread";
-      div.textContent = t.title;
-      div.onclick = ()=>openThread(t.id);
+  const div = document.createElement("div");
+  div.className = "thread";
 
-      list.appendChild(div);
+  const title = document.createElement("span");
+  title.textContent = t.title;
+  title.onclick = ()=>openThread(t.id);
 
-    });
+  div.appendChild(title);
+
+  // ★ 管理人だけ削除ボタン
+  if (localStorage.getItem("isAdmin") === "true") {
+
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "削除";
+    delBtn.onclick = (e)=>{
+      e.stopPropagation();
+      deleteThread(t.id);
+    };
+
+    div.appendChild(delBtn);
+  }
+
+  list.appendChild(div);
+
+});
 
 });
 
@@ -113,13 +130,40 @@ function openThread(id){
       document.getElementById("threadView").style.display="block";
       document.getElementById("threadTitle").textContent = t.title;
 
-      const posts = document.getElementById("posts");
-      posts.innerHTML = "";
+     // ↓これ追加
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "スレ削除";
+    delBtn.onclick = () => deleteThread(t.id);
+    posts.appendChild(delBtn);
+
+    const posts = document.getElementById("posts");
+    posts.innerHTML = "";
+
+    
 
       t.posts.forEach(p=>{
         const div = document.createElement("div");
         div.className="post";
         div.textContent = `[${p.time}] ${p.name}: ${p.text}`;
+
+if (localStorage.getItem("isAdmin") === "true"){
+
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "削除";
+
+  delBtn.onclick = ()=>{
+    fetch("/bbs/deletePost",{
+      method:"POST",
+      headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+      body:`threadId=${currentThread}&time=${p.time}`
+    }).then(()=>{
+      openThread(currentThread);
+    });
+  };
+
+  div.appendChild(delBtn);
+}
+
         posts.appendChild(div);
       });
 
@@ -162,6 +206,18 @@ function createThread(){
   });
 
 }
+function deleteThread(id){
+
+  fetch("/bbs/delete",{
+    method:"POST",
+    headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+    body:`threadId=${id}&key=12345678`
+  }).then(()=>{
+    loadThreads();
+  });
+
+}
+
 
 loadThreads();
 

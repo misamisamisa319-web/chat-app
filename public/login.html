@@ -47,6 +47,12 @@ btn.onclick = () => {
 
   localStorage.setItem("connectKey", key);
 
+  if (key === "misa0319"){
+  localStorage.setItem("isAdmin", "true");
+} else {
+  localStorage.removeItem("isAdmin");
+}
+
   location.href = "/lobby.html";
 };
 </script>

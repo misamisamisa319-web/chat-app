@@ -98,6 +98,30 @@ app.get("/bbs", (req, res) => {
   res.json(bbsData);
 });
 
+app.post("/bbs/delete", (req, res) => {
+
+  const { threadId, key } = req.body;
+
+  if (key !== process.env.ADMIN_KEY) {
+    return res.json({ ok:false });
+  }
+
+  const index =
+    bbsData.threads.findIndex(t => t.id == threadId);
+
+  if (index === -1) {
+    return res.json({ ok:false });
+  }
+
+  bbsData.threads.splice(index, 1);
+
+  saveBBS();
+
+  res.json({ ok:true });
+
+});
+
+
 app.post("/bbs/post", (req, res) => {
 
   const { threadId, name, text } = req.body;
