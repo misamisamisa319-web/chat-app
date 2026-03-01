@@ -562,7 +562,7 @@ muteBtn.onclick = () => {
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
 
-const room = localStorage.getItem("chatRoom");
+const room = "jinmon";
 
 if (!room) {
   alert("ロビーから入室してください");
@@ -693,7 +693,6 @@ if (normalTimer5Btn){
     socket.emit("timerStart", { seconds: 300 });
   };
 }
-
 
 
 // ===== 任意タイマー（通常） =====
