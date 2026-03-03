@@ -231,7 +231,7 @@ input, button, select { padding: 10px; font-size: 16px; }
     <button id="eventGirlBtn">女イベ</button>
     <button id="eventCommonBtn">共通イベ</button>
 
-    <button onclick="rollDice(6)">1d6</button>
+    <button onclick="rollDice(100)">1d100</button>
   </div>
 
   <!-- 2段目 -->
@@ -817,6 +817,13 @@ const normalTimerCustomBtn =
 
 const normalTimerCustomInput =
   document.getElementById("timerCustomInput");
+  function rollDice(max){
+
+  socket.emit("message", {
+    text: `1d${max}`
+  });
+
+}
 
 if (normalTimerCustomBtn){
 
