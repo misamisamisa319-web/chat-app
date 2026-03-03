@@ -851,7 +851,7 @@ document.getElementById("ruleBtn").onclick = () => {
   const w = window.open("", "_blank");
 
   w.document.write("<pre>" +
-    document.getElementById("roomDesc").innerText +
+   document.getElementById("roomDesc").innerHTML +
     "</pre>");
 };
 
