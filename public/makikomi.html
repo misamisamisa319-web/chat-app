@@ -75,7 +75,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   overflow-y: auto;
   padding: 10px;
   list-style: none;
-  padding-bottom: 260px;
+  padding-bottom: 140px;
 }
 #messages li { margin-bottom: 5px; }
 .private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
@@ -173,7 +173,13 @@ input, button, select { padding: 10px; font-size: 16px; }
   <strong>参加者:</strong>
   <ul id="userList"></ul>
 </div>
-
+<div id="eventRemain" style="
+  padding:6px 10px;
+  font-size:14px;
+  background:#f0f0f0;
+">
+  男イベ残10　女イベ残10　共通イベ残10
+</div>
 
 
 <div id="timerDisplay"
@@ -206,6 +212,40 @@ input, button, select { padding: 10px; font-size: 16px; }
   </div>
 
   <ul id="messages"></ul>
+</div>
+
+<div id="bottomBar" style="
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background:#fff;
+  border-top:1px solid #ccc;
+  padding:6px;
+  z-index:200;
+">
+
+  <!-- 1段目 -->
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <button id="eventBoyBtn">男イベ</button>
+    <button id="eventGirlBtn">女イベ</button>
+    <button id="eventCommonBtn">共通イベ</button>
+
+    <button onclick="rollDice(6)">1d6</button>
+  </div>
+
+  <!-- 2段目 -->
+  <div style="display:flex; gap:8px; margin-top:6px;">
+    <button id="timer3Btn">3分</button>
+    <button id="timer5Btn">5分</button>
+
+    <input id="timerCustomInput"
+      placeholder="分"
+      style="width:60px;">
+
+    <button id="timerCustomBtn">任意</button>
+  </div>
+
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -265,12 +305,35 @@ window.addEventListener("load", () => {
     myColor = savedColor;
     colorSelect.value = myColor;
    
-  socket.emit("join", {
+ socket.emit("join", {
   name: username,
   color: myColor,
   room: savedRoom,
   connectKey
 });
+
+// ===== ここに直下で書く =====
+const eventBoyBtn = document.getElementById("eventBoyBtn");
+const eventGirlBtn = document.getElementById("eventGirlBtn");
+const eventCommonBtn = document.getElementById("eventCommonBtn");
+
+if (eventBoyBtn){
+  eventBoyBtn.onclick = () => {
+    socket.emit("room6Event", { type: "boy" });
+  };
+}
+
+if (eventGirlBtn){
+  eventGirlBtn.onclick = () => {
+    socket.emit("room6Event", { type: "girl" });
+  };
+}
+
+if (eventCommonBtn){
+  eventCommonBtn.onclick = () => {
+    socket.emit("room6Event", { type: "common" });
+  };
+}
 
 const ruleBtn =
   document.getElementById("ruleBtn");

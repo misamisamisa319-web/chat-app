@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Chat v2 - Template</title>
+<title>Chat v2 - jinmon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -75,7 +75,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   overflow-y: auto;
   padding: 10px;
   list-style: none;
-  padding-bottom: 140px;
+  padding-bottom: 260px;
 }
 #messages li { margin-bottom: 5px; }
 .private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
@@ -83,7 +83,6 @@ input, button, select { padding: 10px; font-size: 16px; }
 .time { opacity: .6; margin-right: 4px; }
 
 </style>
-</head>
 <body>
 
 <div id="login">
@@ -102,20 +101,13 @@ input, button, select { padding: 10px; font-size: 16px; }
   background:#f5f5f5;
   border:1px solid #ccc;
 ">
-
 <strong>利用ルール</strong><br><br>
 
 <div id="roomDesc"
-     style="
-       margin-bottom:12px;
-       white-space:pre-wrap;
-       font-size:13px;
-       line-height:1.6;
-     ">
+     style="white-space:pre-wrap;">
 </div>
 
 </div>
-
 
   <input id="nameInput"
          placeholder="名前">
@@ -173,13 +165,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   <strong>参加者:</strong>
   <ul id="userList"></ul>
 </div>
-<div id="eventRemain" style="
-  padding:6px 10px;
-  font-size:14px;
-  background:#f0f0f0;
-">
-  男イベ残10　女イベ残10　共通イベ残10
-</div>
+
 
 
 <div id="timerDisplay"
@@ -214,44 +200,13 @@ input, button, select { padding: 10px; font-size: 16px; }
   <ul id="messages"></ul>
 </div>
 
-<div id="bottomBar" style="
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background:#fff;
-  border-top:1px solid #ccc;
-  padding:6px;
-  z-index:200;
-">
-
-  <!-- 1段目 -->
-  <div style="display:flex; gap:8px; flex-wrap:wrap;">
-    <button id="eventBoyBtn">男イベ</button>
-    <button id="eventGirlBtn">女イベ</button>
-    <button id="eventCommonBtn">共通イベ</button>
-
-    <button onclick="rollDice(6)">1d6</button>
-  </div>
-
-  <!-- 2段目 -->
-  <div style="display:flex; gap:8px; margin-top:6px;">
-    <button id="timer3Btn">3分</button>
-    <button id="timer5Btn">5分</button>
-
-    <input id="timerCustomInput"
-      placeholder="分"
-      style="width:60px;">
-
-    <button id="timerCustomBtn">任意</button>
-  </div>
-
-</div>
-
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
 
+/* ===== ロビーからの情報 ===== */
+const room = localStorage.getItem("chatRoom");
+console.log(room);
 const login = document.getElementById("login");
 const chat = document.getElementById("chat");
 const joinBtn = document.getElementById("joinBtn");
@@ -295,123 +250,57 @@ if (!connectKey){
 
 
 
-window.addEventListener("load", () => {
-  const savedName  = localStorage.getItem("chatName");
-  const savedRoom  = localStorage.getItem("chatRoom");
-  const savedColor = localStorage.getItem("chatColor") || "#000000";
+const roomLabel = document.getElementById("roomLabel");
 
-  if (savedName && savedRoom) {
-    username = savedName;
-    myColor = savedColor;
-    colorSelect.value = myColor;
-   
- socket.emit("join", {
-  name: username,
-  color: myColor,
-  room: savedRoom,
-  connectKey
-});
-
-// ===== ここに直下で書く =====
-const eventBoyBtn = document.getElementById("eventBoyBtn");
-const eventGirlBtn = document.getElementById("eventGirlBtn");
-const eventCommonBtn = document.getElementById("eventCommonBtn");
-
-if (eventBoyBtn){
-  eventBoyBtn.onclick = () => {
-    socket.emit("room6Event", { type: "boy" });
-  };
+if (roomLabel && room) {
+  roomLabel.textContent = room;
 }
 
-if (eventGirlBtn){
-  eventGirlBtn.onclick = () => {
-    socket.emit("room6Event", { type: "girl" });
-  };
-}
 
-if (eventCommonBtn){
-  eventCommonBtn.onclick = () => {
-    socket.emit("room6Event", { type: "common" });
-  };
-}
-
-const ruleBtn =
-  document.getElementById("ruleBtn");
-
-const ruleModal =
-  document.getElementById("ruleModal");
-
-const ruleContent =
-  document.getElementById("ruleContent");
-
-const ruleCloseBtn =
-  document.getElementById("ruleCloseBtn");
-
-// 表示
-if (ruleBtn){
-  ruleBtn.onclick = () => {
-
-    const desc =
-      document.getElementById("roomDesc");
-
-    if (desc){
-      ruleContent.textContent =
-        desc.textContent;
-    }
-
-    ruleModal.style.display = "flex";
-  };
-}
-
-// 閉じる
-if (ruleCloseBtn){
-  ruleCloseBtn.onclick = () => {
-    ruleModal.style.display = "none";
-  };
-}
-
-    joined = true;
-    
-
-        // ===== 初回確認済みならチェック非表示 =====
-    const confirmed =
-      localStorage.getItem(
-        "entryConfirmed"
-      );
-
-    if (confirmed){
-      const loginDiv =
-        document.getElementById("login");
-
-      if (loginDiv){
-        loginDiv.style.display =
-          "none";
-      }
-    }
-
-    login.style.display = "none";
-    chat.style.display = "flex";
-  }
-});
-
-/* ===== ロビーからの情報 ===== */
-const room = "room6";
+const key = localStorage.getItem("chatKey");
 
 const descEl =
   document.getElementById("roomDesc");
 
+ if (room) {
 
+descEl.innerHTML =
+`被告人は名前+性別+NorS
+(SからM落ち、ドMの方のみ入室可能)
+攻める方は名前+性別+尋問官
 
-/* ===== 全部屋共通：文字色 ===== */
+①質問する前に何問目か申告し、質問する 
+②A.本当に、いいえの場合「いいえ、違います」
+B.本当は、はいの場合「いいえ....」
+Bの場合は、尋問官がサイコロを振り、玩具をスタートさせる
+玩具がない場合は手でオナニーする。
+③時間が終わり次第「はぁはぁ...///」と言う。
+待ってる間は質問、煽りなどをしてもよい。被告人は質問には答えても答えなくてもいい。個人情報の特定される質問はNG。
+質問数は10問、途中で絶頂しても10問まで続けること。尋問官は被告人が絶頂しても知らないフリをする。
+最初の質問 (0問目)
+「ここに呼ばれた理由わかりますか?」
+弱で3分固定、この時間で残りの質問を考える
+1問目～3問目  弱で3分
+4問目～6問目  中で3分
+7問目～9問目  強で3分  
+10問目  最強で5分
+最後の質問(11問目)
+「最後の質問です絶頂しませんでしたか?正直に答えてください」
+A.絶頂していなければ「絶頂してません」釈放
+冤罪だった場合尋問官に1個お願いできる
+B.絶頂した場合「絶頂しました♡」有罪の場合
+1.罰はなし
+2.罰を１０回
+
+<br><br>
+雑談・部屋まとめ<br>
+<a href="https://chat.luvul.net/ChatRoom?room_id=428529" target="_blank">
+https://chat.luvul.net/ChatRoom?room_id=428529
+</a>
+`;
+}
+
 descEl.style.color = "black";
-
-
-
-const roomLabel = document.getElementById("roomLabel");
-roomLabel.textContent = "巻き込まれ部屋";
-
-
-const key = localStorage.getItem("chatKey");
 
 
 if (!room && !joined) {
@@ -666,7 +555,7 @@ muteBtn.onclick = () => {
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
 
-const room = localStorage.getItem("chatRoom");
+const room = "jinmon";
 
 if (!room) {
   alert("ロビーから入室してください");
@@ -799,7 +688,6 @@ if (normalTimer5Btn){
 }
 
 
-
 // ===== 任意タイマー（通常） =====
 const normalTimerCustomBtn =
   document.getElementById("timerCustomBtn");
@@ -831,7 +719,13 @@ if (normalTimerCustomBtn){
 
 });
 
+document.getElementById("ruleBtn").onclick = () => {
+  const w = window.open("", "_blank");
 
+  w.document.write("<pre>" +
+    document.getElementById("roomDesc").innerText +
+    "</pre>");
+};
 
 </script>
 
