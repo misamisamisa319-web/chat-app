@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Chat v2 - Template</title>
+<title>Chat v2 - sugoroku</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -20,6 +20,7 @@ body {
   display: flex;
   flex-direction: column;
 }
+
 
 #login, #chat { flex: 1; display: flex; flex-direction: column; }
 #chat { display: none; }
@@ -75,12 +76,37 @@ input, button, select { padding: 10px; font-size: 16px; }
   overflow-y: auto;
   padding: 10px;
   list-style: none;
-  padding-bottom: 140px;
+  padding-bottom: 260px;
 }
 #messages li { margin-bottom: 5px; }
 .private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
 
 .time { opacity: .6; margin-right: 4px; }
+
+#bottomControls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  background: #fff;
+  border-top: 1px solid #ccc;
+
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  z-index: 1000;
+}
+
+#sugorokuDice,
+#timerBox {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
 
 </style>
 </head>
@@ -173,13 +199,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   <strong>参加者:</strong>
   <ul id="userList"></ul>
 </div>
-<div id="eventRemain" style="
-  padding:6px 10px;
-  font-size:14px;
-  background:#f0f0f0;
-">
-  男イベ残10　女イベ残10　共通イベ残30
-</div>
+
 
 
 <div id="timerDisplay"
@@ -191,6 +211,10 @@ input, button, select { padding: 10px; font-size: 16px; }
 </div>
 
 <div id="settings">
+
+  <button id="zecchoBtn" style="display:none; background:black; color:white; padding:8px 12px; border-radius:6px;">
+  絶頂許可
+</button>
 
     <label>色: <input type="color" id="colorSelect" value="#000000"></label>
     <label>内緒:
@@ -211,40 +235,31 @@ input, button, select { padding: 10px; font-size: 16px; }
     <button id="leaveBtn">退出</button>
   </div>
 
- <ul id="messages"></ul>
-
+  <ul id="messages"></ul>
 </div>
 
-<div id="bottomBar" style="
-  display:none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background:#fff;
-  border-top:1px solid #ccc;
-  padding:6px;
-  z-index:200;
-">
+<!-- ===== 固定コントロールBOX ===== -->
+<div id="bottomControls">
 
-  <!-- 1段目 -->
-  <div style="display:flex; gap:8px; flex-wrap:wrap;">
-    <button id="eventBoyBtn">男イベ</button>
-    <button id="eventGirlBtn">女イベ</button>
-    <button id="eventCommonBtn">共通イベ</button>
+  <div id="sugorokuDice">
+    <button onclick="rollDice(6)">1d6</button>
+    <button onclick="rollDice(5)">1d5</button>
+    <button onclick="rollDice(4)">1d4</button>
+    <button onclick="rollDice(3)">1d3</button>
+    <button onclick="rollDice(2)">1d2</button>
 
-    <button onclick="rollDice(100)">1d100</button>
+    <button id="luckBtn" onclick="tryLuck()" style="display:none;">
+      運試し
+    </button>
+
+    <button id="specialDiceBtn" style="display:none;"></button>
   </div>
 
-  <!-- 2段目 -->
-  <div style="display:flex; gap:8px; margin-top:6px;">
+  <div id="timerBox">
     <button id="timer3Btn">3分</button>
     <button id="timer5Btn">5分</button>
 
-    <input id="timerCustomInput"
-      placeholder="分"
-      style="width:60px;">
-
+    <input id="timerCustomInput" placeholder="分" style="width:60px;">
     <button id="timerCustomBtn">任意</button>
   </div>
 
@@ -279,19 +294,6 @@ let myColor = "#000000";
 let privateTo = "";
 let joined = false;
 
-let connectKey =
-  localStorage.getItem("connectKey");
-
-if (!connectKey){
-  connectKey =
-    Math.random().toString(36).slice(2) +
-    Date.now().toString(36);
-
-  localStorage.setItem(
-    "connectKey",
-    connectKey
-  );
-}
 
 
 
@@ -306,38 +308,14 @@ window.addEventListener("load", () => {
     username = savedName;
     myColor = savedColor;
     colorSelect.value = myColor;
-   
- socket.emit("join", {
+    
+
+  socket.emit("join", {
   name: username,
   color: myColor,
   room: savedRoom,
-  connectKey
+  connectKey: localStorage.getItem("connectKey")
 });
-
-// ===== ここに直下で書く =====
-const eventBoyBtn = document.getElementById("eventBoyBtn");
-const eventGirlBtn = document.getElementById("eventGirlBtn");
-const eventCommonBtn = document.getElementById("eventCommonBtn");
-
-if (eventBoyBtn){
-  eventBoyBtn.onclick = () => {
-    socket.emit("room6Event", { type: "boy" });
-  };
-}
-
-if (eventGirlBtn){
-  eventGirlBtn.onclick = () => {
-    socket.emit("room6Event", { type: "girl" });
-  };
-}
-
-if (eventCommonBtn){
-  eventCommonBtn.onclick = () => {
-    socket.emit("room6Event", { type: "common" });
-  };
-}
-
-
 
     joined = true;
     
@@ -360,45 +338,69 @@ if (eventCommonBtn){
 
     login.style.display = "none";
     chat.style.display = "flex";
-    const bottomBar =
-  document.getElementById("bottomBar");
-
-if (bottomBar){
-  bottomBar.style.display = "block";
-}
   }
 });
 
 /* ===== ロビーからの情報 ===== */
-const room = "room6";
+const room = localStorage.getItem("chatRoom");
 
 const descEl =
   document.getElementById("roomDesc");
 
-if (room === "room6") {
-descEl.innerHTML = `
-プレイヤーは名前+性別+S.N.Mで入ってくること
-見学はいません。
-入った方はみんなプレイヤーです。
+
+if (
+  room === "sugoroku1" ||
+  room === "sugoroku2" ||
+  room === "sugoroku3"
+) {
+descEl.innerHTML =
+`プレイヤーは
+「名前＋性別＋M」で入室すること
 
 【重要】
-・名前以外で入ってきた人は確認次第BANします♡
-・途中参加歓迎
-・男イベ → 男対象、女イベ → 女対象、共通イベ → 全員対象
-・回数には上限があります。
-・すべて使い切ると発動不可
-・イベントは勝者でも強制参加になる可能性あり
-・勝者指定のオナニー方法で服を脱がせるのは無し
+見学者はプレイヤーに対して
+・オナニー方法
+・寸止め方法
+・体勢
+などの指示を出すことができる
 
 【遊び方】
-1.入室してたら着てる服の枚数を報告する。
-2.1d100のサイコロをふる
-3.一番数字の低い人は服を1枚脱ぐ
-4.もし脱ぐ服がなくなってしまった場合、数字が一番高い人が男イベ、女イベ、共通イベの中から選んでボタンを押す。
-5.脱ぐ服がない一番低い数字の人は基本罰を受ける。
-6.絶頂してしまった場合、その回の勝者が名前を決め、その名前で入り直す。
-7.絶頂してしまった者はそれ以降サイコロをふることなく該当する命令全てに従う。男子罰など出来ない場合は1回絶頂する。
-8.満足するまで行い。参加者が2名になった時終了。
+コースを選ぶ
+
+A. 気軽コース
+→ Mは1d6のサイコロを振れる
+
+B. 普通コース
+→ Mは1d5のサイコロを振れる
+
+C. 絶望コース
+→ Mは1d4のサイコロを振れる
+
+Z. 裏道コース
+→ Mは1d3のサイコロを振れる
+
+
+さらに以下が常時適用される：
+
+✧ 空いている時間は乳首をいじめ続ける
+✧ 寸止めは「止めようと思ってから10回」手を止めずに続ける
+
+ゴールできなかった場合
+→ 後日やり直すこと
+
+全員に対して
+・自分以外は「様付け＋敬語」で話す
+・指示されたら感謝すること
+
+実行中は
+・実況して周りを楽しませること
+
+絶頂する場合
+→「イカせてください」と懇願し許可を得る
+→ 誰もいない場合は30秒我慢後「イキます」と言って絶頂
+
+絶頂してしまった場合
+→ その命令は終了
 
 <br><br>
 何かあった際は↓<br>
@@ -416,7 +418,10 @@ descEl.style.color = "black";
 
 
 const roomLabel = document.getElementById("roomLabel");
-roomLabel.textContent = "巻き込まれ部屋";
+
+if (roomLabel && room) {
+  roomLabel.textContent = room;
+}
 
 
 const key = localStorage.getItem("chatKey");
@@ -515,16 +520,13 @@ if (d.name && myMutes.includes(d.name)) {
 
 socket.on("zecchoUnlock", () => {
 
-  const btn = document.getElementById("denkiZecchoBtn");
-
-  if (btn && btn.style.display === "none") return;
+  const btn = document.getElementById("zecchoBtn");
 
   if (btn){
     btn.style.display = "inline-block";
   }
 
 });
-
 // ===== タイマー同期 =====
 let timerInterval = null;
 
@@ -584,15 +586,17 @@ socket.on("timerEnd", () => {
 
 });
 
-socket.on("orgasmUsed", () => {
-  const btn = document.getElementById("zecchoBtn");
-  if (btn) btn.style.display = "none";
+socket.on("zecchoHide", () => {
+
+  const btn =
+    document.getElementById("zecchoBtn");
+
+  if (btn){
+    btn.style.display = "none";
+  }
+
 });
 
-socket.on("zecchoHide", () => {
-  const btn = document.getElementById("zecchoBtn");
-  if (btn) btn.style.display = "none";
-});
 
 
 
@@ -604,10 +608,9 @@ socket.on("userList", list => {
 
   list.forEach(u => {
 
-const li = document.createElement("li");
+    const li = document.createElement("li");
 
-const nameSpan =
-  document.createElement("span");
+const nameSpan = document.createElement("span");
 
 nameSpan.textContent =
   (u.isAdmin ? "👑" : "") + u.name;
@@ -669,26 +672,23 @@ muteBtn.onclick = () => {
 
 });
 
-socket.on("eventRemain", data => {
 
-  const el =
-    document.getElementById("eventRemain");
+// ===== 接続キー生成 =====
+let connectKey =
+  localStorage.getItem("connectKey");
 
-  if (!el) return;
+if (!connectKey){
 
-  el.textContent =
-    `男イベ残${data.boy}　女イベ残${data.girl}　共通イベ残${data.common}`;
+  connectKey =
+    Math.random().toString(36).slice(2) +
+    Date.now().toString(36);
 
-});
-
-function rollDice(max){
-
-  socket.emit("message", {
-    text: `1d${max}`
-  });
+  localStorage.setItem(
+    "connectKey",
+    connectKey
+  );
 
 }
-
 
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
@@ -749,60 +749,10 @@ if (!room) {
   connectKey
 });
 
-// ===== イベントボタン =====
-const eventBoyBtn = document.getElementById("eventBoyBtn");
-const eventGirlBtn = document.getElementById("eventGirlBtn");
-const eventCommonBtn = document.getElementById("eventCommonBtn");
-
-if (eventBoyBtn){
-  eventBoyBtn.onclick = () => {
-    socket.emit("room6Event", { type: "boy" });
-  };
-}
-
-if (eventGirlBtn){
-  eventGirlBtn.onclick = () => {
-    socket.emit("room6Event", { type: "girl" });
-  };
-}
-
-if (eventCommonBtn){
-  eventCommonBtn.onclick = () => {
-    socket.emit("room6Event", { type: "common" });
-  };
-}
 
   joined = true;
   login.style.display = "none";
   chat.style.display = "flex";
-
-  // ===== 説明ボタン再設定 =====
-const ruleBtn =
-  document.getElementById("ruleBtn");
-
-if (ruleBtn){
-  ruleBtn.onclick = () => {
-
-    const desc =
-      document.getElementById("roomDesc");
-
-    const ruleContent =
-      document.getElementById("ruleContent");
-
-    const ruleModal =
-      document.getElementById("ruleModal");
-
-    if (desc && ruleContent){
-      ruleContent.textContent =
-        desc.textContent;
-    }
-
-    if (ruleModal){
-      ruleModal.style.display = "flex";
-    }
-
-  };
-}
 };
 
 /* ===== 操作 ===== */
@@ -833,6 +783,10 @@ sendBtn.onclick = () => {
   privateTarget.value = "";
 };
 
+document.getElementById("zecchoBtn").onclick = () => {
+  socket.emit("message", { text: "絶頂許可" });
+};
+
 input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -848,14 +802,178 @@ leaveBtn.onclick = () => {
   location.href = "/lobby.html";
 };
 
+// ===== すごろく通常ダイス送信 =====
+function rollDice(sides){
+  socket.emit("sugorokuRoll", { sides });
+}
+
 document.getElementById("ruleBtn").onclick = () => {
   const w = window.open("", "_blank");
 
   w.document.write("<pre>" +
-   document.getElementById("roomDesc").innerHTML +
+    document.getElementById("roomDesc").innerText +
     "</pre>");
 };
 
+function tryLuck(){
+
+  const n = Math.floor(Math.random()*5)+1;
+
+  socket.emit("message", {
+    text: `🎲 運試し → ${n}`
+  });
+
+  const btn =
+    document.getElementById("luckBtn");
+
+  if (btn){
+    btn.style.display = "none";
+  }
+
+
+}
+socket.on("sugorokuEvent", ({ type }) => {
+
+  const btn =
+    document.getElementById("specialDiceBtn");
+
+  if (type === "luck") {
+
+    if (!btn) return;
+
+  btn.style.display = "inline-block";
+  btn.textContent = "1d10";
+
+  btn.onclick = () => {
+
+    const n = Math.floor(Math.random()*10)+1;
+
+    socket.emit("message", {
+      text: `🎲 1d10 → ${n}`
+    });
+
+  };
+  return;
+}
+
+
+
+  btn.style.display = "inline-block";
+
+  if (type === "14" || type === "24" || type === "40") {
+    btn.textContent = "2d6";
+  }
+  else if (type === "2d4") {
+    btn.textContent = "2d4";
+  }
+
+
+
+
+  btn.style.backgroundColor = "red";
+  btn.style.color = "white";
+  btn.style.padding = "8px 12px";
+  btn.style.borderRadius = "6px";
+
+  btn.onclick = () => {
+
+    let d1 = 0;
+    let d2 = 0;
+    let total = 0;
+
+    // ===== 14 / 24 =====
+    if (type === "14" || type === "24") {
+
+      d1 = Math.floor(Math.random()*6)+1;
+      d2 = Math.floor(Math.random()*6)+1;
+      total = d1 + d2;
+
+      socket.emit("message", {
+        text: `🎲 2d6 → ${d1},${d2} = ${total}`
+      });
+
+      if (d1 === d2) {
+
+
+        if (type === "14") {
+          socket.emit("sugorokuMoveTo", { pos: 1 });
+        }
+
+        if (type === "24") {
+          socket.emit("sugorokuMoveTo", { pos: 16 });
+        }
+
+      }
+
+ 
+
+    }
+
+
+    // ===== 40（ゴール用）=====
+    if (type === "40") {
+
+      d1 = Math.floor(Math.random()*6)+1;
+      d2 = Math.floor(Math.random()*6)+1;
+      total = d1 + d2;
+
+      socket.emit("message", {
+        text: `🎲 2d6 → ${d1},${d2} = ${total}`
+      });
+
+  if (d1 === d2) {
+
+  if (type === "40") {
+
+    socket.emit("message", {
+      text: "🏁 ゴール！絶頂解放"
+    });
+
+  const btn = document.getElementById("zecchoBtn");
+if (btn) btn.style.display = "inline-block";
+
+  }
+
+} else {
+
+  socket.emit("message", {
+    text: "⚠ 寸止め1回"
+  });
+
+}
+    }
+
+    // ===== 2d4 =====
+    if (type === "2d4") {
+
+      d1 = Math.floor(Math.random()*4)+1;
+      d2 = Math.floor(Math.random()*4)+1;
+      total = d1 + d2;
+
+      socket.emit("message", {
+        text: `🎲 2d4 → ${d1},${d2} = ${total}`
+      });
+
+      socket.emit("sugorokuBack", {
+        steps: total
+      });
+
+    }
+
+  };
+
+});
+
+socket.on("showLuckBtn", () => {
+
+  const btn =
+    document.getElementById("luckBtn");
+
+  if (btn){
+    btn.style.display = "inline-block";
+  }
+
+});
 
 window.addEventListener("load", () => {
 
@@ -892,7 +1010,6 @@ const normalTimerCustomBtn =
 
 const normalTimerCustomInput =
   document.getElementById("timerCustomInput");
- 
 
 if (normalTimerCustomBtn){
 
@@ -916,42 +1033,13 @@ if (normalTimerCustomBtn){
 
 
 
+
+
 });
 
 
 
 </script>
-
-
-<div id="ruleModal" style="
-  display:none;
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
-  background:rgba(0,0,0,0.6);
-  z-index:999;
-  justify-content:center;
-  align-items:center;
-">
-
-  <div style="
-    background:#fff;
-    padding:20px;
-    max-width:90%;
-    max-height:80%;
-    overflow:auto;
-  ">
-
-    <div id="ruleContent"
-         style="white-space:pre-wrap;">
-    </div>
-
-    <button id="ruleCloseBtn">閉じる</button>
-
-  </div>
-</div>
 
 </body>
 </html>
