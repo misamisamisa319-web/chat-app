@@ -211,10 +211,12 @@ input, button, select { padding: 10px; font-size: 16px; }
     <button id="leaveBtn">退出</button>
   </div>
 
-  <ul id="messages"></ul>
+ <ul id="messages"></ul>
+
 </div>
 
 <div id="bottomBar" style="
+  display:none;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -391,6 +393,12 @@ if (ruleCloseBtn){
 
     login.style.display = "none";
     chat.style.display = "flex";
+    const bottomBar =
+  document.getElementById("bottomBar");
+
+if (bottomBar){
+  bottomBar.style.display = "block";
+}
   }
 });
 
