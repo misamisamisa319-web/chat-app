@@ -178,7 +178,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   font-size:14px;
   background:#f0f0f0;
 ">
-  男イベ残10　女イベ残10　共通イベ残30
+  男イベ残10　女イベ残10　共通イベ残10
 </div>
 
 
@@ -661,17 +661,6 @@ muteBtn.onclick = () => {
 
 });
 
-socket.on("eventRemain", data => {
-
-  const el =
-    document.getElementById("eventRemain");
-
-  if (!el) return;
-
-  el.textContent =
-    `男イベ残${data.boy}　女イベ残${data.girl}　共通イベ残${data.common}`;
-
-});
 
 
 /* ===== 入室処理 ===== */

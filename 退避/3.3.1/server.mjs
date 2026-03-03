@@ -918,65 +918,6 @@ const specialPainPunishItems = [
 "苦痛罰20.おまんこまたはおちんぽに刺激物を塗る",
 ];
 
-const room6MaleEvents = [
-"男イベ1.",
-"男イベ2.",
-"男イベ3.",
-"男イベ4.",
-"男イベ5.",
-"男イベ6.",
-"男イベ7.",
-"男イベ8.",
-"男イベ9.",
-"男イベ10.",
-];
-
-const room6FemaleEvents = [
-"女イベ1.",
-"女イベ2.",
-"女イベ3.",
-"女イベ4.",
-"女イベ5.",
-"女イベ6.",
-"女イベ7.",
-"女イベ8.",
-"女イベ9.",
-"女イベ10.",
-];
-
-const room6CommonEvents = [
-"共通イベ1.",
-"共通イベ2.",
-"共通イベ3.",
-"共通イベ4.",
-"共通イベ5.",
-"共通イベ6.",
-"共通イベ7.",
-"共通イベ8.",
-"共通イベ9.",
-"共通イベ10.",
-"共通イベ11.",
-"共通イベ12.",
-"共通イベ13.",
-"共通イベ14.",
-"共通イベ15.",
-"共通イベ16.",
-"共通イベ17.",
-"共通イベ18.",
-"共通イベ19.",
-"共通イベ20.",
-"共通イベ21.",
-"共通イベ22.",
-"共通イベ23.",
-"共通イベ24.",
-"共通イベ25.",
-"共通イベ26.",
-"共通イベ27.",
-"共通イベ28.",
-"共通イベ29.",
-"共通イベ30.",
-];
-
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 let punishStockByRoom = {};
 // ===== 罰累計（絶頂解放用） =====
@@ -1050,9 +991,6 @@ function initPunishRoom(room){
       onaGirl: shuffle([...onaGirlPunishItems]),
       onaBoy: shuffle([...onaBoyPunishItems]),
       pain: shuffle([...specialPainPunishItems]),
-      eventBoy: shuffle([...room6MaleEvents]),
-      eventGirl: shuffle([...room6FemaleEvents]),
-      eventCommon: shuffle([...room6CommonEvents]),
     
 
     };
@@ -1094,23 +1032,7 @@ function getPainPunish(room){
     punishStockByRoom[room].pain = shuffle([...specialPainPunishItems]);
   return punishStockByRoom[room].pain.shift();
 }
-function getEventBoy(room){
-  initPunishRoom(room);
-  if (!punishStockByRoom[room].eventBoy.length) return null;
-  return punishStockByRoom[room].eventBoy.shift();
-}
 
-function getEventGirl(room){
-  initPunishRoom(room);
-  if (!punishStockByRoom[room].eventGirl.length) return null;
-  return punishStockByRoom[room].eventGirl.shift();
-}
-
-function getEventCommon(room){
-  initPunishRoom(room);
-  if (!punishStockByRoom[room].eventCommon.length) return null;
-  return punishStockByRoom[room].eventCommon.shift();
-}
 
 
 /* ===============================
@@ -1337,91 +1259,6 @@ const sugorokuMap = {
 };
 
 io.on("connection", socket => {
-
-socket.on("room6Event", ({ type }) => {
-
-  if (socket.room !== "room6") return;
-
-  if (!canUsePunish(socket.room)){
-    socket.emit("message",{
-      name:"system",
-      text:"イベントは20秒に1回まで",
-      room:socket.room,
-      time:getTimeString()
-    });
-    return;
-  }
-
-  let text = "";
-
-  if (type === "boy"){
-  text = getEventBoy(socket.room);
-  if (!text){
-    socket.emit("message", {
-      name:"system",
-      text:"男イベントは終了しました",
-      room:socket.room,
-      time:getTimeString()
-    });
-    return;
-  }
-}
-else if (type === "girl"){
-  text = getEventGirl(socket.room);
-  if (!text){
-    socket.emit("message", {
-      name:"system",
-      text:"女イベントは終了しました",
-      room:socket.room,
-      time:getTimeString()
-    });
-    return;
-  }
-}
-else if (type === "common"){
-  text = getEventCommon(socket.room);
-  if (!text){
-    socket.emit("message", {
-      name:"system",
-      text:"共通イベントは終了しました",
-      room:socket.room,
-      time:getTimeString()
-    });
-    return;
-  }
-}
-let color = "orange";
-
-if (type === "boy") color = "blue";
-else if (type === "girl") color = "red";
-else if (type === "common") color = "purple";
-  const msg = {
-    name: socket.username,
-    text: text,
-    color: color,
-    bold: true,
-    room: socket.room,
-    time: getTimeString(),
-    from: socket.id
-  };
-
-  const log = normalizeLog(msg);
-
-  adminLogs.push(log);
-  roomLogs.push(log);
-  saveLogs();
-
-let remain = {
-  boy: punishStockByRoom[socket.room].eventBoy.length,
-  girl: punishStockByRoom[socket.room].eventGirl.length,
-  common: punishStockByRoom[socket.room].eventCommon.length
-};
-
-io.to(socket.room).emit("eventRemain", remain);
-
-  io.to(socket.room).emit("message", msg);
-
-});  
 
 socket.emit("lobbyUpdate", getLobbyInfo());
 
@@ -1867,18 +1704,6 @@ socket.emit(
     (!m.private || m.to === socket.id || m.from === socket.id)
   )
 );
-
-if (room === "room6") {
-
-  initPunishRoom(room);
-
-  socket.emit("eventRemain", {
-    boy: punishStockByRoom[room].eventBoy.length,
-    girl: punishStockByRoom[room].eventGirl.length,
-    common: punishStockByRoom[room].eventCommon.length
-  });
-
-}
 // ===== タイマー途中同期 =====
 if (roomTimerEndByRoom[room]) {
 
