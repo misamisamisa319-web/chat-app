@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Chat v2 - sugoroku</title>
+<title>Chat v2 - jinmon</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -21,7 +21,6 @@ body {
   flex-direction: column;
 }
 
-
 #login, #chat { flex: 1; display: flex; flex-direction: column; }
 #chat { display: none; }
 
@@ -31,21 +30,21 @@ body {
 
 #controls { display: flex; gap: 5px; padding: 5px; position: sticky; top: 0; background: #fff; z-index: 10; }
 input, button, select { padding: 10px; font-size: 16px; }
-
 #punishWrap {
-  gap: 20px;
+  gap: 20px;   /* ボタン同士の間隔 */
 
-  position: fixed;   /* ←ここ変更 */
-  bottom: 0;         /* ←ここ変更 */
+  position: absolute;
+  bottom: 100%;
   left: 0;
   right: 0;
 
   background: #fff;
-  padding: 10px;
+  padding: 8px;
   z-index: 200;
-
-  display: flex;     /* ←追加（横並び） */
-  justify-content: center; /* ←中央寄せ */
+}
+#punishWrap button {
+  padding: 6px 12px;  /* ボタンの中の余白 */
+  font-size: 16px;   /* 文字サイズ */
 }
 
 
@@ -84,7 +83,6 @@ input, button, select { padding: 10px; font-size: 16px; }
 .time { opacity: .6; margin-right: 4px; }
 
 </style>
-</head>
 <body>
 
 <div id="login">
@@ -103,20 +101,13 @@ input, button, select { padding: 10px; font-size: 16px; }
   background:#f5f5f5;
   border:1px solid #ccc;
 ">
-
 <strong>利用ルール</strong><br><br>
 
 <div id="roomDesc"
-     style="
-       margin-bottom:12px;
-       white-space:pre-wrap;
-       font-size:13px;
-       line-height:1.6;
-     ">
+     style="white-space:pre-wrap;">
 </div>
 
 </div>
-
 
   <input id="nameInput"
          placeholder="名前">
@@ -168,49 +159,6 @@ input, button, select { padding: 10px; font-size: 16px; }
   </span>
 </div>
 
-<!-- ===== すごろくダイス ===== -->
-<div id="sugorokuDice" style="
-  padding:8px;
-  display:flex;
-  gap:8px;
-  align-items:center;
-">
-  <button onclick="rollDice(6)">1d6</button>
-  <button onclick="rollDice(5)">1d5</button>
-  <button onclick="rollDice(4)">1d4</button>
-  <button onclick="rollDice(3)">1d3</button>
-  <button onclick="rollDice(2)">1d2</button>
-
-  <button id="luckBtn" onclick="tryLuck()" style="display:none;">
-    運試し
-  </button>
-
-  <button id="specialDiceBtn" style="display:none;">
-    2d6
-  </button>
-</div>
-
-<!-- ===== タイマー ===== -->
-<div id="timerBox" style="
-  padding:8px;
-  display:flex;
-  gap:8px;
-  align-items:center;
-  border-top:1px solid #ccc;
-">
-
-  <button id="timer3Btn">3分</button>
-  <button id="timer5Btn">5分</button>
-
-  <input id="timerCustomInput"
-    placeholder="分"
-    style="width:60px;">
-
-  <button id="timerCustomBtn">任意</button>
-
-</div>
-
-
 
 <!-- ===== 参加者 ===== -->
 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -229,10 +177,6 @@ input, button, select { padding: 10px; font-size: 16px; }
 </div>
 
 <div id="settings">
-
-  <button id="zecchoBtn" style="display:none; background:black; color:white; padding:8px 12px; border-radius:6px;">
-  絶頂許可
-</button>
 
     <label>色: <input type="color" id="colorSelect" value="#000000"></label>
     <label>内緒:
@@ -254,16 +198,15 @@ input, button, select { padding: 10px; font-size: 16px; }
   </div>
 
   <ul id="messages"></ul>
-  <div id="punishWrap">
-  <button onclick="sendPunish('girl')">女子罰</button>
-  <button onclick="sendPunish('boy')">男子罰</button>
-</div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
 
+/* ===== ロビーからの情報 ===== */
+const room = localStorage.getItem("chatRoom");
+console.log(room);
 const login = document.getElementById("login");
 const chat = document.getElementById("chat");
 const joinBtn = document.getElementById("joinBtn");
@@ -289,126 +232,21 @@ let myColor = "#000000";
 let privateTo = "";
 let joined = false;
 
+let connectKey =
+  localStorage.getItem("connectKey");
+
+if (!connectKey){
+  connectKey =
+    Math.random().toString(36).slice(2) +
+    Date.now().toString(36);
+
+  localStorage.setItem(
+    "connectKey",
+    connectKey
+  );
+}
 
 
-
-
-
-window.addEventListener("load", () => {
-  const savedName  = localStorage.getItem("chatName");
-  const savedRoom  = localStorage.getItem("chatRoom");
-  const savedColor = localStorage.getItem("chatColor") || "#000000";
-
-  if (savedName && savedRoom) {
-    username = savedName;
-    myColor = savedColor;
-    colorSelect.value = myColor;
-    
-
-  socket.emit("join", {
-  name: username,
-  color: myColor,
-  room: savedRoom,
-  connectKey: localStorage.getItem("connectKey")
-});
-
-    joined = true;
-    
-
-        // ===== 初回確認済みならチェック非表示 =====
-    const confirmed =
-      localStorage.getItem(
-        "entryConfirmed"
-      );
-
-    if (confirmed){
-      const loginDiv =
-        document.getElementById("login");
-
-      if (loginDiv){
-        loginDiv.style.display =
-          "none";
-      }
-    }
-
-    login.style.display = "none";
-    chat.style.display = "flex";
-  }
-});
-
-/* ===== ロビーからの情報 ===== */
-const room = localStorage.getItem("chatRoom");
-
-const descEl =
-  document.getElementById("roomDesc");
-
-
-if (
-  room === "sugoroku1" ||
-  room === "sugoroku2" ||
-  room === "sugoroku3"
-) {
-descEl.innerHTML =
-`プレイヤーは
-「名前＋性別＋M」で入室すること
-
-【重要】
-見学者はプレイヤーに対して
-・オナニー方法
-・寸止め方法
-・体勢
-などの指示を出すことができる
-
-【遊び方】
-コースを選ぶ
-
-A. 気軽コース
-→ Mは1d6のサイコロを振れる
-
-B. 普通コース
-→ Mは1d5のサイコロを振れる
-
-C. 絶望コース
-→ Mは1d4のサイコロを振れる
-
-Z. 裏道コース
-→ Mは1d3のサイコロを振れる
-
-
-さらに以下が常時適用される：
-
-✧ 空いている時間は乳首をいじめ続ける
-✧ 寸止めは「止めようと思ってから10回」手を止めずに続ける
-
-ゴールできなかった場合
-→ 後日やり直すこと
-
-全員に対して
-・自分以外は「様付け＋敬語」で話す
-・指示されたら感謝すること
-
-実行中は
-・実況して周りを楽しませること
-
-絶頂する場合
-→「イカせてください」と懇願し許可を得る
-→ 誰もいない場合は30秒我慢後「イキます」と言って絶頂
-
-絶頂してしまった場合
-→ その命令は終了
-
-<br><br>
-何かあった際は↓<br>
-<a href="https://chat.luvul.net/ChatRoom?room_id=428529" target="_blank">
-https://chat.luvul.net/ChatRoom?room_id=428529
-</a>
-`;
-}  
-
-
-
-/* ===== 全部屋共通：文字色 ===== */
-descEl.style.color = "black";
 
 
 
@@ -420,6 +258,49 @@ if (roomLabel && room) {
 
 
 const key = localStorage.getItem("chatKey");
+
+const descEl =
+  document.getElementById("roomDesc");
+
+ if (room) {
+
+descEl.innerHTML =
+`被告人は名前+性別+NorS
+(SからM落ち、ドMの方のみ入室可能)
+攻める方は名前+性別+尋問官
+
+①質問する前に何問目か申告し、質問する 
+②A.本当に、いいえの場合「いいえ、違います」
+B.本当は、はいの場合「いいえ....」
+Bの場合は、尋問官がサイコロを振り、玩具をスタートさせる
+玩具がない場合は手でオナニーする。
+③時間が終わり次第「はぁはぁ...///」と言う。
+待ってる間は質問、煽りなどをしてもよい。被告人は質問には答えても答えなくてもいい。個人情報の特定される質問はNG。
+質問数は10問、途中で絶頂しても10問まで続けること。尋問官は被告人が絶頂しても知らないフリをする。
+最初の質問 (0問目)
+「ここに呼ばれた理由わかりますか?」
+弱で3分固定、この時間で残りの質問を考える
+1問目～3問目  弱で3分
+4問目～6問目  中で3分
+7問目～9問目  強で3分  
+10問目  最強で5分
+最後の質問(11問目)
+「最後の質問です絶頂しませんでしたか?正直に答えてください」
+A.絶頂していなければ「絶頂してません」釈放
+冤罪だった場合尋問官に1個お願いできる
+B.絶頂した場合「絶頂しました♡」有罪の場合
+1.罰はなし
+2.罰を１０回
+
+<br><br>
+雑談・部屋まとめ<br>
+<a href="https://chat.luvul.net/ChatRoom?room_id=428529" target="_blank">
+https://chat.luvul.net/ChatRoom?room_id=428529
+</a>
+`;
+}
+
+descEl.style.color = "black";
 
 
 if (!room && !joined) {
@@ -515,13 +396,16 @@ if (d.name && myMutes.includes(d.name)) {
 
 socket.on("zecchoUnlock", () => {
 
-  const btn = document.getElementById("zecchoBtn");
+  const btn = document.getElementById("denkiZecchoBtn");
+
+  if (btn && btn.style.display === "none") return;
 
   if (btn){
     btn.style.display = "inline-block";
   }
 
 });
+
 // ===== タイマー同期 =====
 let timerInterval = null;
 
@@ -581,17 +465,15 @@ socket.on("timerEnd", () => {
 
 });
 
-socket.on("zecchoHide", () => {
-
-  const btn =
-    document.getElementById("zecchoBtn");
-
-  if (btn){
-    btn.style.display = "none";
-  }
-
+socket.on("orgasmUsed", () => {
+  const btn = document.getElementById("zecchoBtn");
+  if (btn) btn.style.display = "none";
 });
 
+socket.on("zecchoHide", () => {
+  const btn = document.getElementById("zecchoBtn");
+  if (btn) btn.style.display = "none";
+});
 
 
 
@@ -603,9 +485,10 @@ socket.on("userList", list => {
 
   list.forEach(u => {
 
-    const li = document.createElement("li");
+const li = document.createElement("li");
 
-const nameSpan = document.createElement("span");
+const nameSpan =
+  document.createElement("span");
 
 nameSpan.textContent =
   (u.isAdmin ? "👑" : "") + u.name;
@@ -668,27 +551,11 @@ muteBtn.onclick = () => {
 });
 
 
-// ===== 接続キー生成 =====
-let connectKey =
-  localStorage.getItem("connectKey");
-
-if (!connectKey){
-
-  connectKey =
-    Math.random().toString(36).slice(2) +
-    Date.now().toString(36);
-
-  localStorage.setItem(
-    "connectKey",
-    connectKey
-  );
-
-}
 
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
 
-const room = localStorage.getItem("chatRoom");
+const room = "jinmon";
 
 if (!room) {
   alert("ロビーから入室してください");
@@ -778,10 +645,6 @@ sendBtn.onclick = () => {
   privateTarget.value = "";
 };
 
-document.getElementById("zecchoBtn").onclick = () => {
-  socket.emit("message", { text: "絶頂許可" });
-};
-
 input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -796,197 +659,6 @@ leaveBtn.onclick = () => {
   localStorage.removeItem("chatKey");
   location.href = "/lobby.html";
 };
-
-// ===== すごろく通常ダイス送信 =====
-function rollDice(sides){
-  socket.emit("sugorokuRoll", { sides });
-}
-
-document.getElementById("ruleBtn").onclick = () => {
-  const w = window.open("", "_blank");
-
-  w.document.write("<pre>" +
-    document.getElementById("roomDesc").innerText +
-    "</pre>");
-};
-
-function tryLuck(){
-
-  const n = Math.floor(Math.random()*5)+1;
-
-  socket.emit("message", {
-    text: `🎲 運試し → ${n}`
-  });
-
-  const btn =
-    document.getElementById("luckBtn");
-
-  if (btn){
-    btn.style.display = "none";
-  }
-
-
-}
-socket.on("sugorokuEvent", ({ type }) => {
-
-  const btn =
-    document.getElementById("specialDiceBtn");
-
-  if (type === "luck") {
-
-    if (!btn) return;
-
-  btn.style.display = "inline-block";
-  btn.textContent = "1d10";
-
-  btn.onclick = () => {
-
-    const n = Math.floor(Math.random()*10)+1;
-
-    socket.emit("message", {
-      text: `🎲 1d10 → ${n}`
-    });
-
-  };
-  return;
-}
-
-
-
-  btn.style.display = "inline-block";
-
-  if (type === "14" || type === "24" || type === "40") {
-    btn.textContent = "2d6";
-  }
-  else if (type === "2d4") {
-    btn.textContent = "2d4";
-  }
-
-
-
-
-  btn.style.backgroundColor = "red";
-  btn.style.color = "white";
-  btn.style.padding = "8px 12px";
-  btn.style.borderRadius = "6px";
-
-  btn.onclick = () => {
-
-    let d1 = 0;
-    let d2 = 0;
-    let total = 0;
-
-    // ===== 14 / 24 =====
-    if (type === "14" || type === "24") {
-
-      d1 = Math.floor(Math.random()*6)+1;
-      d2 = Math.floor(Math.random()*6)+1;
-      total = d1 + d2;
-
-      socket.emit("message", {
-        text: `🎲 2d6 → ${d1},${d2} = ${total}`
-      });
-
-      if (d1 === d2) {
-
-
-        if (type === "14") {
-          socket.emit("sugorokuMoveTo", { pos: 1 });
-        }
-
-        if (type === "24") {
-          socket.emit("sugorokuMoveTo", { pos: 16 });
-        }
-
-      }
-
- 
-
-    }
-
-
-    // ===== 40（ゴール用）=====
-    if (type === "40") {
-
-      d1 = Math.floor(Math.random()*6)+1;
-      d2 = Math.floor(Math.random()*6)+1;
-      total = d1 + d2;
-
-      socket.emit("message", {
-        text: `🎲 2d6 → ${d1},${d2} = ${total}`
-      });
-
-  if (d1 === d2) {
-
-  if (type === "40") {
-
-    socket.emit("message", {
-      text: "🏁 ゴール！絶頂解放"
-    });
-
-  const btn = document.getElementById("zecchoBtn");
-if (btn) btn.style.display = "inline-block";
-
-  }
-
-} else {
-
-  socket.emit("message", {
-    text: "⚠ 寸止め1回"
-  });
-
-}
-    }
-
-    // ===== 2d4 =====
-    if (type === "2d4") {
-
-      d1 = Math.floor(Math.random()*4)+1;
-      d2 = Math.floor(Math.random()*4)+1;
-      total = d1 + d2;
-
-      socket.emit("message", {
-        text: `🎲 2d4 → ${d1},${d2} = ${total}`
-      });
-
-      socket.emit("sugorokuBack", {
-        steps: total
-      });
-
-    }
-
-  };
-
-});
-
-function sendPunish(type){
-
-  if (type === "girl"){
-    socket.emit("message", {
-      text: "女子罰",
-      bold: true
-    });
-  }
-
-  if (type === "boy"){
-    socket.emit("message", {
-      text: "男子罰",
-      bold: true
-    });
-  }
-
-}
-
-socket.on("showLuckBtn", () => {
-
-  const btn =
-    document.getElementById("luckBtn");
-
-  if (btn){
-    btn.style.display = "inline-block";
-  }
-
-});
 
 window.addEventListener("load", () => {
 
@@ -1014,7 +686,6 @@ if (normalTimer5Btn){
     socket.emit("timerStart", { seconds: 300 });
   };
 }
-
 
 
 // ===== 任意タイマー（通常） =====
@@ -1046,13 +717,48 @@ if (normalTimerCustomBtn){
 
 
 
-
-
 });
 
+document.getElementById("ruleBtn").onclick = () => {
+  const w = window.open("", "_blank");
 
+  w.document.write("<pre>" +
+    document.getElementById("roomDesc").innerText +
+    "</pre>");
+};
 
 </script>
+
+
+<div id="ruleModal" style="
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.6);
+  z-index:999;
+  justify-content:center;
+  align-items:center;
+">
+
+  <div style="
+    background:#fff;
+    padding:20px;
+    max-width:90%;
+    max-height:80%;
+    overflow:auto;
+  ">
+
+    <div id="ruleContent"
+         style="white-space:pre-wrap;">
+    </div>
+
+    <button id="ruleCloseBtn">閉じる</button>
+
+  </div>
+</div>
 
 </body>
 </html>

@@ -31,21 +31,21 @@ body {
 
 #controls { display: flex; gap: 5px; padding: 5px; position: sticky; top: 0; background: #fff; z-index: 10; }
 input, button, select { padding: 10px; font-size: 16px; }
-#punishWrap {
-  gap: 20px;   /* ボタン同士の間隔 */
 
-  position: absolute;
-  bottom: 100%;
+#punishWrap {
+  gap: 20px;
+
+  position: fixed;   /* ←ここ変更 */
+  bottom: 0;         /* ←ここ変更 */
   left: 0;
   right: 0;
 
   background: #fff;
-  padding: 8px;
+  padding: 10px;
   z-index: 200;
-}
-#punishWrap button {
-  padding: 6px 12px;  /* ボタンの中の余白 */
-  font-size: 16px;   /* 文字サイズ */
+
+  display: flex;     /* ←追加（横並び） */
+  justify-content: center; /* ←中央寄せ */
 }
 
 
@@ -254,6 +254,10 @@ input, button, select { padding: 10px; font-size: 16px; }
   </div>
 
   <ul id="messages"></ul>
+  <div id="punishWrap">
+  <button onclick="sendPunish('girl')">女子罰</button>
+  <button onclick="sendPunish('boy')">男子罰</button>
+</div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -954,6 +958,24 @@ if (btn) btn.style.display = "inline-block";
   };
 
 });
+
+function sendPunish(type){
+
+  if (type === "girl"){
+    socket.emit("message", {
+      text: "女子罰",
+      bold: true
+    });
+  }
+
+  if (type === "boy"){
+    socket.emit("message", {
+      text: "男子罰",
+      bold: true
+    });
+  }
+
+}
 
 socket.on("showLuckBtn", () => {
 
