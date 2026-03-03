@@ -774,6 +774,34 @@ if (eventCommonBtn){
   joined = true;
   login.style.display = "none";
   chat.style.display = "flex";
+
+  // ===== 説明ボタン再設定 =====
+const ruleBtn =
+  document.getElementById("ruleBtn");
+
+if (ruleBtn){
+  ruleBtn.onclick = () => {
+
+    const desc =
+      document.getElementById("roomDesc");
+
+    const ruleContent =
+      document.getElementById("ruleContent");
+
+    const ruleModal =
+      document.getElementById("ruleModal");
+
+    if (desc && ruleContent){
+      ruleContent.textContent =
+        desc.textContent;
+    }
+
+    if (ruleModal){
+      ruleModal.style.display = "flex";
+    }
+
+  };
+}
 };
 
 /* ===== 操作 ===== */
@@ -824,7 +852,7 @@ const ruleBtn =
   document.getElementById("ruleBtn");
 
 const ruleModal =
-  document.getElementById("ruleModal");
+  document.querySelector("#ruleModal");
 
 const ruleContent =
   document.getElementById("ruleContent");
