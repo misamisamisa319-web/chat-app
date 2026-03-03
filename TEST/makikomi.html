@@ -673,6 +673,14 @@ socket.on("eventRemain", data => {
 
 });
 
+function rollDice(max){
+
+  socket.emit("message", {
+    text: `1d${max}`
+  });
+
+}
+
 
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
@@ -817,13 +825,7 @@ const normalTimerCustomBtn =
 
 const normalTimerCustomInput =
   document.getElementById("timerCustomInput");
-  function rollDice(max){
-
-  socket.emit("message", {
-    text: `1d${max}`
-  });
-
-}
+ 
 
 if (normalTimerCustomBtn){
 
