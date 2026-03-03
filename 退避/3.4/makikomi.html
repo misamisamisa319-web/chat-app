@@ -337,7 +337,40 @@ if (eventCommonBtn){
   };
 }
 
+const ruleBtn =
+  document.getElementById("ruleBtn");
 
+const ruleModal =
+  document.getElementById("ruleModal");
+
+const ruleContent =
+  document.getElementById("ruleContent");
+
+const ruleCloseBtn =
+  document.getElementById("ruleCloseBtn");
+
+// 表示
+if (ruleBtn){
+  ruleBtn.onclick = () => {
+
+    const desc =
+      document.getElementById("roomDesc");
+
+    if (desc){
+      ruleContent.textContent =
+        desc.textContent;
+    }
+
+    ruleModal.style.display = "flex";
+  };
+}
+
+// 閉じる
+if (ruleCloseBtn){
+  ruleCloseBtn.onclick = () => {
+    ruleModal.style.display = "none";
+  };
+}
 
     joined = true;
     
@@ -748,28 +781,6 @@ if (!room) {
   connectKey
 });
 
-// ===== イベントボタン =====
-const eventBoyBtn = document.getElementById("eventBoyBtn");
-const eventGirlBtn = document.getElementById("eventGirlBtn");
-const eventCommonBtn = document.getElementById("eventCommonBtn");
-
-if (eventBoyBtn){
-  eventBoyBtn.onclick = () => {
-    socket.emit("room6Event", { type: "boy" });
-  };
-}
-
-if (eventGirlBtn){
-  eventGirlBtn.onclick = () => {
-    socket.emit("room6Event", { type: "girl" });
-  };
-}
-
-if (eventCommonBtn){
-  eventCommonBtn.onclick = () => {
-    socket.emit("room6Event", { type: "common" });
-  };
-}
 
   joined = true;
   login.style.display = "none";
@@ -818,42 +829,6 @@ leaveBtn.onclick = () => {
   localStorage.removeItem("chatKey");
   location.href = "/lobby.html";
 };
-
-// ===== 説明モーダル =====
-const ruleBtn =
-  document.getElementById("ruleBtn");
-
-const ruleModal =
-  document.getElementById("ruleModal");
-
-const ruleContent =
-  document.getElementById("ruleContent");
-
-const ruleCloseBtn =
-  document.getElementById("ruleCloseBtn");
-
-// 表示
-if (ruleBtn){
-  ruleBtn.onclick = () => {
-
-    const desc =
-      document.getElementById("roomDesc");
-
-    if (desc){
-      ruleContent.textContent =
-        desc.textContent;
-    }
-
-    ruleModal.style.display = "flex";
-  };
-}
-
-// 閉じる
-if (ruleCloseBtn){
-  ruleCloseBtn.onclick = () => {
-    ruleModal.style.display = "none";
-  };
-}
 
 window.addEventListener("load", () => {
 
