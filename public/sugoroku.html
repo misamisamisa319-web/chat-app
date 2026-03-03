@@ -83,6 +83,31 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 .time { opacity: .6; margin-right: 4px; }
 
+#bottomControls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  background: #fff;
+  border-top: 1px solid #ccc;
+
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  z-index: 1000;
+}
+
+#sugorokuDice,
+#timerBox {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 </style>
 </head>
 <body>
@@ -168,49 +193,6 @@ input, button, select { padding: 10px; font-size: 16px; }
   </span>
 </div>
 
-<!-- ===== すごろくダイス ===== -->
-<div id="sugorokuDice" style="
-  padding:8px;
-  display:flex;
-  gap:8px;
-  align-items:center;
-">
-  <button onclick="rollDice(6)">1d6</button>
-  <button onclick="rollDice(5)">1d5</button>
-  <button onclick="rollDice(4)">1d4</button>
-  <button onclick="rollDice(3)">1d3</button>
-  <button onclick="rollDice(2)">1d2</button>
-
-  <button id="luckBtn" onclick="tryLuck()" style="display:none;">
-    運試し
-  </button>
-
-  <button id="specialDiceBtn" style="display:none;">
-    2d6
-  </button>
-</div>
-
-<!-- ===== タイマー ===== -->
-<div id="timerBox" style="
-  padding:8px;
-  display:flex;
-  gap:8px;
-  align-items:center;
-  border-top:1px solid #ccc;
-">
-
-  <button id="timer3Btn">3分</button>
-  <button id="timer5Btn">5分</button>
-
-  <input id="timerCustomInput"
-    placeholder="分"
-    style="width:60px;">
-
-  <button id="timerCustomBtn">任意</button>
-
-</div>
-
-
 
 <!-- ===== 参加者 ===== -->
 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -254,6 +236,33 @@ input, button, select { padding: 10px; font-size: 16px; }
   </div>
 
   <ul id="messages"></ul>
+</div>
+
+<!-- ===== 固定コントロールBOX ===== -->
+<div id="bottomControls">
+
+  <div id="sugorokuDice">
+    <button onclick="rollDice(6)">1d6</button>
+    <button onclick="rollDice(5)">1d5</button>
+    <button onclick="rollDice(4)">1d4</button>
+    <button onclick="rollDice(3)">1d3</button>
+    <button onclick="rollDice(2)">1d2</button>
+
+    <button id="luckBtn" onclick="tryLuck()" style="display:none;">
+      運試し
+    </button>
+
+    <button id="specialDiceBtn" style="display:none;"></button>
+  </div>
+
+  <div id="timerBox">
+    <button id="timer3Btn">3分</button>
+    <button id="timer5Btn">5分</button>
+
+    <input id="timerCustomInput" placeholder="分" style="width:60px;">
+    <button id="timerCustomBtn">任意</button>
+  </div>
+
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
