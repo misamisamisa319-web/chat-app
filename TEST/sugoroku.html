@@ -972,14 +972,14 @@ function sendPunish(type){
 
   if (type === "girl"){
     socket.emit("message", {
-      text: "女子罰",
+      text: "命令女",
       bold: true
     });
   }
 
   if (type === "boy"){
     socket.emit("message", {
-      text: "男子罰",
+      text: "命令男",
       bold: true
     });
   }
