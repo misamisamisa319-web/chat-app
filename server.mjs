@@ -918,75 +918,6 @@ const specialPainPunishItems = [
 "苦痛罰20.おまんこまたはおちんぽに刺激物を塗る",
 ];
 
-const easyEventItems = [
-"イージー1.",
-"イージー2.",
-"イージー3.",
-"イージー4.",
-"イージー5.",
-"イージー6.",
-"イージー7.",
-"イージー8.",
-"イージー9.",
-"イージー10.",
-"イージー11.",
-"イージー12.",
-"イージー13.",
-"イージー14.",
-"イージー15.",
-"イージー16.",
-"イージー17.",
-"イージー18.",
-"イージー19.",
-"イージー20.",
-];
-
-const normalEventItems = [
-"ノーマル1.",
-"ノーマル2.",
-"ノーマル3.",
-"ノーマル4.",
-"ノーマル5.",
-"ノーマル6.",
-"ノーマル7.",
-"ノーマル8.",
-"ノーマル9.",
-"ノーマル10.",
-"ノーマル11.",
-"ノーマル12.",
-"ノーマル13.",
-"ノーマル14.",
-"ノーマル15.",
-"ノーマル16.",
-"ノーマル17.",
-"ノーマル18.",
-"ノーマル19.",
-"ノーマル20.",
-];
-
-const hardEventItems = [
-"ハード1.",
-"ハード2.",
-"ハード3.",
-"ハード4.",
-"ハード5.",
-"ハード6.",
-"ハード7.",
-"ハード8.",
-"ハード9.",
-"ハード10.",
-"ハード11.",
-"ハード12.",
-"ハード13.",
-"ハード14.",
-"ハード15.",
-"ハード16.",
-"ハード17.",
-"ハード18.",
-"ハード19.",
-"ハード20.",
-];
-
 function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 let punishStockByRoom = {};
 // ===== 罰累計（絶頂解放用） =====
@@ -1060,9 +991,7 @@ function initPunishRoom(room){
       onaGirl: shuffle([...onaGirlPunishItems]),
       onaBoy: shuffle([...onaBoyPunishItems]),
       pain: shuffle([...specialPainPunishItems]),
-      easyEvent: shuffle([...easyEventItems]),
-      normalEvent: shuffle([...normalEventItems]),
-      hardEvent: shuffle([...hardEventItems]),
+    
 
     };
   }
@@ -1103,32 +1032,7 @@ function getPainPunish(room){
     punishStockByRoom[room].pain = shuffle([...specialPainPunishItems]);
   return punishStockByRoom[room].pain.shift();
 }
-function getEasyEvent(room){
-  initPunishRoom(room);
-  if (!punishStockByRoom[room].easyEvent.length){
-    punishStockByRoom[room].easyEvent =
-      shuffle([...easyEventItems]);
-  }
-  return punishStockByRoom[room].easyEvent.shift();
-}
 
-function getNormalEvent(room){
-  initPunishRoom(room);
-  if (!punishStockByRoom[room].normalEvent.length){
-    punishStockByRoom[room].normalEvent =
-      shuffle([...normalEventItems]);
-  }
-  return punishStockByRoom[room].normalEvent.shift();
-}
-
-function getHardEvent(room){
-  initPunishRoom(room);
-  if (!punishStockByRoom[room].hardEvent.length){
-    punishStockByRoom[room].hardEvent =
-      shuffle([...hardEventItems]);
-  }
-  return punishStockByRoom[room].hardEvent.shift();
-}
 
 
 /* ===============================
@@ -2670,69 +2574,6 @@ if (text === "絶頂許可") {
   return;
 }
 
-  
-if (text === "easy") {
-
-  const item = getEasyEvent(socket.room);
-
-  const msg = {
-    name: socket.username,
-    text: item,
-    room: socket.room,
-    bold: true,
-    time: getTimeString()
-  };
-
-  const log = normalizeLog(msg);
-  adminLogs.push(log);
-  roomLogs.push(log);
-  saveLogs();
-
-  io.to(socket.room).emit("message", msg);
-  return;
-}
-
-if (text === "normal") {
-
-  const item = getNormalEvent(socket.room);
-
-  const msg = {
-    name: socket.username,
-    text: item,
-    room: socket.room,
-    bold: true,
-    time: getTimeString()
-  };
-
-  const log = normalizeLog(msg);
-  adminLogs.push(log);
-  roomLogs.push(log);
-  saveLogs();
-
-  io.to(socket.room).emit("message", msg);
-  return;
-}
-
-if (text === "hard") {
-
-  const item = getHardEvent(socket.room);
-
-  const msg = {
-    name: socket.username,
-    text: item,
-    room: socket.room,
-    bold: true,
-    time: getTimeString()
-  };
-
-  const log = normalizeLog(msg);
-  adminLogs.push(log);
-  roomLogs.push(log);
-  saveLogs();
-
-  io.to(socket.room).emit("message", msg);
-  return;
-}
 
 
  
