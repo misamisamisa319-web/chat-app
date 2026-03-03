@@ -46,6 +46,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 
   display: flex;
   justify-content: flex-start;
+  flex-wrap: nowrap;
 }
 
 
@@ -247,11 +248,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   ⏱ 00:00
 </div>
 
-<div id="settings">
 
-  <button id="zecchoBtn" style="display:none; background:black; color:white; padding:8px 12px; border-radius:6px;">
-  絶頂許可
-</button>
 
     <label>色: <input type="color" id="colorSelect" value="#000000"></label>
     <label>内緒:
@@ -276,6 +273,9 @@ input, button, select { padding: 10px; font-size: 16px; }
   <div id="punishWrap">
   <button onclick="sendPunish('girl')">女子罰</button>
   <button onclick="sendPunish('boy')">男子罰</button>
+  <button id="zecchoBtn" style="display:none; background:black; color:white; padding:8px 12px; border-radius:6px;">
+    絶頂許可
+  </button>
 </div>
 </div>
 
