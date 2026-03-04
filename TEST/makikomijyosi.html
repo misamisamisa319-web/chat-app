@@ -313,16 +313,15 @@ window.addEventListener("load", () => {
   connectKey
 });
 
+if (savedRoom === "room7") {
+  socket.emit("room6Event", { type: "common" });
+}
+
 // ===== ここに直下で書く =====
 const eventBoyBtn = document.getElementById("eventBoyBtn");
 const eventGirlBtn = document.getElementById("eventGirlBtn");
 const eventCommonBtn = document.getElementById("eventCommonBtn");
 
-if (eventBoyBtn){
-  eventBoyBtn.onclick = () => {
-    socket.emit("room6Event", { type: "boy" });
-  };
-}
 
 if (eventGirlBtn){
   eventGirlBtn.onclick = () => {
@@ -668,6 +667,8 @@ muteBtn.onclick = () => {
 
 });
 
+
+
 socket.on("eventRemain", data => {
 
   const el =
@@ -677,6 +678,25 @@ socket.on("eventRemain", data => {
 
   el.textContent =
     `女イベ残${data.girl}　共通イベ残${data.common}`;
+
+  // ▼ここ追加
+  const girlBtn =
+    document.getElementById("eventGirlBtn");
+
+  const commonBtn =
+    document.getElementById("eventCommonBtn");
+
+  if (girlBtn){
+    girlBtn.onclick = () => {
+      socket.emit("room6Event", { type: "girl" });
+    };
+  }
+
+  if (commonBtn){
+    commonBtn.onclick = () => {
+      socket.emit("room6Event", { type: "common" });
+    };
+  }
 
 });
 
@@ -752,24 +772,6 @@ if (!room) {
 const eventBoyBtn = document.getElementById("eventBoyBtn");
 const eventGirlBtn = document.getElementById("eventGirlBtn");
 const eventCommonBtn = document.getElementById("eventCommonBtn");
-
-if (eventBoyBtn){
-  eventBoyBtn.onclick = () => {
-    socket.emit("roomEvent", { type: "boy" });
-  };
-}
-
-if (eventGirlBtn){
-  eventGirlBtn.onclick = () => {
-    socket.emit("room7Event", { type: "girl" });
-  };
-}
-
-if (eventCommonBtn){
-  eventCommonBtn.onclick = () => {
-    socket.emit("roomEvent", { type: "common" });
-  };
-}
 
   joined = true;
   login.style.display = "none";
