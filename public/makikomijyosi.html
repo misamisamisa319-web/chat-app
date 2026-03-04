@@ -253,6 +253,38 @@ input, button, select { padding: 10px; font-size: 16px; }
 <script>
 const socket = io();
 
+const socket = io();
+
+socket.on("eventRemain", data => {
+
+  const el =
+    document.getElementById("eventRemain");
+
+  if (!el) return;
+
+  el.textContent =
+    `女イベ残${data.girl}　共通イベ残${data.common}`;
+
+  const girlBtn =
+    document.getElementById("eventGirlBtn");
+
+  const commonBtn =
+    document.getElementById("eventCommonBtn");
+
+  if (girlBtn){
+    girlBtn.onclick = () => {
+      socket.emit("room6Event", { type: "girl" });
+    };
+  }
+
+  if (commonBtn){
+    commonBtn.onclick = () => {
+      socket.emit("room6Event", { type: "common" });
+    };
+  }
+
+});
+
 const login = document.getElementById("login");
 const chat = document.getElementById("chat");
 const joinBtn = document.getElementById("joinBtn");
@@ -670,44 +702,6 @@ muteBtn.onclick = () => {
 
 
 
-socket.on("eventRemain", data => {
-
-  const el =
-    document.getElementById("eventRemain");
-
-  if (!el) return;
-
-  el.textContent =
-    `女イベ残${data.girl}　共通イベ残${data.common}`;
-
-  // ▼ここ追加
-  const girlBtn =
-    document.getElementById("eventGirlBtn");
-
-  const commonBtn =
-    document.getElementById("eventCommonBtn");
-
-  if (girlBtn){
-    girlBtn.onclick = () => {
-      socket.emit("room6Event", { type: "girl" });
-    };
-  }
-
-  if (commonBtn){
-    commonBtn.onclick = () => {
-      socket.emit("room6Event", { type: "common" });
-    };
-  }
-
-});
-
-function rollDice(max){
-
-  socket.emit("message", {
-    text: `1d${max}`
-  });
-
-}
 
 
 /* ===== 入室処理 ===== */
