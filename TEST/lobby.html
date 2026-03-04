@@ -73,6 +73,16 @@
   color: #fff;
 }
 
+.room.room7 {
+  background: #660033;
+  color: #fff;
+}
+.room.room7,
+.room.room7 span,
+.room.room7 label {
+  color: #fff;
+}
+
 .room.denki {
   background: #fff4cc;
 }
@@ -347,6 +357,29 @@ input[type="password"] {
   <button onclick="enterRoom('jinmon')">入室</button>
 </div>
 
+<!-- ===== room7 ===== -->
+<div class="room room7">
+  <div class="room-title-row">
+    <span class="room-title">
+      巻き込み（女性限定）
+    </span>
+    <span class="room-desc">
+      女性のみ入室可・見学不可
+    </span>
+  </div>
+
+  <div class="room-info">
+    人数（<span id="count-room7">0</span>人）
+    <span id="names-room7">なし</span>
+  </div>
+
+  <label>
+  <input type="checkbox" id="girl-room7">
+  女性
+</label>
+  <button onclick="enterRoom('room7')">入室</button>
+</div>
+
 <!-- ===== room6 ===== -->
 <div class="room room6">
   <div class="room-title-row">
@@ -549,7 +582,8 @@ const allRooms = [
   "room3",
   "room4",
   "room5",
-  "room6",  
+  "room6", 
+  "room7", 
   "denki",
   "denki1",
   "denki2",
@@ -599,6 +633,16 @@ if (room === "room5") {
 
 }
 
+if (room === "room5") {
+  const girlCheck =
+    document.getElementById("girl-room5");
+
+  if (!girlCheck || !girlCheck.checked) {
+    document.getElementById("error").textContent =
+      "女子のみ入室できます";
+    return;
+  }
+}
 
   // ===== 既存処理 =====
   const errorEl = document.getElementById("error");
@@ -637,6 +681,8 @@ if (room === "room5") {
   location.href = "/jinmon.html";
 } else if (room === "room6") {
   location.href = "/makikomi.html";
+} else if (room === "room7") {
+  location.href = "/makikomijyosi.html";  
 } else {
   location.href = "/";
 }

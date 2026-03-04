@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Chat v2 - makikomi</title>
+<title>Chat v2 - makikomijyosi</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -178,7 +178,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   font-size:14px;
   background:#f0f0f0;
 ">
-  男イベ残10　女イベ残10　共通イベ残30
+  女イベ残10　共通イベ残30
 </div>
 
 
@@ -229,7 +229,6 @@ input, button, select { padding: 10px; font-size: 16px; }
 
   <!-- 1段目 -->
   <div style="display:flex; gap:8px; flex-wrap:wrap;">
-    <button id="eventBoyBtn">男イベ</button>
     <button id="eventGirlBtn">女イベ</button>
     <button id="eventCommonBtn">共通イベ</button>
 
@@ -370,7 +369,7 @@ if (bottomBar){
 });
 
 /* ===== ロビーからの情報 ===== */
-const room = "room6";
+const room = "room7";
 
 const descEl =
   document.getElementById("roomDesc");
@@ -416,7 +415,7 @@ descEl.style.color = "black";
 
 
 const roomLabel = document.getElementById("roomLabel");
-roomLabel.textContent = "巻き込まれ部屋";
+roomLabel.textContent = "巻き込まれ部屋（女性限定）";
 
 
 const key = localStorage.getItem("chatKey");
@@ -677,7 +676,7 @@ socket.on("eventRemain", data => {
   if (!el) return;
 
   el.textContent =
-    `男イベ残${data.boy}　女イベ残${data.girl}　共通イベ残${data.common}`;
+    `女イベ残${data.girl}　共通イベ残${data.common}`;
 
 });
 
