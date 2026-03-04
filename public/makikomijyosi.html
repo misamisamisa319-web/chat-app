@@ -312,10 +312,11 @@ window.addEventListener("load", () => {
   room: savedRoom,
   connectKey
 });
-
 if (savedRoom === "room7") {
-  socket.emit("room6Event", { type: "common" });
+  socket.emit("getEventRemain");
 }
+
+
 
 // ===== ここに直下で書く =====
 const eventBoyBtn = document.getElementById("eventBoyBtn");
