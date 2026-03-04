@@ -1868,7 +1868,7 @@ socket.emit(
   )
 );
 
-if (room === "room6") {
+if (room === "room6" || room === "room7") {
 
   initPunishRoom(room);
 
