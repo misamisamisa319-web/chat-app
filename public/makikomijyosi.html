@@ -264,23 +264,7 @@ socket.on("eventRemain", data => {
   el.textContent =
     `女イベ残${data.girl}　共通イベ残${data.common}`;
 
-  const girlBtn =
-    document.getElementById("eventGirlBtn");
 
-  const commonBtn =
-    document.getElementById("eventCommonBtn");
-
-  if (girlBtn){
-    girlBtn.onclick = () => {
-      socket.emit("room6Event", { type: "girl" });
-    };
-  }
-
-  if (commonBtn){
-    commonBtn.onclick = () => {
-      socket.emit("room6Event", { type: "common" });
-    };
-  }
 
 });
 
@@ -705,6 +689,13 @@ muteBtn.onclick = () => {
 
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
+
+ const bottomBar =
+  document.getElementById("bottomBar");
+
+if (bottomBar){
+  bottomBar.style.display = "block";
+} 
 
 const room = localStorage.getItem("chatRoom");
 
