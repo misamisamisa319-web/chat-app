@@ -755,19 +755,19 @@ const eventCommonBtn = document.getElementById("eventCommonBtn");
 
 if (eventBoyBtn){
   eventBoyBtn.onclick = () => {
-    socket.emit("room6Event", { type: "boy" });
+    socket.emit("roomEvent", { type: "boy" });
   };
 }
 
 if (eventGirlBtn){
   eventGirlBtn.onclick = () => {
-    socket.emit("room6Event", { type: "girl" });
+    socket.emit("room7Event", { type: "girl" });
   };
 }
 
 if (eventCommonBtn){
   eventCommonBtn.onclick = () => {
-    socket.emit("room6Event", { type: "common" });
+    socket.emit("roomEvent", { type: "common" });
   };
 }
 
