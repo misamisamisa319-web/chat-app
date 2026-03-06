@@ -239,7 +239,7 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 
 <!-- ===== 固定コントロールBOX ===== -->
-<div id="bottomControls">
+<div id="bottomControls" style="display:none;"></div>
 
   <div id="sugorokuDice">
     <button onclick="rollDice(6)">1d6</button>
@@ -337,7 +337,8 @@ window.addEventListener("load", () => {
     }
 
     login.style.display = "none";
-    chat.style.display = "flex";
+chat.style.display = "flex";
+document.getElementById("bottomControls").style.display = "flex";
   }
 });
 
@@ -749,10 +750,10 @@ if (!room) {
   connectKey
 });
 
-
-  joined = true;
-  login.style.display = "none";
-  chat.style.display = "flex";
+joined = true;
+login.style.display = "none";
+chat.style.display = "flex";
+document.getElementById("bottomControls").style.display = "flex";
 };
 
 /* ===== 操作 ===== */
