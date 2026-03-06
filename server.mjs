@@ -223,6 +223,11 @@ if (fs.existsSync(LOG_FILE)) {
 
 function saveLogs() {
 
+  // ===== ログ上限 =====
+  if (adminLogs.length > 5000) {
+    adminLogs = adminLogs.slice(-5000);
+  }
+
   fs.writeFileSync(
     LOG_FILE,
     JSON.stringify(adminLogs, null, 2)
