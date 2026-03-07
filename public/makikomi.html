@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Chat v2 - Template</title>
+<title>Chat v2 - makikomi</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -370,29 +370,31 @@ if (bottomBar){
 });
 
 /* ===== ロビーからの情報 ===== */
-const room = "room6";
+const room = localStorage.getItem("chatRoom");
 
 const descEl =
   document.getElementById("roomDesc");
 
-if (room === "room6") {
+if (room === "room6" || room === "room8") {
 descEl.innerHTML = `
 プレイヤーは名前+性別+S.N.Mで入ってくること
 見学はいません。
 入った方はみんなプレイヤーです。
 
 【重要】
+・勝手にルール変更や命令をしない。
 ・名前以外で入ってきた人は確認次第BANします♡
 ・途中参加歓迎
 ・男イベ → 男対象、女イベ → 女対象、共通イベ → 全員対象
 ・回数には上限があります。
-・すべて使い切ると発動不可
-・イベントは勝者でも強制参加になる可能性あり
-・勝者指定のオナニー方法で服を脱がせるのは無し
+・すべて使い切ると発動不可。
+・イベントは勝者でも強制参加になる可能性あり。
+・勝者指定のオナニー方法で服を脱がせるのは無し。
+・自由命令でも継続系の命令はしない。
 
 【遊び方】
 1.入室してたら着てる服の枚数を報告する。
-2.1d100のサイコロをふる
+2.1d100のサイコロをふる（勝者が二人の場合はもう一度全員降り直す）
 3.一番数字の低い人は服を1枚脱ぐ
 4.もし脱ぐ服がなくなってしまった場合、数字が一番高い人が男イベ、女イベ、共通イベの中から選んでボタンを押す。
 5.脱ぐ服がない一番低い数字の人は基本罰を受ける。

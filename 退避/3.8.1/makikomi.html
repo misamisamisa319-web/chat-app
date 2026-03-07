@@ -370,12 +370,12 @@ if (bottomBar){
 });
 
 /* ===== ロビーからの情報 ===== */
-const room = localStorage.getItem("chatRoom");
+const room = "room6";
 
 const descEl =
   document.getElementById("roomDesc");
 
-if (room === "room6" || room === "room8") {
+if (room === "room6") {
 descEl.innerHTML = `
 プレイヤーは名前+性別+S.N.Mで入ってくること
 見学はいません。
