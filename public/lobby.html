@@ -335,27 +335,6 @@ input[type="password"] {
 <button onclick="enterRoom('room5')">入室</button>
 </div>
 
-<!-- ===== 尋問部屋 ===== -->
-<div class="room jinmon">
-  <div class="room-title-row">
-
-  <span class="room-title">
-    尋問部屋
-  </span>
-
-  <span class="room-desc">
-    Mの方限定
-  </span>
-
-</div>
-
-  <div class="room-info">
-    人数（<span id="count-jinmon">0</span>人）
-    <span id="names-jinmon">なし</span>
-  </div>
-
-  <button onclick="enterRoom('jinmon')">入室</button>
-</div>
 
 <!-- ===== room7 ===== -->
 <div class="room room7">
@@ -401,6 +380,72 @@ input[type="password"] {
 
 
   <button onclick="enterRoom('room6')">入室</button>
+</div>
+
+<!-- ===== room8 ===== -->
+<div class="room room6">
+  <div class="room-title-row">
+
+  <span class="room-title">
+    巻き込み部屋②
+  </span>
+
+  <span class="room-desc">
+    見学不可、必ず名前で入室すること。
+  </span>
+
+</div>
+
+  <div class="room-info">
+    人数（<span id="count-room8">0</span>人）
+    <span id="names-room8">なし</span>
+  </div>
+
+  <button onclick="enterRoom('room8')">入室</button>
+</div>
+
+<!-- ===== room9 ===== -->
+<div class="room">
+  <div class="room-title-row">
+
+  <span class="room-title">
+    雑談部屋
+  </span>
+
+  <span class="room-desc">
+    雑談
+  </span>
+
+</div>
+
+  <div class="room-info">
+    人数（<span id="count-room9">0</span>人）
+    <span id="names-room9">なし</span>
+  </div>
+
+  <button onclick="enterRoom('room9')">入室</button>
+</div>
+
+<!-- ===== 尋問部屋 ===== -->
+<div class="room jinmon">
+  <div class="room-title-row">
+
+  <span class="room-title">
+    尋問部屋
+  </span>
+
+  <span class="room-desc">
+    Mの方限定
+  </span>
+
+</div>
+
+  <div class="room-info">
+    人数（<span id="count-jinmon">0</span>人）
+    <span id="names-jinmon">なし</span>
+  </div>
+
+  <button onclick="enterRoom('jinmon')">入室</button>
 </div>
 
 
@@ -584,6 +629,8 @@ const allRooms = [
   "room5",
   "room6", 
   "room7", 
+  "room8",
+  "room9",
   "denki",
   "denki1",
   "denki2",
@@ -681,8 +728,12 @@ if (room === "room5") {
   location.href = "/jinmon.html";
 } else if (room === "room6") {
   location.href = "/makikomi.html";
+} else if (room === "room8") {
+  location.href = "/makikomi.html";  
 } else if (room === "room7") {
   location.href = "/makikomijyosi.html";  
+} else if (room === "room9") {
+  location.href = "/";
 } else {
   location.href = "/";
 }

@@ -1345,11 +1345,7 @@ io.on("connection", socket => {
 
 socket.on("room6Event", ({ type }) => {
 
-if (
-  socket.room !== "room6" &&
-  socket.room !== "room7" &&
-  socket.room !== "room8"
-) return;
+  if (socket.room !== "room6" && socket.room !== "room7") return;
 
   if (!canUsePunish(socket.room)){
     socket.emit("message",{
