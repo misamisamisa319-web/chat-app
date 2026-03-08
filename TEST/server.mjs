@@ -5,7 +5,7 @@ import fs from "fs";
 
 let ipBans = {};
 
-const BAN_FILE = "/data/banList.json";
+const BAN_FILE = "./data/banList.json";
 
 try {
   ipBans = JSON.parse(fs.readFileSync(BAN_FILE, "utf-8"));
