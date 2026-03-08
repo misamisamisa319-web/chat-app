@@ -99,6 +99,10 @@
   background: #e6f7ff;
 }
 
+.room.sugoroku3 {
+  background: #ffb3d9;
+}
+
 .room-title {
   font-weight: bold;
   margin-bottom: 4px;
@@ -237,6 +241,97 @@ input[type="password"] {
 <div id="error" style="color:red; margin-bottom:10px;"></div>
 
 <div id="roomContainer">
+
+<!-- ===== room9 ===== -->
+<div class="room">
+  <div class="room-title-row">
+
+  <span class="room-title">
+    雑談部屋①
+  </span>
+
+  <span class="room-desc">
+    雑談
+  </span>
+
+</div>
+
+  <div class="room-info">
+    人数（<span id="count-room9">0</span>人）
+    <span id="names-room9">なし</span>
+  </div>
+
+  <button onclick="enterRoom('room9')">入室</button>
+</div>
+
+<!-- ===== room10 ===== -->
+<div class="room">
+  <div class="room-title-row">
+
+  <span class="room-title">
+    雑談部屋②
+  </span>
+
+  <span class="room-desc">
+    雑談
+  </span>
+
+</div>
+
+  <div class="room-info">
+    人数（<span id="count-room10">0</span>人）
+    <span id="names-room10">なし</span>
+  </div>
+
+  <button onclick="enterRoom('room10')">入室</button>
+</div>
+
+
+<!-- ===== room6 ===== -->
+<div class="room room6">
+  <div class="room-title-row">
+
+  <span class="room-title">
+    巻き込み部屋①
+  </span>
+
+  <span class="room-desc">
+    見学不可、必ず名前で入室すること。
+  </span>
+
+</div>
+
+  <div class="room-info">
+    人数（<span id="count-room6">0</span>人）
+    <span id="names-room6">なし</span>
+  </div>
+
+
+  <button onclick="enterRoom('room6')">入室</button>
+</div>
+
+<!-- ===== room8 ===== -->
+<div class="room room6">
+  <div class="room-title-row">
+
+  <span class="room-title">
+    巻き込み部屋②
+  </span>
+
+  <span class="room-desc">
+    見学不可、必ず名前で入室すること。
+  </span>
+
+</div>
+
+  <div class="room-info">
+    人数（<span id="count-room8">0</span>人）
+    <span id="names-room8">なし</span>
+  </div>
+
+  <button onclick="enterRoom('room8')">入室</button>
+</div>
+
 <!-- ===== room1 ===== -->
 <div class="room room1">
   <div class="room-title-row">
@@ -375,72 +470,22 @@ input[type="password"] {
   <button onclick="enterRoom('room7')">入室</button>
 </div>
 
-<!-- ===== room6 ===== -->
-<div class="room room6">
+
+<!-- ===== sugoroku3 ===== -->
+<div class="room sugoroku3">
   <div class="room-title-row">
-
-  <span class="room-title">
-    巻き込み部屋①
-  </span>
-
-  <span class="room-desc">
-    見学不可、必ず名前で入室すること。
-  </span>
-
-</div>
-
-  <div class="room-info">
-    人数（<span id="count-room6">0</span>人）
-    <span id="names-room6">なし</span>
+    <span class="room-title">🎲 女子用すごろく</span>
+    <span class="room-desc">女子専用、イキグルイver</span>
   </div>
 
-
-  <button onclick="enterRoom('room6')">入室</button>
-</div>
-
-<!-- ===== room8 ===== -->
-<div class="room room6">
-  <div class="room-title-row">
-
-  <span class="room-title">
-    巻き込み部屋②
-  </span>
-
-  <span class="room-desc">
-    見学不可、必ず名前で入室すること。
-  </span>
-
-</div>
-
   <div class="room-info">
-    人数（<span id="count-room8">0</span>人）
-    <span id="names-room8">なし</span>
+    人数（<span id="count-sugoroku3">0</span>人）
+    <span id="names-sugoroku3">なし</span>
   </div>
 
-  <button onclick="enterRoom('room8')">入室</button>
+  <button onclick="enterRoom('sugoroku3')">入室</button>
 </div>
 
-<!-- ===== room9 ===== -->
-<div class="room">
-  <div class="room-title-row">
-
-  <span class="room-title">
-    雑談部屋
-  </span>
-
-  <span class="room-desc">
-    雑談
-  </span>
-
-</div>
-
-  <div class="room-info">
-    人数（<span id="count-room9">0</span>人）
-    <span id="names-room9">なし</span>
-  </div>
-
-  <button onclick="enterRoom('room9')">入室</button>
-</div>
 
 <!-- ===== 尋問部屋 ===== -->
 <div class="room jinmon">
@@ -535,21 +580,6 @@ input[type="password"] {
     <span id="names-sugoroku2">なし</span>
   </div>
   <button onclick="enterRoom('sugoroku2')">入室</button>
-</div>
-
-<!-- ===== sugoroku3 ===== -->
-<div class="room sugoroku">
-  <div class="room-title-row">
-    <span class="room-title">🎲 女子用すごろく</span>
-    <span class="room-desc">女子専用、イキグルイver</span>
-  </div>
-
-  <div class="room-info">
-    人数（<span id="count-sugoroku3">0</span>人）
-    <span id="names-sugoroku3">なし</span>
-  </div>
-
-  <button onclick="enterRoom('sugoroku3')">入室</button>
 </div>
 
 
@@ -660,6 +690,7 @@ const allRooms = [
   "room7", 
   "room8",
   "room9",
+  "room10",
   "denki",
   "denki1",
   "denki2",
@@ -770,14 +801,22 @@ if (room === "sugoroku3") {
 
 } else if (room === "jinmon") {
   location.href = "/jinmon.html";
+
 } else if (room === "room6") {
   location.href = "/makikomi.html";
+
 } else if (room === "room8") {
   location.href = "/makikomi.html";  
+
 } else if (room === "room7") {
   location.href = "/makikomijyosi.html";  
+
 } else if (room === "room9") {
   location.href = "/";
+
+} else if (room === "room10") {
+  location.href = "/";
+
 } else {
   location.href = "/";
 }
