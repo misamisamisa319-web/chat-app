@@ -471,6 +471,16 @@ const logRows = [...filteredLogs].reverse().map(m => {
   room6
 </option>
 
+<option value="room7"
+  ${selectedRoom==="room7"?"selected":""}>
+  room7
+</option>
+
+<option value="room8"
+  ${selectedRoom==="room8"?"selected":""}>
+  room8
+</option>
+
 <option value="denki"
   ${selectedRoom==="denki"?"selected":""}>
   denki
