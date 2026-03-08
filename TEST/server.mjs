@@ -288,16 +288,24 @@ function addDate(timeStr) {
   }
 
   const roomOrder = [
+  "room9",
+  "room10",
+  "room6",
+  "room8",
   "room1",
   "room2",
   "room3",
   "room4",
   "room5",
-  "room6",
+  "room7",
   "denki",
   "denki1",
-  "denki2",
+  "sugoroku1",
+  "sugoroku2",
+  "sugoroku3",
+  "jinmon",
   "special",
+  "specialFree",
   "privateA",
   "privateB",
   "privateC",
@@ -337,8 +345,12 @@ u.room==="room5"?"女子部屋":
 u.room==="special"?"スペシャル":
 u.room==="specialFree"?"スペシャル鍵無し":
 u.room}</td>
+<td>${u.name}</td>
+<td>${u.ip || "-"}</td>
+<td>
 
-       <form method="POST" action="/admin/kick" style="display:inline;">
+<form method="POST" action="/admin/kick" style="display:inline;">
+
   <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
   <input type="hidden" name="userId" value="${u.id}">
   <button type="submit">キック</button>
