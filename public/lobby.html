@@ -537,7 +537,20 @@ input[type="password"] {
   <button onclick="enterRoom('sugoroku2')">入室</button>
 </div>
 
+<!-- ===== sugoroku3 ===== -->
+<div class="room sugoroku">
+  <div class="room-title-row">
+    <span class="room-title">🎲 女子用すごろく</span>
+    <span class="room-desc">女子専用、イキグルイver</span>
+  </div>
 
+  <div class="room-info">
+    人数（<span id="count-sugoroku3">0</span>人）
+    <span id="names-sugoroku3">なし</span>
+  </div>
+
+  <button onclick="enterRoom('sugoroku3')">入室</button>
+</div>
 
 
 <!-- ===== special ===== -->
@@ -707,6 +720,19 @@ if (room === "room5") {
   }
 }
 
+if (room === "sugoroku3") {
+
+  const girlCheck =
+    document.getElementById("girl-sugoroku3");
+
+  if (!girlCheck || !girlCheck.checked) {
+    document.getElementById("error").textContent =
+      "女子のみ入室できます";
+    return;
+  }
+
+}
+
   // ===== 既存処理 =====
   const errorEl = document.getElementById("error");
   errorEl.textContent = "";
@@ -735,10 +761,12 @@ if (room === "room5") {
 
 } else if (
   room === "sugoroku1" ||
-  room === "sugoroku2" ||
-  room === "sugoroku3"
+  room === "sugoroku2"
 ){
   location.href = "/sugoroku.html";
+
+} else if (room === "sugoroku3"){
+  location.href = "/sugorokujyosi.html";
 
 } else if (room === "jinmon") {
   location.href = "/jinmon.html";
