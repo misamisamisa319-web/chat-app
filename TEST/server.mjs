@@ -740,8 +740,8 @@ function getLobbyInfo() {
 const roomKeys = {
   special: "12345678",
   specialFree: "",
-  privateA: "1234a",
-  privateB: "1234b",
+  privateA: "a1234",
+  privateB: "b1234",
   privateC: "1234c",
   privateD: "1234d",
 };
