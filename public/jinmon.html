@@ -232,6 +232,31 @@ let myColor = "#000000";
 let privateTo = "";
 let joined = false;
 
+window.addEventListener("load", () => {
+
+  const savedName  = localStorage.getItem("chatName");
+  const savedRoom  = localStorage.getItem("chatRoom");
+  const savedColor = localStorage.getItem("chatColor") || "#000000";
+
+  if (savedName && savedRoom === "jinmon") {
+
+    username = savedName;
+    myColor = savedColor;
+
+    socket.emit("join", {
+      name: username,
+      color: myColor,
+      room: "jinmon",
+      connectKey
+    });
+
+    joined = true;
+    login.style.display = "none";
+    chat.style.display = "flex";
+  }
+
+});
+
 let connectKey =
   localStorage.getItem("connectKey");
 
