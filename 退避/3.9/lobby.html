@@ -143,7 +143,8 @@ input[type="password"] {
     掲示板
   </button>
 </div>
-<div style="
+
+<div id="features" style="
   border:1px solid #ccc;
   padding:12px;
   margin-bottom:20px;
@@ -502,10 +503,6 @@ input[type="password"] {
   <div class="room-title-row">
     <span class="room-title">🎲 女子用すごろく</span>
     <span class="room-desc">女子専用、イキグルイver</span>
-    <label>
-  <input type="checkbox" id="girl-sugoroku3">
-  女性
-</label>
   </div>
 
   <div class="room-info">
@@ -750,7 +747,16 @@ if (room === "room5") {
 
 }
 
+if (room === "room5") {
+  const girlCheck =
+    document.getElementById("girl-room5");
 
+  if (!girlCheck || !girlCheck.checked) {
+    document.getElementById("error").textContent =
+      "女子のみ入室できます";
+    return;
+  }
+}
 
 if (room === "sugoroku3") {
 
