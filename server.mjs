@@ -552,11 +552,17 @@ app.post("/admin/ipban24", (req, res) => {
     return res.status(403).send("Forbidden");
   }
 
-  const ip = req.body.ip;
+const ip = req.body.ip;
 
-  // ===== 24時間BAN =====
-  ipBans[ip] =
-    Date.now() + (24 * 60 * 60 * 1000);
+const target =
+  users.find(u => u.ip === ip);
+
+// ===== 24時間BAN =====
+ipBans[ip] = {
+  name: target?.name || "-",
+  type: "24時間",
+  expire: Date.now() + (24 * 60 * 60 * 1000)
+};
 
   fs.writeFileSync(
   BAN_FILE,
@@ -587,16 +593,16 @@ app.get("/admin/ipbanlist", (req, res) => {
   }
 
   const rows = Object.entries(ipBans)
-    .map(([ip, expire]) => {
+    .map(([ip, data]) => {
 
-      const type =
-        expire === Infinity
-          ? "永久"
-          : "24時間";
+      const type = data.type;
+      const name = data.name;
+      
 
-      return `
+return `
 <tr>
 <td>${ip}</td>
+<td>${name}</td>
 <td>${type}</td>
 <td>
 
@@ -633,6 +639,7 @@ th{background:#eee;}
 <table>
 <tr>
 <th>IP</th>
+<th>名前</th>
 <th>種別</th>
 <th>解除</th>
 </tr>
@@ -655,7 +662,14 @@ app.post("/admin/ipbanPermanent", (req, res) => {
   const ip = req.body.ip;
 
   // ===== 永久BAN =====
-  ipBans[ip] = Infinity;
+  const target =
+  users.find(u => u.ip === ip);
+
+ipBans[ip] = {
+  name: target?.name || "-",
+  type: "永久",
+  expire: Infinity
+};
 
   fs.writeFileSync(
   BAN_FILE,
@@ -1741,7 +1755,10 @@ socket.on("join", ({
     return;
   }
   // ===== IP BAN =====
-if (ipBans[ip] && ipBans[ip] > Date.now()) {
+if (
+  ipBans[ip] &&
+  ipBans[ip].expire > Date.now()
+) {
 
   socket.emit("message", {
     name:"system",
