@@ -838,7 +838,7 @@ function tryLuck(){
   const n = Math.floor(Math.random()*5)+1;
 
   socket.emit("message", {
-    text: `🎲 運試し → ${n}`
+    text: `🎲 イキグルイ → ${n}`
   });
 
   const btn =
@@ -860,14 +860,14 @@ socket.on("sugorokuEvent", ({ type }) => {
     if (!btn) return;
 
   btn.style.display = "inline-block";
-  btn.textContent = "1d10";
+  btn.textContent = "2d2+1";
 
   btn.onclick = () => {
 
     const n = Math.floor(Math.random()*10)+1;
 
     socket.emit("message", {
-      text: `🎲 1d10 → ${n}`
+      text: `🎲 2d2+1 → ${n}`
     });
 
   };
@@ -955,7 +955,7 @@ if (btn) btn.style.display = "inline-block";
 } else {
 
   socket.emit("message", {
-    text: "⚠ 寸止め1回"
+    text: "⚠ 絶頂1回"
   });
 
 }

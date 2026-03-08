@@ -3193,7 +3193,14 @@ for (let i = prevPos + 1; i <= user.position; i++) {
 
     user.position = i;
 
-    const squareText = sugorokuMap[i];
+
+    const map =
+  user.room === "sugoroku3"
+    ? sugorokuMapJyosi
+    : sugorokuMap;
+
+const squareText =
+  map[i];
 
    const msg = {
   name: "🎲すごろく",
@@ -3203,6 +3210,7 @@ for (let i = prevPos + 1; i <= user.position; i++) {
   room: user.room,
   time: getTimeString()
 };
+
 
 const log = normalizeLog(msg);
 
