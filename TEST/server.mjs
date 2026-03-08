@@ -1770,6 +1770,23 @@ if (
   socket.disconnect(true);
   return;
 }
+// ===== 巻き込み部屋・女子部屋 見学禁止 =====
+if (
+  (room === "room7" || room === "room8") &&
+  name.includes("見学")
+){
+
+  socket.emit("message", {
+    name: "system",
+    text: "この部屋は見学入室できません",
+    room,
+    time: getTimeString()
+  });
+
+  socket.disconnect(true);
+  return;
+}
+
 
 // ===== room6 入室制限 =====
 const ngNames = ["見学","観戦","ROM"];
