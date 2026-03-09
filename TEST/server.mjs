@@ -624,7 +624,7 @@ app.get("/admin/ipbanlist", (req, res) => {
     return res.status(403).send("Forbidden");
   }
 
-  const rows = Object.entries(ipBans)
+  const rows = Object.entries(ipBans || {})
     .map(([ip, data]) => {
 
       const type = data.type;
