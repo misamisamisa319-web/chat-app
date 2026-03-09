@@ -687,18 +687,7 @@ socket.on("eventRemain", data => {
 
 });
 
-let lastDiceTime = 0;
-
 function rollDice(max){
-
-  const now = Date.now();
-
-  if (now - lastDiceTime < 10000){
-    alert("サイコロは10秒に1回");
-    return;
-  }
-
-  lastDiceTime = now;
 
   socket.emit("message", {
     text: `1d${max}`

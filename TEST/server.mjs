@@ -1105,6 +1105,9 @@ function isSamePunishUnlocked(room){
 let punishCooldownByRoom = {};
 const PUNISH_COOLDOWN = 30 * 1000; // 20秒
 
+let eventCooldownByUser = {};
+const EVENT_COOLDOWN = 10 * 1000;
+
 function canUsePunish(room){
 
   const now = Date.now();
@@ -1116,6 +1119,19 @@ function canUsePunish(room){
 
   punishCooldownByRoom[room] = now;
   return true;
+}
+function canUseEvent(userId){
+
+  const now = Date.now();
+  const last = eventCooldownByUser[userId] || 0;
+
+  if (now - last < EVENT_COOLDOWN){
+    return false;
+  }
+
+  eventCooldownByUser[userId] = now;
+  return true;
+
 }
 
 function initPunishRoom(room){
@@ -1547,7 +1563,7 @@ if (
   if (!canUsePunish(socket.room)){
     socket.emit("message",{
       name:"system",
-      text:"イベントは20秒に1回まで",
+      text:"イベントは30秒に1回まで",
       room:socket.room,
       time:getTimeString()
     });
@@ -2595,7 +2611,7 @@ if(text==="女子罰"){
   if (!canUsePunish(socket.room)){
     socket.emit("message",{
       name:"system",
-      text:"罰は20秒に1回まで",
+      text:"罰は30秒に1回まで",
       room:socket.room,
       time:getTimeString()
     });
