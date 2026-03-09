@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Chat v2 - makikomi</title>
+<title>Chat v2 - makikomijyosi</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -178,7 +178,7 @@ input, button, select { padding: 10px; font-size: 16px; }
   font-size:14px;
   background:#f0f0f0;
 ">
-  男イベ残20　女イベ残20　共通イベ残30
+  女イベ残10　共通イベ残30
 </div>
 
 
@@ -229,7 +229,6 @@ input, button, select { padding: 10px; font-size: 16px; }
 
   <!-- 1段目 -->
   <div style="display:flex; gap:8px; flex-wrap:wrap;">
-    <button id="eventBoyBtn">男イベ</button>
     <button id="eventGirlBtn">女イベ</button>
     <button id="eventCommonBtn">共通イベ</button>
 
@@ -253,6 +252,21 @@ input, button, select { padding: 10px; font-size: 16px; }
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
+
+
+socket.on("eventRemain", data => {
+
+  const el =
+    document.getElementById("eventRemain");
+
+  if (!el) return;
+
+  el.textContent =
+    `女イベ残${data.girl}　共通イベ残${data.common}`;
+
+
+
+});
 
 const login = document.getElementById("login");
 const chat = document.getElementById("chat");
@@ -313,17 +327,17 @@ window.addEventListener("load", () => {
   room: savedRoom,
   connectKey
 });
+if (savedRoom === "room7") {
+  socket.emit("getEventRemain");
+}
+
+
 
 // ===== ここに直下で書く =====
 const eventBoyBtn = document.getElementById("eventBoyBtn");
 const eventGirlBtn = document.getElementById("eventGirlBtn");
 const eventCommonBtn = document.getElementById("eventCommonBtn");
 
-if (eventBoyBtn){
-  eventBoyBtn.onclick = () => {
-    socket.emit("room6Event", { type: "boy" });
-  };
-}
 
 if (eventGirlBtn){
   eventGirlBtn.onclick = () => {
@@ -370,41 +384,34 @@ if (bottomBar){
 });
 
 /* ===== ロビーからの情報 ===== */
-const room = localStorage.getItem("chatRoom");
+const room = "room7";
 
 const descEl =
   document.getElementById("roomDesc");
 
-if (room === "room6" || room === "room8") {
+if (room === "room7") {
 descEl.innerHTML = `
 プレイヤーは名前+性別+S.N.Mで入ってくること
 見学はいません。
-名前以外で入ってきた人は確認次第BANします♡
 入った方はみんなプレイヤーです。
-3-7人推奨
 
 【重要】
-・勝手にルール変更や命令をしない。
-・みんな仲良く遊ぶこと。内緒でコソコソはミサが嫌いなのでBAN覚悟でね♡
-・寸止めイベントは最大5分、5分以内に出来ない場合は強制的に次のイベントも受ける
-・ボタンが出ないなどの不具合がある場合は更新押してね
-・途中参加歓迎（途中参加は最初から全裸）
+・名前以外で入ってきた人は確認次第BANします♡
+・途中参加歓迎
 ・男イベ → 男対象、女イベ → 女対象、共通イベ → 全員対象
 ・回数には上限があります。
-・すべて使い切ると発動不可。
-・イベントは勝者でも強制参加になる可能性あり。
-・勝者指定のオナニー方法で服を脱がせるのは無し。
-・自由命令でも継続系の命令はしない。
-・絶頂できなくなった時点でリタイアすること
+・すべて使い切ると発動不可
+・イベントは勝者でも強制参加になる可能性あり
+・勝者指定のオナニー方法で服を脱がせるのは無し
 
 【遊び方】
-1.入室してたら女子はブラとパンツ、男子はパンツでスタート（途中参加は最初から全裸）
-2.1d100のサイコロをふる（勝者が二人の場合はもう一度全員降り直す、敗者が二人の場合は二人とも敗者になる。）
-3.一番数字の低い人は敗者として服を1枚脱ぐ（6人以上参加者がいる場合は敗者は2人）
-4.もし敗者の脱ぐ服がなくなってしまった場合、数字が一番高い人が男イベ、女イベ、共通イベの中から選んでボタンを押す。
-5.脱ぐ服がない敗者は基本罰を受ける。
-6.【大事】絶頂してしまった場合、その回の勝者が名前を決め、その名前で入り直す。その回に勝者がいない場合は次の回の勝者が決める。
-7.絶頂者は敗者ではなくイキグルイ人形。絶頂してしまった者はそれ以降サイコロをふることなく該当する命令全てに従う。男子罰など出来ない場合は1回絶頂する。
+1.入室してたら着てる服の枚数を報告する。
+2.1d100のサイコロをふる
+3.一番数字の低い人は服を1枚脱ぐ
+4.もし脱ぐ服がなくなってしまった場合、数字が一番高い人が男イベ、女イベ、共通イベの中から選んでボタンを押す。
+5.脱ぐ服がない一番低い数字の人は基本罰を受ける。
+6.絶頂してしまった場合、その回の勝者が名前を決め、その名前で入り直す。
+7.絶頂してしまった者はそれ以降サイコロをふることなく該当する命令全てに従う。男子罰など出来ない場合は1回絶頂する。
 8.満足するまで行い。参加者が2名になった時終了。
 
 <br><br>
@@ -423,7 +430,7 @@ descEl.style.color = "black";
 
 
 const roomLabel = document.getElementById("roomLabel");
-roomLabel.textContent = "巻き込まれ部屋";
+roomLabel.textContent = "巻き込まれ部屋（女性限定）";
 
 
 const key = localStorage.getItem("chatKey");
@@ -676,40 +683,19 @@ muteBtn.onclick = () => {
 
 });
 
-socket.on("eventRemain", data => {
 
-  const el =
-    document.getElementById("eventRemain");
 
-  if (!el) return;
-
-  el.textContent =
-    `男イベ残${data.boy}　女イベ残${data.girl}　共通イベ残${data.common}`;
-
-});
-
-let lastDiceTime = 0;
-
-function rollDice(max){
-
-  const now = Date.now();
-
-  if (now - lastDiceTime < 10000){
-    alert("サイコロは10秒に1回");
-    return;
-  }
-
-  lastDiceTime = now;
-
-  socket.emit("message", {
-    text: `1d${max}`
-  });
-
-}
 
 
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
+
+ const bottomBar =
+  document.getElementById("bottomBar");
+
+if (bottomBar){
+  bottomBar.style.display = "block";
+} 
 
 const room = localStorage.getItem("chatRoom");
 
@@ -771,24 +757,6 @@ if (!room) {
 const eventBoyBtn = document.getElementById("eventBoyBtn");
 const eventGirlBtn = document.getElementById("eventGirlBtn");
 const eventCommonBtn = document.getElementById("eventCommonBtn");
-
-if (eventBoyBtn){
-  eventBoyBtn.onclick = () => {
-    socket.emit("room6Event", { type: "boy" });
-  };
-}
-
-if (eventGirlBtn){
-  eventGirlBtn.onclick = () => {
-    socket.emit("room6Event", { type: "girl" });
-  };
-}
-
-if (eventCommonBtn){
-  eventCommonBtn.onclick = () => {
-    socket.emit("room6Event", { type: "common" });
-  };
-}
 
   joined = true;
   login.style.display = "none";
