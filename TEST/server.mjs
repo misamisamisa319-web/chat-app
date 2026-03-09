@@ -700,7 +700,7 @@ app.post("/admin/ipbanPermanent", (req, res) => {
 ipBans[ip] = {
   name: target?.name || "-",
   type: "永久",
-  expire: Infinity
+  expire: 9999999999999
 };
 
   fs.writeFileSync(
