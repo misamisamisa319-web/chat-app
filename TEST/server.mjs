@@ -7,6 +7,10 @@ let ipBans = {};
 
 const BAN_FILE = "/data/banList.json";
 
+if (!fs.existsSync(BAN_FILE)) {
+  fs.writeFileSync(BAN_FILE, JSON.stringify({}, null, 2));
+}
+
 try {
   ipBans = JSON.parse(fs.readFileSync(BAN_FILE, "utf-8"));
 } catch {
@@ -1639,10 +1643,16 @@ else if (type === "common") color = "purple";
   roomLogs.push(log);
   saveLogs();
 
+let stock = punishStockByRoom[socket.room] || {
+  eventBoy: [],
+  eventGirl: [],
+  eventCommon: []
+};
+
 let remain = {
-  boy: punishStockByRoom[socket.room].eventBoy.length,
-  girl: punishStockByRoom[socket.room].eventGirl.length,
-  common: punishStockByRoom[socket.room].eventCommon.length
+  boy: stock.eventBoy.length,
+  girl: stock.eventGirl.length,
+  common: stock.eventCommon.length
 };
 
 io.to(socket.room).emit("eventRemain", remain);
