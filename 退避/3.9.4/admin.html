@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>管理人ログイン</title>
+</head>
+<body>
+
+<h2>管理人ログイン</h2>
+
+<input id="pass" type="password" placeholder="パスワード">
+<button id="loginBtn">ログイン</button>
+
+<script>
+const btn = document.getElementById("loginBtn");
+
+btn.onclick = () => {
+  const p = document.getElementById("pass").value;
+
+  if (p === "misa123") {
+    localStorage.setItem("isAdmin", "true");
+    alert("ログイン成功");
+    location.href = "/";
+  } else {
+    alert("違う");
+  }
+};
+</script>
+
+</body>
+</html>
