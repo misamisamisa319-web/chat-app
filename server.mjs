@@ -462,7 +462,11 @@ m.room
       <style>
         body { font-family: sans-serif; padding: 20px; }
         table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-        th, td { border: 1px solid #ccc; padding: 6px; }
+        th, td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  white-space: nowrap;
+}
         th { background: #f0f0f0; }
       </style>
     </head>
