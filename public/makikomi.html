@@ -192,7 +192,23 @@ input, button, select { padding: 10px; font-size: 16px; }
 
 <div id="settings">
 
-    <label>色: <input type="color" id="colorSelect" value="#000000"></label>
+    <label>色:
+<select id="colorPreset">
+<option value="">プリセット</option>
+<option value="#000000">黒</option>
+<option value="#cc0000">赤</option>
+<option value="#0066ff">青</option>
+<option value="#008800">緑</option>
+<option value="#8000cc">紫</option>
+<option value="#ff6600">オレンジ</option>
+<option value="#ff1493">ピンク</option>
+<option value="#8b4513">茶色</option>
+<option value="#003366">紺</option>
+<option value="#555555">グレー</option>
+</select>
+
+<input type="color" id="colorSelect" value="#000000">
+</label>
     <label>内緒:
       <select id="privateTarget">
         <option value="">なし</option>
@@ -824,11 +840,25 @@ if (ruleBtn){
 };
 
 /* ===== 操作 ===== */
-colorSelect.oninput = () => {
-  myColor = colorSelect.value;
-  localStorage.setItem("chatColor", myColor);
-  socket.emit("updateColor", { color: myColor });
-};
+const colorPreset = document.getElementById("colorPreset");
+
+if (colorPreset){
+
+  colorPreset.onchange = () => {
+
+    if (!colorPreset.value) return;
+
+    myColor = colorPreset.value;
+
+    colorSelect.value = myColor;
+
+    localStorage.setItem("chatColor", myColor);
+
+    socket.emit("updateColor", { color: myColor });
+
+  };
+
+}
 
 soundSelect.onchange = () => {
   soundLevel = soundSelect.value;
