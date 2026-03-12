@@ -405,7 +405,6 @@ const logRows = [...filteredLogs]
   return 0;
 
 })
-.reverse()
 .map(m => {
 
 
