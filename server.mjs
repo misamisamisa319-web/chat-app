@@ -407,7 +407,27 @@ const logRows = [...filteredLogs].reverse().map(m => {
   return `
     <tr>
       <td>${addDate(m.time)}</td>
-      <td>${m.room}</td>
+      <td>${
+m.room==="room9"?"雑談部屋①":
+m.room==="room10"?"雑談部屋②":
+m.room==="room6"?"巻き込み部屋①":
+m.room==="room8"?"巻き込み部屋②":
+m.room==="room1"?"サイコロ対決①":
+m.room==="room2"?"サイコロ対決②":
+m.room==="room3"?"オナ部屋①":
+m.room==="room4"?"オナ部屋②":
+m.room==="room5"?"女子部屋":
+m.room==="room7"?"巻き込み部屋（女性限定）":
+m.room==="denki"?"電気椅子1":
+m.room==="denki1"?"電気椅子2":
+m.room==="sugoroku1"?"すごろく1":
+m.room==="sugoroku2"?"すごろく2":
+m.room==="sugoroku3"?"女子用すごろく":
+m.room==="jinmon"?"尋問部屋":
+m.room==="special"?"スペシャル":
+m.room==="specialFree"?"スペシャル鍵無し":
+m.room
+}</td>
       <td>${nameDisplay}</td>
       <td>${m.ip || "-"}</td>
       <td>${m.private ? "内緒" : "通常"}</td>
