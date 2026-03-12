@@ -394,7 +394,19 @@ const filteredLogs =
     : adminLogs.filter(m =>
         m.room === selectedRoom
       );
-const logRows = [...filteredLogs].reverse().map(m => {
+const logRows = [...filteredLogs]
+.sort((a,b)=>{
+
+  const rA = roomOrder.indexOf(a.room);
+  const rB = roomOrder.indexOf(b.room);
+
+  if (rA !== rB) return rA - rB;
+
+  return 0;
+
+})
+.reverse()
+.map(m => {
 
 
   let nameDisplay = m.name;
