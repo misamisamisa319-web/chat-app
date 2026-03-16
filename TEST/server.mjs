@@ -252,6 +252,14 @@ function getDateTimeString() {
 
   return `${Y}/${M}/${D} ${h}:${m}`;
 }
+function escapeHtml(str){
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
 
 function normalizeLog(msg){
   return {
@@ -411,7 +419,7 @@ const logRows = [...filteredLogs].reverse().map(m => {
       <td>${nameDisplay}</td>
       <td>${m.ip || "-"}</td>
       <td>${m.private ? "内緒" : "通常"}</td>
-      <td>${m.text}</td>
+      <td>${escapeHtml(m.text)}</td>
 
 </tr>
 `;
