@@ -259,20 +259,20 @@ input, button, select { padding: 10px; font-size: 16px; }
   </button>
 
   <button id="maleEventBtn"
-    style="display:none;"
-    onclick="sendPunish('男イベント')">
-    男イベント
-  </button>
+  style="display:none;"
+  onclick="socket.emit('room6Event',{ type:'boy' })">
+  男イベント
+</button>
 
   <button id="femaleEventBtn"
     style="display:none;"
-    onclick="sendPunish('女イベント')">
+    onclick="socket.emit('room6Event',{ type:'girl' })">
     女イベント
   </button>
 
   <button id="commonEventBtn"
     style="display:none;"
-    onclick="sendPunish('共通イベント')">
+    onclick="socket.emit('room6Event',{ type:'common' })">
     共通イベント
   </button>
 
@@ -633,7 +633,8 @@ if (painPunishBtn){
 
 
 // ===== ルーム6制御（イベントボタン表示） =====
-if (room === "room6" || room === "special") {
+if (room === "room6") {
+
   const punishWrap =
     document.getElementById("punishWrap");
 
@@ -644,8 +645,7 @@ if (room === "room6" || room === "special") {
     document.getElementById("femaleEventBtn");
 
   const commonEventBtn =
-  document.getElementById("commonEventBtn");
-
+    document.getElementById("commonEventBtn");
 
   if (punishWrap){
     punishWrap.style.display = "flex";
@@ -660,30 +660,55 @@ if (room === "room6" || room === "special") {
   }
 
   if (commonEventBtn){
-  commonEventBtn.style.display = "inline-block";
-}
+    commonEventBtn.style.display = "inline-block";
+  }
 
   const girlPunishBtn =
-  document.querySelector("button[onclick=\"sendPunish('女子罰')\"]");
+    document.querySelector("button[onclick=\"sendPunish('女子罰')\"]");
 
-const boyPunishBtn =
-  document.getElementById("boyPunishBtn");
+  const boyPunishBtn =
+    document.getElementById("boyPunishBtn");
 
-const girlOnaBtn =
-  document.querySelector("button[onclick=\"sendPunish('命令女')\"]");
+  const girlOnaBtn =
+    document.querySelector("button[onclick=\"sendPunish('命令女')\"]");
 
-const boyOnaBtn =
-  document.getElementById("boyOnaBtn");
+  const boyOnaBtn =
+    document.getElementById("boyOnaBtn");
 
-const painBtn =
-  document.querySelector("button[onclick=\"sendPunish('苦痛罰')\"]");
+  const painBtn =
+    document.querySelector("button[onclick=\"sendPunish('苦痛罰')\"]");
 
-if (girlPunishBtn) girlPunishBtn.style.display = "none";
-if (boyPunishBtn) boyPunishBtn.style.display = "none";
-if (girlOnaBtn)   girlOnaBtn.style.display = "none";
-if (boyOnaBtn)    boyOnaBtn.style.display = "none";
-if (painBtn)      painBtn.style.display = "none";
+  if (girlPunishBtn) girlPunishBtn.style.display = "none";
+  if (boyPunishBtn) boyPunishBtn.style.display = "none";
+  if (girlOnaBtn)   girlOnaBtn.style.display = "none";
+  if (boyOnaBtn)    boyOnaBtn.style.display = "none";
+  if (painBtn)      painBtn.style.display = "none";
 
+}
+
+// ===== スペシャル制御（罰は残してイベントだけ追加） =====
+if (room === "special") {
+
+  const maleEventBtn =
+    document.getElementById("maleEventBtn");
+
+  const femaleEventBtn =
+    document.getElementById("femaleEventBtn");
+
+  const commonEventBtn =
+    document.getElementById("commonEventBtn");
+
+  if (maleEventBtn){
+    maleEventBtn.style.display = "inline-block";
+  }
+
+  if (femaleEventBtn){
+    femaleEventBtn.style.display = "inline-block";
+  }
+
+  if (commonEventBtn){
+    commonEventBtn.style.display = "inline-block";
+  }
 
 }
 
