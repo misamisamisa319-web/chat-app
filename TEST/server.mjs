@@ -1580,7 +1580,8 @@ socket.on("room6Event", ({ type }) => {
 if (
   socket.room !== "room6" &&
   socket.room !== "room7" &&
-  socket.room !== "room8"
+  socket.room !== "room8" &&
+  socket.room !== "special"
 ) return;
 
   if (!canUsePunish(socket.room)){
