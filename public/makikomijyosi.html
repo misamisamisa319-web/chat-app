@@ -899,11 +899,16 @@ if (normalTimerCustomBtn){
 
 }
 
-
-
-
 });
 
+function rollDice(max) {
+  const num = Math.floor(Math.random() * max) + 1;
+
+  socket.emit("message", {
+    text: `🎲 1d${max} → ${num}`,
+    color: myColor
+  });
+}
 
 
 </script>
