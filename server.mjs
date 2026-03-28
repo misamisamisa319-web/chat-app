@@ -45,8 +45,9 @@ let muteByRoom = {
 
 
 
-// ===== ログ分離（追加） =====
-let roomLogs = [];
+
+// ===== ログ分離（修正） =====
+let messagesLog = {};
 let adminLogs = [];
 
 // ===== 掲示板 =====
