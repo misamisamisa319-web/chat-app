@@ -197,7 +197,7 @@ app.post("/bbs/create", (req, res) => {
 });
 
 // 既存互換（まだ使う）
-
+let messagesLog = [];
 
 let bans = {}; // { name: expireTime }
 
@@ -215,8 +215,8 @@ if (fs.existsSync(LOG_FILE)) {
     const data =
       JSON.parse(fs.readFileSync(LOG_FILE, "utf8"));
 
-    messagesLog = data.messagesLog || {};
-    adminLogs  = data.adminLogs  || [];
+    messagesLog = data;
+    adminLogs  = data;
 
   }
   catch {
@@ -232,17 +232,10 @@ function saveLogs() {
     adminLogs = adminLogs.slice(-5000);
   }
 
- fs.writeFileSync(
-  LOG_FILE,
-  JSON.stringify(
-    {
-      messagesLog,
-      adminLogs
-    },
-    null,
-    2
-  )
-);
+  fs.writeFileSync(
+    LOG_FILE,
+    JSON.stringify(adminLogs, null, 2)
+  );
 
 }
 
@@ -1269,21 +1262,9 @@ setInterval(() => {
 
   const now = Date.now();
 
-  for (const room in messagesLog) {
-
- const isPrivate = room.startsWith("private");
-
-messagesLog[room] = messagesLog[room].filter(
-  m => {
-    // 個室は削除しない
-    if (isPrivate) return true;
-
-    // 他の部屋は今まで通り
-    return now - (m.savedAt || now) < LOG_LIFETIME;
-  }
-);
-
-}
+  messagesLog = messagesLog.filter(
+    m => now - (m.savedAt || now) < LOG_LIFETIME
+  );
 
   saveLogs();
 
@@ -2436,8 +2417,7 @@ const msg = {
   text: text,
   color: color,
   room: socket.room,
-  time: getTimeString(),
-  savedAt: Date.now()
+  time: getTimeString()
 };
 
 const log = normalizeLog(msg);
