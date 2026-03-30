@@ -5,7 +5,7 @@ import fs from "fs";
 
 let ipBans = {};
 
-const BAN_FILE = "/data/banList.json";
+const BAN_FILE = "./banList.json";
 
 if (!fs.existsSync(BAN_FILE)) {
   fs.writeFileSync(BAN_FILE, JSON.stringify({}, null, 2));
@@ -45,13 +45,13 @@ let muteByRoom = {
 
 
 
-// ===== ログ分離（追加） =====
-let roomLogs = [];
+
+// ===== ログ分離（修正） =====
+let messagesLog = {};
 let adminLogs = [];
 
 // ===== 掲示板 =====
-const BBS_FILE = "/data/bbs.json";
-
+const BBS_FILE = "./bbs.json";
 let bbsData = {
   threads: []
 };
@@ -197,7 +197,7 @@ app.post("/bbs/create", (req, res) => {
 });
 
 // 既存互換（まだ使う）
-let messagesLog = [];
+
 
 let bans = {}; // { name: expireTime }
 
@@ -207,7 +207,7 @@ const LOG_LIFETIME = 3 * 24 * 60 * 60 * 1000; // 3日
 
 
 /* ===== ログ保存 ===== */
-const LOG_FILE = "/data/logs.json";
+const LOG_FILE = "./logs.json";
 
 if (fs.existsSync(LOG_FILE)) {
   try {
@@ -215,8 +215,8 @@ if (fs.existsSync(LOG_FILE)) {
     const data =
       JSON.parse(fs.readFileSync(LOG_FILE, "utf8"));
 
-    messagesLog = data;
-    adminLogs  = data;
+    messagesLog = data.messagesLog || {};
+    adminLogs  = data.adminLogs  || [];
 
   }
   catch {
@@ -232,10 +232,17 @@ function saveLogs() {
     adminLogs = adminLogs.slice(-5000);
   }
 
-  fs.writeFileSync(
-    LOG_FILE,
-    JSON.stringify(adminLogs, null, 2)
-  );
+ fs.writeFileSync(
+  LOG_FILE,
+  JSON.stringify(
+    {
+      messagesLog,
+      adminLogs
+    },
+    null,
+    2
+  )
+);
 
 }
 
@@ -1262,9 +1269,21 @@ setInterval(() => {
 
   const now = Date.now();
 
-  messagesLog = messagesLog.filter(
-    m => now - (m.savedAt || now) < LOG_LIFETIME
-  );
+  for (const room in messagesLog) {
+
+ const isPrivate = room.startsWith("private");
+
+messagesLog[room] = messagesLog[room].filter(
+  m => {
+    // 個室は削除しない
+    if (isPrivate) return true;
+
+    // 他の部屋は今まで通り
+    return now - (m.savedAt || now) < LOG_LIFETIME;
+  }
+);
+
+}
 
   saveLogs();
 
@@ -1650,7 +1669,11 @@ else if (type === "common") color = "purple";
   const log = normalizeLog(msg);
 
   adminLogs.push(log);
-  roomLogs.push(log);
+  if (!messagesLog[room]) {
+  messagesLog[room] = [];
+}
+
+messagesLog[socket.room].push(log);
   saveLogs();
 
 let stock = punishStockByRoom[socket.room] || {
@@ -2417,7 +2440,8 @@ const msg = {
   text: text,
   color: color,
   room: socket.room,
-  time: getTimeString()
+  time: getTimeString(),
+  savedAt: Date.now()
 };
 
 const log = normalizeLog(msg);
