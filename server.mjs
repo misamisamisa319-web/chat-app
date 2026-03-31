@@ -227,19 +227,24 @@ roomLogs  = data.roomLogs || [];
 
 function saveLogs() {
 
+
   // ===== ログ上限 =====
   if (adminLogs.length > 5000) {
     adminLogs = adminLogs.slice(-5000);
   }
 
+  // バックアップ
+  if (fs.existsSync(LOG_FILE)) {
+    fs.copyFileSync(LOG_FILE, LOG_FILE + ".bak");
+  }
+
   fs.writeFileSync(
     LOG_FILE,
     JSON.stringify({
-  adminLogs,
-  roomLogs
-}, null, 2)
+      adminLogs,
+      roomLogs
+    }, null, 2)
   );
-
 }
 
 function getDateTimeString() {
