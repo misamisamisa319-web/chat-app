@@ -215,8 +215,8 @@ if (fs.existsSync(LOG_FILE)) {
     const data =
       JSON.parse(fs.readFileSync(LOG_FILE, "utf8"));
 
-    messagesLog = data;
-    adminLogs  = data;
+    adminLogs = data.adminLogs || [];
+roomLogs  = data.roomLogs || [];
 
   }
   catch {
@@ -234,7 +234,10 @@ function saveLogs() {
 
   fs.writeFileSync(
     LOG_FILE,
-    JSON.stringify(adminLogs, null, 2)
+    JSON.stringify({
+  adminLogs,
+  roomLogs
+}, null, 2)
   );
 
 }
@@ -273,7 +276,9 @@ function normalizeLog(msg){
     savedAt: Date.now()
   };
 }
-
+function isPrivateRoom(room){
+  return ["privateA","privateB","privateC","privateD"].includes(room);
+}
 
 
 
@@ -1653,6 +1658,8 @@ else if (type === "common") color = "purple";
   roomLogs.push(log);
   saveLogs();
 
+
+  
 let stock = punishStockByRoom[socket.room] || {
   eventBoy: [],
   eventGirl: [],
