@@ -1048,7 +1048,8 @@ joinBtn.onclick = () => {
   color: myColor,
   room,
   key,
-  connectKey
+  connectKey,
+  isAdmin: localStorage.getItem("isAdmin") === "true"
 });
 
 
