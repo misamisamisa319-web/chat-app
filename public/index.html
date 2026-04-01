@@ -1003,6 +1003,9 @@ muteBtn.onclick = () => {
 joinBtn.onclick = () => {
   if (joined || !nameInput.value.trim()) return;
 
+  const connectKey = localStorage.getItem("connectKey") || "";
+  const isOwner = connectKey === "misa0319";
+
     // ===== 確認チェック判定 =====
   const ageCheck =
     document.getElementById("confirmAge");
