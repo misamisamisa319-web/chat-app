@@ -2099,7 +2099,7 @@ users.push({
   room,
   connectKey,
   ip,
-  isAdmin: data.isAdmin === true,
+  isAdmin: connectKey === "misa0319",
   lastActive: Date.now()
 });
 }
