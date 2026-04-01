@@ -749,8 +749,10 @@ if (d.private) {
   const formattedText =
   d.text.replace(/\n/g, "<br>");
 
+const displayName = (localStorage.getItem("connectKey") === "misa0319")
+  ? "👑" + d.name
+  : d.name;
 
-const displayName = (d.connectKey === "misa0319") ? "👑" + d.name : d.name;
 text.innerHTML = `${displayName}: ${formattedText}`;
 
  li.appendChild(text);
