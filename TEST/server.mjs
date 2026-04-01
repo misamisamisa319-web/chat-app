@@ -1973,7 +1973,8 @@ socket.on("join", ({
   name,
   color="black",
   room="room1",
-  connectKey
+  connectKey,
+  isAdmin
 }) => {
 
 
