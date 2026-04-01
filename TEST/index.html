@@ -428,7 +428,8 @@ window.addEventListener("load", () => {
   name: username,
   color: myColor,
   room: savedRoom,
-  connectKey: localStorage.getItem("connectKey")
+  connectKey: localStorage.getItem("connectKey"),
+  isAdmin: localStorage.getItem("isAdmin") === "true"
 });
 
 
