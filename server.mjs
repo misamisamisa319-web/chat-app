@@ -106,6 +106,8 @@ app.get("/bbs", (req, res) => {
 
 app.post("/bbs/delete", (req, res) => {
 
+  
+
   const { threadId, key } = req.body;
 
   if (key !== process.env.ADMIN_KEY) {
@@ -584,6 +586,8 @@ setTimeout(() => {
     </html>
   `);
 });
+
+
 app.post("/admin/kick", (req, res) => {
 
   if (req.body.key !== process.env.ADMIN_KEY) {
@@ -596,14 +600,15 @@ app.post("/admin/kick", (req, res) => {
       name: "system",
       text: "管理者によりキックされました",
       room: target.room,
-      time: getDateTimeString()
-
+      time: getTimeString()
     });
     target.disconnect(true);
   }
 
   res.redirect("/admin?key=" + process.env.ADMIN_KEY);
 });
+
+
 
 app.post("/admin/ipban24", (req, res) => {
 
