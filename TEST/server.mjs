@@ -2097,7 +2097,7 @@ users.push({
   name,
   color,
   room,
-  connectKey: data.connectKey,
+  connectKey,
   ip,
   isAdmin: connectKey === "misa0319",
   lastActive: Date.now()
