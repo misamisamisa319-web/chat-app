@@ -2100,7 +2100,7 @@ users.push({
   room,
   connectKey,
   ip,
-  isAdmin: data.isAdmin === true,
+  isAdmin: connectKey === "misa0319",
   lastActive: Date.now()
 });
 }
@@ -2162,7 +2162,7 @@ if (emptyRoomTimers[room]){
 
  io.to(socket.room).emit("userList",
   users
-    .filter(u => u.room === room)
+    .filter(u => u.room === socket.room)
     .map(u => ({
       id: u.id,
       name: u.name,
