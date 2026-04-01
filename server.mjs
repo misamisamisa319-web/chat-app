@@ -2159,7 +2159,7 @@ if (emptyRoomTimers[room]){
 }
 
 
- io.to(room).emit("userList",
+ io.to(socket.room).emit("userList",
   users
     .filter(u => u.room === room)
     .map(u => ({
