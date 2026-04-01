@@ -749,9 +749,9 @@ if (d.private) {
   const formattedText =
   d.text.replace(/\n/g, "<br>");
 
-text.innerHTML =
-  `${d.name}: ${formattedText}`;
-}
+
+const displayName = (d.connectKey === "misa0319") ? "👑" + d.name : d.name;
+text.innerHTML = `${displayName}: ${formattedText}`;
 
  li.appendChild(text);
 li.style.color = d.color || "#000";
