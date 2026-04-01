@@ -749,11 +749,9 @@ if (d.private) {
   const formattedText =
   d.text.replace(/\n/g, "<br>");
 
-const displayName = (localStorage.getItem("connectKey") === "misa0319")
-  ? "👑" + d.name
-  : d.name;
-
-text.innerHTML = `${displayName}: ${formattedText}`;
+text.innerHTML =
+  `${d.name}: ${formattedText}`;
+}
 
  li.appendChild(text);
 li.style.color = d.color || "#000";
@@ -940,7 +938,7 @@ const li = document.createElement("li");
 const nameSpan = document.createElement("span");
 
 nameSpan.textContent =
-  (u.connectKey === "loki0319" ? "👑" : "") + u.name;
+  (u.isAdmin ? "👑" : "") + u.name;
 
 nameSpan.style.color =
   u.color || "#000";
@@ -1004,9 +1002,6 @@ muteBtn.onclick = () => {
 /* ===== 入室処理 ===== */
 joinBtn.onclick = () => {
   if (joined || !nameInput.value.trim()) return;
-
-  const connectKey = localStorage.getItem("connectKey") || "";
-  const isOwner = connectKey === "misa0319";
 
     // ===== 確認チェック判定 =====
   const ageCheck =
