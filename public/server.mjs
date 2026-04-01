@@ -1973,7 +1973,8 @@ socket.on("join", ({
   name,
   color="black",
   room="room1",
-  connectKey
+  connectKey,
+  isAdmin
 }) => {
 
 
@@ -2099,7 +2100,7 @@ users.push({
   room,
   connectKey,
   ip,
-  isAdmin: connectKey === "misa0319",
+  isAdmin,
   lastActive: Date.now()
 });
 }
@@ -2159,11 +2160,17 @@ if (emptyRoomTimers[room]){
 }
 
 
-  io.to(room).emit(
-    "userList",
-    users.filter(u=>u.room===room)
-  );
-io.emit("lobbyUpdate", getLobbyInfo());
+ io.to(socket.room).emit("userList",
+  users
+    .filter(u => u.room === socket.room)
+    .map(u => ({
+      id: u.id,
+      name: u.name,
+      color: u.color,
+      connectKey: u.connectKey,
+      isAdmin: u.isAdmin,
+    }))
+);
 
 
 

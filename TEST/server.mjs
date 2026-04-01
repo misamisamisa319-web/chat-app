@@ -2100,7 +2100,7 @@ users.push({
   room,
   connectKey,
   ip,
-  isAdmin: connectKey === "misa0319",
+  isAdmin,
   lastActive: Date.now()
 });
 }
