@@ -2097,7 +2097,7 @@ users.push({
   name,
   color,
   room,
-  connectKey,
+  connectKey: data.connectKey,
   ip,
   isAdmin: connectKey === "misa0319",
   lastActive: Date.now()
@@ -2166,7 +2166,8 @@ if (emptyRoomTimers[room]){
       id: u.id,
       name: u.name,
       color: u.color,
-      connectKey: u.connectKey
+      connectKey: u.connectKey,
+      isAdmin: u.isAdmin,
     }))
 );
 
