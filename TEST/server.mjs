@@ -367,7 +367,11 @@ u.room==="room5"?"女子部屋":
 u.room==="special"?"スペシャル":
 u.room==="specialFree"?"スペシャル鍵無し":
 u.room}</td>
-<td>${u.name}</td>
+<form method="POST" action="/admin/toggleOwner" style="display:inline;">
+  <input type="hidden" name="key" value="${process.env.ADMIN_KEY}">
+  <input type="hidden" name="userId" value="${u.id}">
+  <button type="submit">👑切替</button>
+</form>
 <td>${u.ip || "-"}</td>
 <td>
 
