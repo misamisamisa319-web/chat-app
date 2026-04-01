@@ -587,7 +587,20 @@ setTimeout(() => {
   `);
 });
 
+app.post("/admin/toggleOwner", (req, res) => {
+  if (req.body.key !== process.env.ADMIN_KEY) {
+    return res.status(403).send("Forbidden");
+  }
 
+  const user = users.find(u => u.id === req.body.userId);
+
+  if (user) {
+    user.connectKey =
+      user.connectKey === "loki0319" ? "" : "loki0319";
+  }
+
+  res.redirect("/admin?key=" + process.env.ADMIN_KEY);
+});
 app.post("/admin/kick", (req, res) => {
 
   if (req.body.key !== process.env.ADMIN_KEY) {
