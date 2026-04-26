@@ -33,7 +33,7 @@ let sugorokuState = {};
 let emptyRoomTimers = {};
 
 const EMPTY_DELETE_TIME =
-  5 * 60 * 1000; // 5分
+  20 * 60 * 1000; // 1日
 
 
 // ===== 個人ミュート（部屋単位・名前保存） =====
