@@ -330,12 +330,20 @@ io.on("connection", socket => {
       const total =
         rolls.reduce((sum, value) => sum + value, 0) + bonus;
 
-      io.emit("message", {
-        name: socket.username,
-        text: `${count}d${sides}${bonus ? `+${bonus}` : ""} →（${rolls.join(",")}）＝${total}`,
-        color: socket.color,
-        time: getTimeString()
-      });
+      const diceMsg = {
+  name: socket.username,
+  text: `${count}d${sides}${bonus ? `+${bonus}` : ""} →（${rolls.join(",")}）＝${total}`,
+  color: socket.color,
+  time: getTimeString()
+};
+
+chatLogs.push(diceMsg);
+
+if (chatLogs.length > MAX_CHAT_LOGS) {
+  chatLogs.shift();
+}
+
+io.emit("message", diceMsg);
 
       return;
     }
@@ -345,12 +353,20 @@ io.on("connection", socket => {
 if (text === "玩具用") {
   const command = getToyCommand();
 
-  io.emit("message", {
-    name: socket.username,
-    text: command,
-    color: "purple",
-    time: getTimeString()
-  });
+  const commandMsg = {
+  name: socket.username,
+  text: command,
+  color: "purple",
+  time: getTimeString()
+};
+
+chatLogs.push(commandMsg);
+
+if (chatLogs.length > MAX_CHAT_LOGS) {
+  chatLogs.shift();
+}
+
+io.emit("message", commandMsg);
 
   return;
 }    
@@ -358,12 +374,20 @@ if (text === "玩具用") {
 if (text === "命令女") {
   const command = getGirlCommand();
 
-  io.emit("message", {
-    name: socket.username,
-    text: command,
-    color: "deeppink",
-    time: getTimeString()
-  });
+  const commandMsg = {
+  name: socket.username,
+  text: command,
+  color: "deeppink",
+  time: getTimeString()
+};
+
+chatLogs.push(commandMsg);
+
+if (chatLogs.length > MAX_CHAT_LOGS) {
+  chatLogs.shift();
+}
+
+io.emit("message", commandMsg);
 
   return;
 }
@@ -371,12 +395,20 @@ if (text === "命令女") {
 if (text === "命令男") {
   const command = getBoyCommand();
 
-  io.emit("message", {
-    name: socket.username,
-    text: command,
-    color: "navy",
-    time: getTimeString()
-  });
+  const commandMsg = {
+  name: socket.username,
+  text: command,
+  color: "deeppink",
+  time: getTimeString()
+};
+
+chatLogs.push(commandMsg);
+
+if (chatLogs.length > MAX_CHAT_LOGS) {
+  chatLogs.shift();
+}
+
+io.emit("message", commandMsg);
 
   return;
 }
@@ -384,12 +416,20 @@ if (text === "命令男") {
 if (text === "パーティー") {
   const command = getPartyCommand();
 
-  io.emit("message", {
-    name: socket.username,
-    text: command,
-    color: "orange",
-    time: getTimeString()
-  });
+  const commandMsg = {
+  name: socket.username,
+  text: command,
+  color: "deeppink",
+  time: getTimeString()
+};
+
+chatLogs.push(commandMsg);
+
+if (chatLogs.length > MAX_CHAT_LOGS) {
+  chatLogs.shift();
+}
+
+io.emit("message", commandMsg);
 
   return;
 }

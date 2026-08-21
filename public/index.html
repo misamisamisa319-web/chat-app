@@ -487,6 +487,7 @@ window.addEventListener("load", () => {
 
   const savedName  = localStorage.getItem("chatName");
   const savedRoom  = localStorage.getItem("chatRoom");
+  console.log("保存データ", savedName, savedRoom);
   const savedColor = localStorage.getItem("chatColor") || "#000000";
 
   const normalTimerCustomBtn =
@@ -1034,6 +1035,8 @@ joinBtn.onclick = () => {
 
   username = nameInput.value.trim();
   localStorage.setItem("chatName", username);
+
+  localStorage.setItem("chatRoom", room);
 
   socket.emit("join", {
   name: username,
