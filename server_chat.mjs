@@ -149,9 +149,128 @@ const partyCommands = [
   "パーティー30."
 ];
 
+// ===== 指示用6カテゴリ =====
 
+const stopCommands = [
+  "寸止め01",
+  "寸止め02", 
+  "寸止め03", 
+  "寸止め04", 
+  "寸止め05",
+  "寸止め06", 
+  "寸止め07", 
+  "寸止め08", 
+  "寸止め09", 
+  "寸止め10"
+];
+
+const onaCommands = [
+  "オナ01", 
+  "オナ02", 
+  "オナ03", 
+  "オナ04", 
+  "オナ05",
+  "オナ06", 
+  "オナ07", 
+  "オナ08", 
+  "オナ09", 
+  "オナ10"
+];
+
+const nippleCommands = [
+  "乳首01", 
+  "乳首02", 
+  "乳首03", 
+  "乳首04", 
+  "乳首05",
+  "乳首06", 
+  "乳首07", 
+  "乳首08", 
+  "乳首09", 
+  "乳首10"
+];
+
+const rotorCommands = [
+  "ローター01", 
+  "ローター02", 
+  "ローター03", 
+  "ローター04", 
+  "ローター05",
+  "ローター06", 
+  "ローター07", 
+  "ローター08", 
+  "ローター09", 
+  "ローター10"
+];
+
+const vibeCommands = [
+  "バイブ01", 
+  "バイブ02", 
+  "バイブ03", 
+  "バイブ04", 
+  "バイブ05",
+  "バイブ06", 
+  "バイブ07", 
+  "バイブ08", 
+  "バイブ09", 
+  "バイブ10"
+];
+
+const makikomiCommands = [
+  "巻き込み01", 
+  "巻き込み02", 
+  "巻き込み03", 
+  "巻き込み04", 
+  "巻き込み05",
+  "巻き込み06", 
+  "巻き込み07", 
+  "巻き込み08", 
+  "巻き込み09", 
+  "巻き込み10"
+];
+
+const specialCommands = [
+  "解放01",
+  "解放02",
+  "解放03",
+  "解放04",
+  "解放05"
+];
 
 // ===== 命令抽選ストック =====
+
+function getInstructionCommand(type) {
+
+  const lists = {
+    寸止め: stopCommands,
+    オナ: onaCommands,
+    乳首: nippleCommands,
+    ローター: rotorCommands,
+    バイブ: vibeCommands,
+    巻き込み: makikomiCommands
+  };
+
+  const list = lists[type];
+
+  if (!list || list.length === 0) {
+    return null;
+  }
+
+  return list[
+    Math.floor(Math.random() * list.length)
+  ];
+}
+
+function getSpecialCommand() {
+
+  if (specialCommands.length === 0) {
+    return null;
+  }
+
+  return specialCommands[
+    Math.floor(Math.random() * specialCommands.length)
+  ];
+}
 
 let girlCommandStock = [];
 
@@ -307,6 +426,87 @@ io.on("connection", socket => {
 
     socket.emit("muteSync", mutedNames);
   });
+
+// ===== 指示抽選 =====
+
+// ===== 指示の解放カウント =====
+let instructionCount = 0;
+
+socket.on("instructionDraw", data => {
+
+  const types = Array.isArray(data?.types)
+    ? data.types
+    : [];
+
+  instructionCount++;
+
+  console.log("指示カウント:", instructionCount);
+
+  if (types.length === 0) return;
+
+  const type =
+    types[Math.floor(Math.random() * types.length)];
+
+  const command =
+    getInstructionCommand(type);
+
+  if (!command) return;
+
+  // ===== 絶頂解放確率 =====
+  // 10回目 5%
+  // 以降1回ごとに +5%
+  // 解放されたらカウントをリセット
+  const releaseRate =
+    instructionCount >= 10
+      ? Math.min((instructionCount - 9) * 5, 100)
+      : 0;
+
+  const canRelease =
+    releaseRate > 0 &&
+    Math.random() * 100 < releaseRate;
+
+  if (canRelease) {
+
+    const specialCommand = getSpecialCommand();
+
+    if (specialCommand) {
+
+      const specialMsg = {
+        name: socket.username,
+        text: specialCommand,
+        color: "purple",
+        time: getTimeString()
+      };
+
+      chatLogs.push(specialMsg);
+
+      if (chatLogs.length > MAX_CHAT_LOGS) {
+        chatLogs.shift();
+      }
+
+      io.emit("message", specialMsg);
+
+      // 解放されたらリセット
+      instructionCount = 0;
+    }
+  }
+
+  const msg = {
+    name: socket.username,
+    text: command,
+    color: socket.color,
+    time: getTimeString()
+  };
+
+  chatLogs.push(msg);
+
+  if (chatLogs.length > MAX_CHAT_LOGS) {
+    chatLogs.shift();
+  }
+
+  io.emit("message", msg);
+});
+ 
 
   socket.on("message", data => {
 

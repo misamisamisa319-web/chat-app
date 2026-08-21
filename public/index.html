@@ -274,12 +274,56 @@ button:hover {
         <option value="">なし</option>
       </select>
     </label>
-
-　　<button id="reloadBtn">更新</button>
+    <button id="settingsBtn">設定</button>
+    <button id="reloadBtn">更新</button>
 
     <button id="leaveBtn">退出</button>
 
   </div>
+  <div id="instructionSettings" style="
+  display:none;
+  padding:8px;
+  background:#fff;
+  border-bottom:1px solid #ccc;
+">
+
+  <strong>指示設定</strong>
+
+  <div style="margin-top:8px;">
+
+  <label>
+    <input type="checkbox" name="instructionType" value="寸止め" checked>
+    寸止め
+  </label>
+
+  <label>
+    <input type="checkbox" name="instructionType" value="オナ" checked>
+    オナ
+  </label>
+
+  <label>
+    <input type="checkbox" name="instructionType" value="乳首" checked>
+    乳首
+  </label>
+
+  <label>
+    <input type="checkbox" name="instructionType" value="ローター" checked>
+    ローター
+  </label>
+
+  <label>
+    <input type="checkbox" name="instructionType" value="バイブ" checked>
+    バイブ
+  </label>
+
+  <label>
+    <input type="checkbox" name="instructionType" value="巻き込み" checked>
+    巻き込み
+  </label>
+
+</div>
+
+</div>
 
 <ul id="messages"></ul>
 
@@ -351,8 +395,12 @@ button:hover {
       z-index:200;
     ">
 
-      <button onclick="sendPunish('玩具用')">
-        玩具用
+      <button id="instructionDrawBtn">
+         指示
+      </button>
+
+      <button onclick="sendPunish('M玩具')">
+        M玩具
       </button>
 
       <button onclick="sendPunish('命令女')">
@@ -458,6 +506,79 @@ const messages = document.getElementById("messages");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
 const leaveBtn = document.getElementById("leaveBtn");
+
+const settingsBtn =
+  document.getElementById("settingsBtn");
+
+const instructionSettings =
+  document.getElementById("instructionSettings");
+
+if (settingsBtn && instructionSettings){
+  settingsBtn.onclick = () => {
+
+    instructionSettings.style.display =
+      instructionSettings.style.display === "none"
+        ? "block"
+        : "none";
+
+  };
+}
+const instructionChecks =
+  document.querySelectorAll(
+    'input[name="instructionType"]'
+  );
+
+const instructionDrawBtn =
+  document.getElementById("instructionDrawBtn");
+
+if (instructionDrawBtn){
+  instructionDrawBtn.onclick = () => {
+
+    const selectedTypes =
+      Array.from(instructionChecks)
+        .filter(check => check.checked)
+        .map(check => check.value);
+
+    if (selectedTypes.length === 0){
+      alert("指示を1つ以上選択してください");
+      return;
+    }
+
+    socket.emit("instructionDraw", {
+      types: selectedTypes
+    });
+
+  };
+}
+
+const savedInstructionTypes =
+  JSON.parse(
+    localStorage.getItem("instructionTypes") || "null"
+  );
+
+if (savedInstructionTypes){
+  instructionChecks.forEach(check => {
+    check.checked =
+      savedInstructionTypes.includes(check.value);
+  });
+}  
+
+instructionChecks.forEach(check => {
+  check.addEventListener("change", () => {
+
+    const selected =
+      Array.from(instructionChecks)
+        .filter(item => item.checked)
+        .map(item => item.value);
+
+    localStorage.setItem(
+      "instructionTypes",
+      JSON.stringify(selected)
+    );
+
+  });
+});  
+
 const userList = document.getElementById("userList");
 const colorSelect = document.getElementById("colorSelect");
 const privateTarget = document.getElementById("privateTarget");
