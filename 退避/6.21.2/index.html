@@ -1364,12 +1364,12 @@ function startMetroBeat(bpm) {
 
     const marks = ["①", "②", "③"];
 
-    display.innerHTML =
-  marks.map((mark, index) =>
-    index === metroBeat - 1
-      ? `<span style="font-size:32px; font-weight:bold;">${mark}</span>`
-      : `<span style="font-size:24px; opacity:0.4;">${mark}</span>`
-  ).join(" ");
+    display.textContent =
+      marks.map((mark, index) =>
+        index === metroBeat - 1
+          ? `<strong>${mark}</strong>`
+          : mark
+      ).join(" ");
 
     metroBeat++;
 
