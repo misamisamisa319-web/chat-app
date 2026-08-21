@@ -10,6 +10,9 @@ app.use(express.static("public"));
 
 const users = [];
 
+// ===== チャットログ（最新100件） =====
+const chatLogs = [];
+const MAX_CHAT_LOGS = 100;
 
 // ===== 女性用・男性用 命令リスト =====
 
@@ -267,6 +270,8 @@ io.on("connection", socket => {
     });
   });
 
+  socket.emit("pastMessages", chatLogs);
+
   socket.on("updateColor", data => {
 
     socket.color = data?.color || "#000000";
@@ -419,6 +424,12 @@ if (text === "パーティー") {
       color: socket.color,
       time: getTimeString()
     };
+
+    chatLogs.push(msg);
+
+if (chatLogs.length > MAX_CHAT_LOGS) {
+  chatLogs.shift();
+}
 
     io.emit("message", msg);
   });

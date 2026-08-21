@@ -275,6 +275,7 @@ button:hover {
       </select>
     </label>
 
+　　<button id="reloadBtn">更新</button>
 
     <button id="leaveBtn">退出</button>
 
@@ -1106,6 +1107,16 @@ leaveBtn.onclick = () => {
   chat.style.display = "none";
   login.style.display = "flex";
 };
+
+const reloadBtn =
+  document.getElementById("reloadBtn");
+
+if (reloadBtn){
+  reloadBtn.onclick = () => {
+    location.reload();
+  };
+}
+
 function sendPunish(cmd){
   socket.emit("message",{ text: cmd });
 }
