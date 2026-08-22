@@ -344,12 +344,14 @@ function getTimeString() {
 
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
+let instructionCount = 0;
 
 io.on("connection", socket => {
 
     // ===== タイマー =====
   socket.on("timerStart", data => {
 
+    
     console.log("timerStart受信", data);
     
     const seconds = Number(data?.seconds);
@@ -433,7 +435,6 @@ io.on("connection", socket => {
 // ===== 指示抽選 =====
 
 // ===== 指示の解放カウント =====
-let instructionCount = 0;
 
 socket.on("instructionDraw", data => {
 
