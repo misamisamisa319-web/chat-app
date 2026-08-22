@@ -551,9 +551,12 @@ if (instructionDrawBtn){
   };
 }
 
+const instructionStorageKey =
+  `instructionTypes_${localStorage.getItem("chatRoom") || "room1"}`;
+
 const savedInstructionTypes =
   JSON.parse(
-    localStorage.getItem("instructionTypes") || "null"
+  localStorage.getItem(instructionStorageKey) || "null"
   );
 
 if (savedInstructionTypes){
@@ -572,9 +575,9 @@ instructionChecks.forEach(check => {
         .map(item => item.value);
 
     localStorage.setItem(
-      "instructionTypes",
-      JSON.stringify(selected)
-    );
+  instructionStorageKey,
+  JSON.stringify(selected)
+);
 
   });
 });  
