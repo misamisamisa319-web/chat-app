@@ -541,6 +541,10 @@ socket.on("instructionDraw", data => {
     time: getTimeString()
   };
 
+if (!roomChatLogs[socket.room]) {
+  roomChatLogs[socket.room] = [];
+}
+
   roomChatLogs[socket.room].push(msg);
 
   if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
