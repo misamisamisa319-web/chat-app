@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Chat v2 - index</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  margin: 0;
+  font-family:
+  "Yu Gothic",
+  "Hiragino Kaku Gothic ProN",
+  "Noto Sans JP",
+  sans-serif;
+font-weight: 500;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  color: #333333;
+}
+
+#login, #chat { flex: 1; display: flex; flex-direction: column; }
+#chat { display: none; }
+
+.system { color: gray; }
+.system.girl { color: red; font-weight: bold; }
+.system.boy { color: blue; font-weight: bold; }
+
+#controls {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  border: 1px solid #cfe8d5;
+  border-radius: 8px;
+  z-index: 10;
+  align-items: center;
+}
+
+#controls input {
+  flex: 1;
+  min-width: 0;
+}
+
+input, button, select { padding: 10px; font-size: 16px; }
+#punishWrap {
+  gap: 20px;   /* ボタン同士の間隔 */
+
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+
+  background: #fff;
+  padding: 8px;
+  z-index: 200;
+}
+#punishWrap button {
+  padding: 6px 12px;  /* ボタンの中の余白 */
+  font-size: 16px;   /* 文字サイズ */
+}
+
+
+#userList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid #cfe8d5;
+  border-radius: 8px;
+  padding: 8px;
+  list-style: none;
+  align-items: center;
+}
+
+#userList li {
+  padding: 3px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+
+#settings {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 5px;
+  background: #f9f9f9;
+  border-bottom: 1px solid #ccc;
+}
+#settings input, #settings button, #settings select { padding: 5px; font-size: 14px; }
+
+#messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 12px;
+  list-style: none;
+  padding-bottom: 260px;
+  background: #ffffff;
+  border-left: 1px solid #cfe8d5;
+  border-right: 1px solid #cfe8d5;
+}
+#messages li {
+  margin-bottom: 7px;
+  padding: 6px 8px;
+  border: 1px solid #e2f1e5;
+  border-radius: 6px;
+  background: #ffffff;
+  white-space: pre-wrap;
+}
+input,
+button,
+select {
+  border: 1px solid #cfe8d5;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover {
+  background: #f0faf2;
+}
+.private { background: #fff3cd; padding: 3px 6px; border-radius: 4px; }
+
+.time { opacity: .6; margin-right: 4px; }
+
+#bottomUI {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-top: 1px solid #cfe8d5;
+  border-radius: 10px 10px 0 0;
+  padding: 8px;
+  z-index: 100;
+}
+
+#timerPunishRow {
+  position: relative;
+}
+
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h2>チャット</h2>
+
+<div id="roomInfo"
+     style="margin-bottom:10px; color:#555;">
+</div>
+
+<div id="roomMembers"
+     style="margin-bottom:10px; color:#555;">
+  閲覧：0人
+</div>
+
+<div id="roomParticipants"
+     style="margin-bottom:10px; color:#555;">
+  参加者：なし
+</div>
+
+
+  <input id="nameInput"
+         placeholder="名前">
+
+  <!-- ===== 確認チェック ===== -->
+  <div style="
+    margin-top:12px;
+    font-size:14px;
+    line-height:1.6;
+  ">
+
+    <label>
+      <input type="checkbox"
+             id="confirmAge">
+      18歳未満の利用は禁止です
+    </label>
+    <br>
+
+    <label>
+      <input type="checkbox"
+             id="confirmRule">
+      ルール・禁止事項を確認しました
+    </label>
+    <br>
+
+
+  </div>
+
+  <button id="joinBtn"
+          style="margin-top:12px;">
+    入室
+  </button>
+</div>
+
+<div id="chat">
+ <div id="controls">
+  <input id="input" placeholder="メッセージ">
+  <button id="sendBtn">送信</button>
+
+  <span id="roomLabel"
+    style="padding:10px; font-weight:bold;">
+  </span>
+</div>
+
+
+<!-- ===== 参加者 ===== -->
+<div style="
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:6px 8px;
+  background:#ffffff;
+  border:1px solid #cfe8d5;
+  border-radius:8px;
+  margin:4px 0;
+">
+  <strong>参加者:</strong>
+  <ul id="userList"></ul>
+</div>
+
+<div id="timerStatusRow" 
+  style=" 
+    display:flex; 
+    align-items:center; 
+    gap:10px; 
+    padding:4px 0;"> 
+ 
+  <div id="timerDisplay" 
+    style=" 
+      font-weight:bold; 
+      display:none;"> 
+    ⏱ 00:00 
+  </div> 
+ 
+  <div id="metroBeatDisplay" 
+    style=" 
+      display:none; 
+      font-size:24px; 
+      font-weight:bold;"> 
+    ① ② ③ 
+  </div> 
+ 
+</div>
+
+<div id="settings">
+
+    <label>色:
+      <select id="colorPreset">
+        <option value="">プリセット</option>
+        <option value="#000000">黒</option>
+        <option value="#cc0000">赤</option>
+        <option value="#0066ff">青</option>
+        <option value="#008800">緑</option>
+        <option value="#8000cc">紫</option>
+        <option value="#ff6600">オレンジ</option>
+        <option value="#ff1493">ピンク</option>
+        <option value="#8b4513">茶色</option>
+        <option value="#003366">紺</option>
+        <option value="#555555">グレー</option>
+      </select>
+
+      <input type="color"
+        id="colorSelect"
+        value="#000000">
+    </label>
+
+    <label>内緒:
+      <select id="privateTarget">
+        <option value="">なし</option>
+      </select>
+    </label>
+    <button id="settingsBtn">設定</button>
+    <button id="reloadBtn">更新</button>
+
+    <button id="leaveBtn">退出</button>
+
+  </div>
+  <div id="instructionSettings" style="
+  display:none;
+  padding:8px;
+  background:#fff;
+  border-bottom:1px solid #ccc;
+">
+
+  <strong>指示設定</strong>
+
+  <div style="margin-top:8px;">
+
+  <label>
+    <input type="checkbox" name="instructionType" value="寸止め" checked>
+    寸止め
+  </label>
+
+  <label>
+    <input type="checkbox" name="instructionType" value="オナ" checked>
+    オナ
+  </label>
+
+  <label>
+    <input type="checkbox" name="instructionType" value="乳首" checked>
+    乳首
+  </label>
+
+  <label>
+    <input type="checkbox" name="instructionType" value="ローター">
+    ローター
+  </label>
+
+  <label>
+    <input type="checkbox" name="instructionType" value="バイブ">
+    バイブ
+  </label>
+
+  <label>
+    <input type="checkbox" name="instructionType" value="巻き込み">
+    巻き込み
+  </label>
+
+</div>
+
+</div>
+
+<ul id="messages"></ul>
+
+
+
+<div id="bottomUI">
+
+  <div id="timerPunishRow">
+
+    <button type="button" id="punishToggleBtn">
+      メニュー
+    </button>
+
+    <button type="button" id="timerToggleBtn">
+      タイマー
+    </button>
+
+    <button type="button" id="metronomeToggleBtn">
+     メトロノーム
+    </button>
+
+    <div id="metronomeWrap" style="
+  display:none;
+  position:absolute;
+  bottom:100%;
+  left:0;
+  right:0;
+  gap:7px;
+  flex-wrap:wrap;
+  align-items:center;
+  background:#fff;
+  padding:8px;
+  z-index:202;
+">
+
+
+<button id="metro30Btn">30</button>
+<button id="metro60Btn">60</button>
+<button id="metro120Btn">120</button>
+<button id="metro180Btn">180</button>
+<button id="metroStopBtn">停止</button>
+
+  <input
+    id="metroCustomInput"
+    type="number"
+    min="1"
+    max="300"
+    step="1"
+    placeholder="BPM"
+    style="width:70px;"
+  >
+
+  <button id="metroCustomBtn">
+    任意
+  </button>
+
+</div>
+
+    <div id="punishWrap" style="
+      display:none;
+      position:absolute;
+      bottom:100%;
+      left:0;
+      right:0;
+      gap:7px;
+      flex-wrap:wrap;
+      padding:6px 0;
+      background:#fff;
+      z-index:200;
+    ">
+
+      <button id="instructionDrawBtn">
+         指示
+      </button>
+
+      <button onclick="sendPunish('玩具用')">
+        M玩具
+      </button>
+
+      <button onclick="sendPunish('命令女')">
+        女子用
+      </button>
+
+      <button onclick="sendPunish('命令男')">
+        男子用
+      </button>
+
+      <button onclick="sendPunish('パーティー')">
+        パーティー
+      </button>
+
+      <button id="painPunishBtn"
+        onclick="sendPunish('苦痛罰')">
+        苦痛罰
+      </button>
+
+      <button id="zecchoBtn"
+        onclick="sendPunish('絶頂許可')"
+        style="display:none;">
+        絶頂許可
+      </button>
+
+      <button id="maleEventBtn"
+        style="display:none;"
+        onclick="socket.emit('room6Event',{ type:'boy' })">
+        男イベント
+      </button>
+
+      <button id="femaleEventBtn"
+        style="display:none;"
+        onclick="socket.emit('room6Event',{ type:'girl' })">
+        女イベント
+      </button>
+
+      <button id="commonEventBtn"
+        style="display:none;"
+        onclick="socket.emit('room6Event',{ type:'common' })">
+        共通イベント
+      </button>
+
+    </div>
+
+    <div id="timerWrap" style="
+      display:none;
+      position:absolute;
+      bottom:100%;
+      left:0;
+      right:0;
+      gap:7px;
+      flex-wrap:wrap;
+      align-items:center;
+      background:#fff;
+      padding:8px;
+      z-index:201;
+    ">
+
+      <button id="timer1Btn">1分</button>
+      <button id="timer3Btn">3分</button>
+      <button id="timer5Btn">5分</button>
+
+      <input id="timerCustomInput"
+        type="number"
+        min="1"
+        step="1"
+        placeholder="分"
+        style="width:60px;">
+
+      <button id="timerCustomBtn">
+        任意
+      </button>
+
+    </div>
+
+    <div id="diceRow" style="
+      display:none;
+    ">
+
+      <button onclick="sendDice('2d6')">S</button>
+      <button onclick="sendDice('2d5')">N</button>
+      <button onclick="sendDice('2d4')">M</button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+const socket = io();
+
+const login = document.getElementById("login");
+const chat = document.getElementById("chat");
+const joinBtn = document.getElementById("joinBtn");
+const nameInput = document.getElementById("nameInput");
+const roomInfo = document.getElementById("roomInfo");
+
+const messages = document.getElementById("messages");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("sendBtn");
+const leaveBtn = document.getElementById("leaveBtn");
+
+const settingsBtn =
+  document.getElementById("settingsBtn");
+
+const instructionSettings =
+  document.getElementById("instructionSettings");
+
+if (settingsBtn && instructionSettings){
+  settingsBtn.onclick = () => {
+
+    instructionSettings.style.display =
+      instructionSettings.style.display === "none"
+        ? "block"
+        : "none";
+
+  };
+}
+const instructionChecks =
+  document.querySelectorAll(
+    'input[name="instructionType"]'
+  );
+
+const instructionDrawBtn =
+  document.getElementById("instructionDrawBtn");
+
+if (instructionDrawBtn){
+  instructionDrawBtn.onclick = () => {
+
+    if (instructionDrawBtn.disabled) return;
+
+instructionDrawBtn.disabled = true;
+
+setTimeout(() => {
+  instructionDrawBtn.disabled = false;
+}, 3000);
+
+    const selectedTypes =
+      Array.from(instructionChecks)
+        .filter(check => check.checked)
+        .map(check => check.value);
+
+    if (selectedTypes.length === 0){
+      alert("指示を1つ以上選択してください");
+      return;
+    }
+
+    socket.emit("instructionDraw", {
+      types: selectedTypes
+    });
+
+  };
+}
+
+const instructionStorageKey =
+  `instructionTypes_${localStorage.getItem("chatRoom") || "room1"}`;
+
+const savedInstructionTypes =
+  JSON.parse(
+  localStorage.getItem(instructionStorageKey) || "null"
+  );
+
+if (savedInstructionTypes){
+  instructionChecks.forEach(check => {
+    check.checked =
+      savedInstructionTypes.includes(check.value);
+  });
+}  
+
+instructionChecks.forEach(check => {
+  check.addEventListener("change", () => {
+
+    const selected =
+      Array.from(instructionChecks)
+        .filter(item => item.checked)
+        .map(item => item.value);
+
+    localStorage.setItem(
+  instructionStorageKey,
+  JSON.stringify(selected)
+);
+
+  });
+});  
+
+const userList = document.getElementById("userList");
+const colorSelect = document.getElementById("colorSelect");
+const privateTarget = document.getElementById("privateTarget");
+
+let username = "";
+let myColor = "#000000";
+let privateTo = "";
+let joined = false;
+
+let connectKey =
+  localStorage.getItem("connectKey");
+
+if (!connectKey){
+
+  connectKey =
+    Math.random().toString(36).slice(2) +
+    Date.now().toString(36);
+
+  localStorage.setItem(
+    "connectKey",
+    connectKey
+  );
+}
+
+
+window.addEventListener("load", () => {
+
+  const savedName  = localStorage.getItem(`chatName_${room}`);
+  const savedRoom = room;
+  socket.emit("viewRoom", room);
+  console.log("保存データ", savedName, savedRoom);
+  const savedColor = localStorage.getItem("chatColor") || "#000000";
+
+  const normalTimerCustomBtn =
+    document.getElementById("timerCustomBtn");
+
+  const normalTimerCustomInput =
+    document.getElementById("timerCustomInput");
+
+  if (normalTimerCustomBtn){
+
+    normalTimerCustomBtn.onclick = () => {
+
+      const min =
+        parseInt(normalTimerCustomInput.value);
+
+      if (!min || min <= 0) return;
+
+      socket.emit("timerStart", {
+        seconds: min * 60
+      });
+
+      normalTimerCustomInput.value = "";
+
+    };
+
+  }
+
+  if (savedName && savedRoom) {
+ 
+    username = savedName;
+    myColor = savedColor;
+    colorSelect.value = myColor;
+
+    socket.emit("join", {
+  name: username,
+  color: myColor,
+  room,
+  connectKey: localStorage.getItem("connectKey"),
+  isAdmin: localStorage.getItem("isAdmin") === "true"
+});
+
+
+    joined = true;
+
+        // ===== 初回確認済みならチェック非表示 =====
+    const confirmed =
+      localStorage.getItem(
+        "entryConfirmed"
+      );
+
+    if (confirmed){
+      const loginDiv =
+        document.getElementById("login");
+
+      if (loginDiv){
+        loginDiv.style.display =
+          "none";
+      }
+    }
+
+    login.style.display = "none";
+    chat.style.display = "flex";
+  }
+});
+
+/* ===== URLから部屋を決定 ===== */
+const path = location.pathname;
+
+const room =
+  path === "/room2" ? "room2" :
+  path === "/room3" ? "room3" :
+  "room1";
+
+// ===== ダイス表示制御 =====
+const diceRow =
+  document.getElementById("diceRow");
+
+const showDiceRooms = [
+  "room1",
+  "room2",
+  "room3",
+  "room4",
+  "room5",
+  "room6"
+];
+
+if (diceRow){
+  diceRow.style.display = "none";
+}
+
+
+
+
+const roomNames = {
+  room1: "ルーム1",
+  room2: "ルーム2",
+  room3: "ルーム3",
+  room4: "ルーム4",
+  room5: "女子部屋",
+  room6: "巻き込み",   // ← 追加
+  denki: "電気1",
+  denki1: "電気椅2",
+  denki2: "電気3",
+  special: "スペシャル",
+  privateA: "個室A",
+  privateB: "個室B",
+  privateC: "個室C",
+  privateD: "個室D"
+};
+
+
+const roomLabel = document.getElementById("roomLabel");
+
+if (roomLabel && room) {
+  roomLabel.textContent = `${roomNames[room] || room}`;
+}
+
+// ===== 女子部屋制御 =====
+if (room === "room5") {
+
+  const boyPunishBtn =
+    document.getElementById("boyPunishBtn");
+
+  const boyOnaBtn =
+    document.getElementById("boyOnaBtn");
+
+  if (boyPunishBtn){
+    boyPunishBtn.style.display = "none";
+  }
+
+  if (boyOnaBtn){
+    boyOnaBtn.style.display = "none";
+  }
+
+}
+// ===== 苦痛罰表示制御 =====
+const painPunishBtn =
+  document.getElementById("painPunishBtn");
+
+if (painPunishBtn){
+
+  if (
+    room === "special" ||
+    room === "denki"  ||
+    room === "denki1" ||
+    room === "denki2"
+  ){
+    painPunishBtn.style.display =
+      "inline-block";
+  }
+  else{
+    painPunishBtn.style.display =
+      "none";
+  }
+
+}
+
+
+// ===== ルーム6制御（イベントボタン表示） =====
+if (room === "room6") {
+
+  const punishWrap =
+    document.getElementById("punishWrap");
+
+  const maleEventBtn =
+    document.getElementById("maleEventBtn");
+
+  const femaleEventBtn =
+    document.getElementById("femaleEventBtn");
+
+  const commonEventBtn =
+    document.getElementById("commonEventBtn");
+
+  if (punishWrap){
+    punishWrap.style.display = "flex";
+  }
+
+  if (maleEventBtn){
+    maleEventBtn.style.display = "inline-block";
+  }
+
+  if (femaleEventBtn){
+    femaleEventBtn.style.display = "inline-block";
+  }
+
+  if (commonEventBtn){
+    commonEventBtn.style.display = "inline-block";
+  }
+
+  const girlPunishBtn =
+    document.querySelector("button[onclick=\"sendPunish('女子罰')\"]");
+
+  const boyPunishBtn =
+    document.getElementById("boyPunishBtn");
+
+  const girlOnaBtn =
+    document.querySelector("button[onclick=\"sendPunish('命令女')\"]");
+
+  const boyOnaBtn =
+    document.getElementById("boyOnaBtn");
+
+  const painBtn =
+    document.querySelector("button[onclick=\"sendPunish('苦痛罰')\"]");
+
+  if (girlPunishBtn) girlPunishBtn.style.display = "none";
+  if (boyPunishBtn) boyPunishBtn.style.display = "none";
+  if (girlOnaBtn)   girlOnaBtn.style.display = "none";
+  if (boyOnaBtn)    boyOnaBtn.style.display = "none";
+  if (painBtn)      painBtn.style.display = "none";
+
+}
+
+// ===== スペシャル制御（罰は残してイベントだけ追加） =====
+if (room === "special") {
+
+  const maleEventBtn =
+    document.getElementById("maleEventBtn");
+
+  const femaleEventBtn =
+    document.getElementById("femaleEventBtn");
+
+  const commonEventBtn =
+    document.getElementById("commonEventBtn");
+
+  if (maleEventBtn){
+    maleEventBtn.style.display = "inline-block";
+  }
+
+  if (femaleEventBtn){
+    femaleEventBtn.style.display = "inline-block";
+  }
+
+  if (commonEventBtn){
+    commonEventBtn.style.display = "inline-block";
+  }
+
+}
+
+
+
+const key = localStorage.getItem("chatKey");
+
+
+
+
+/* ===== 表示 ===== */
+function renderMsg(d) {
+  const li = document.createElement("li");
+
+  if (d.time) {
+    const t = document.createElement("span");
+    t.textContent = `[${d.time}] `;
+    t.className = "time";
+    li.appendChild(t);
+  }
+
+  const text = document.createElement("span");
+if (d.private) {
+  const toName = d.toName || "相手";
+
+  const formattedText =
+    d.text.replace(/\n/g, "<br>");
+
+  text.innerHTML =
+    `【内緒】${d.name} ▶ ${toName}: ${formattedText}`;
+
+  li.classList.add("private");
+} else {
+  const formattedText =
+  d.text.replace(/\n/g, "<br>");
+
+text.innerHTML =
+  `${d.name}: ${formattedText}`;
+}
+
+ li.appendChild(text);
+li.style.color = d.color || "#000";
+
+if (d.bold) {
+  text.style.fontWeight = "bold";
+}
+
+messages.prepend(li);
+
+}
+
+/* ===== 受信 ===== */
+let myId; // 初期化追加
+socket.on("connect", () => {
+
+  myId = socket.id;
+
+
+});
+
+socket.on("pastMessages", logs => {
+
+  messages.innerHTML = "";
+  logs.forEach(renderMsg);
+
+  // ===== 絶頂解放ログ判定 =====
+  const unlocked = logs.some(m =>
+    m.text?.includes("絶頂許可が解放されました")
+  );
+
+  if (unlocked){
+    const btn = document.getElementById("zecchoBtn");
+    if (btn) btn.style.display = "inline-block";
+  }
+
+});
+
+// ===== 個人ミュート管理 =====
+let myMutes = [];
+
+// server から同期（後で拡張用）
+socket.on("muteSync", list => {
+  myMutes = list || [];
+});
+
+socket.on("message", d => {
+
+// ===== ミュート遮断 =====
+if (d.name && myMutes.includes(d.name)) {
+  return;
+}
+
+
+  // ===== 内緒表示制御 =====
+  if (d.private) {
+    if (d.to !== myId && d.name !== username) return;
+  }
+
+
+
+  renderMsg(d);
+
+});
+
+socket.on("zecchoUnlock", () => {
+
+  const btn = document.getElementById("zecchoBtn");
+
+  if (btn){
+    btn.style.display = "inline-block";
+
+    btn.style.backgroundColor = "black";
+    btn.style.color = "white";
+  }
+
+});
+
+
+socket.on("orgasmUsed", () => {
+  const btn = document.getElementById("zecchoBtn");
+  if (btn) btn.style.display = "none";
+});
+
+socket.on("zecchoHide", () => {
+  const btn = document.getElementById("zecchoBtn");
+  if (btn) btn.style.display = "none";
+});
+
+// ===== タイマー同期 =====
+let timerInterval = null;
+
+socket.on("timerSync", ({ endTime }) => {
+
+
+  const display =
+    document.getElementById("timerDisplay");
+
+  if (!display) return;
+
+  display.style.display = "block";
+
+  if (timerInterval){
+    clearInterval(timerInterval);
+  }
+
+
+  timerInterval = setInterval(() => {
+
+    const remain =
+      Math.max(0, endTime - Date.now());
+
+    const sec =
+      Math.floor(remain / 1000);
+
+    const m =
+      String(Math.floor(sec / 60))
+        .padStart(2,"0");
+
+    const s =
+      String(sec % 60)
+        .padStart(2,"0");
+
+    display.textContent =
+      `⏱ ${m}:${s}`;
+
+    if (remain <= 0){
+      clearInterval(timerInterval);
+    }
+
+  }, 1000);
+
+});
+
+// ===== タイマー終了 =====
+socket.on("timerEnd", () => {
+
+  const display =
+    document.getElementById("timerDisplay");
+
+  if (display){
+    display.style.display = "none";
+  }
+
+  if (timerInterval){
+    clearInterval(timerInterval);
+  }
+
+});
+
+socket.on("zecchoHide", () => {
+
+  const btn =
+    document.getElementById("zecchoBtn");
+
+  if (btn){
+    btn.style.display = "none";
+  }
+
+});
+
+
+socket.on("viewerCount", count => {
+  const roomMembers = document.getElementById("roomMembers");
+
+  if (roomMembers) {
+    roomMembers.textContent = `閲覧：${count}人`;
+  }
+});
+
+socket.on("userList", list => {
+
+const roomParticipants =
+  document.getElementById("roomParticipants");
+
+if (roomParticipants) {
+  const roomUsers = list.filter(u => u.room === room);
+  roomParticipants.textContent =
+    "参加者：" +
+    (roomUsers.length
+      ? roomUsers.map(u => u.name).join("、")
+      : "なし");
+}  
+
+  userList.innerHTML = "";
+  privateTarget.innerHTML =
+    `<option value="">なし</option>`;
+
+  list.forEach(u => {
+
+const li = document.createElement("li");
+
+const nameSpan = document.createElement("span");
+
+nameSpan.textContent =
+  (u.isAdmin ? "👑" : "") + u.name;
+
+nameSpan.style.color =
+  u.color || "#000";
+
+li.appendChild(nameSpan);
+
+    // ===== 自分以外のみ操作ボタン =====
+    if (u.id !== myId) {
+
+      // 内緒用
+      const opt =
+        document.createElement("option");
+
+      opt.value = u.id;
+      opt.textContent = u.name;
+
+      privateTarget.appendChild(opt);
+
+    
+   // ===== ミュートボタン =====
+const muteBtn =
+  document.createElement("button");
+
+// 初期表示
+if (myMutes.includes(u.name)) {
+  muteBtn.textContent = "戻";
+} else {
+  muteBtn.textContent = "消";
+}
+
+muteBtn.style.marginLeft = "6px";
+muteBtn.style.padding = "2px 6px";
+muteBtn.style.fontSize = "12px";
+muteBtn.style.lineHeight = "1.2";
+
+muteBtn.onclick = () => {
+
+  socket.emit("muteUser", u.id);
+
+  // 表示トグル
+  if (muteBtn.textContent === "消") {
+    muteBtn.textContent = "戻";
+  } else {
+    muteBtn.textContent = "消";
+  }
+
+};
+
+
+      li.appendChild(muteBtn);
+    }
+
+    userList.appendChild(li);
+
+  });
+
+});
+
+
+
+/* ===== 入室処理 ===== */
+joinBtn.onclick = () => {
+  if (joined || !nameInput.value.trim()) return;
+
+    // ===== 確認チェック判定 =====
+  const ageCheck =
+    document.getElementById("confirmAge");
+
+  const ruleCheck =
+    document.getElementById("confirmRule");
+
+
+  const confirmed =
+    localStorage.getItem(
+      "entryConfirmed"
+    );
+
+  // 初回のみ必須
+  if (!confirmed) {
+
+    if (
+      !ageCheck?.checked ||
+      !ruleCheck?.checked 
+    ){
+      alert(
+        "確認項目をすべてチェックしてください"
+      );
+      return;
+    }
+
+    localStorage.setItem(
+      "entryConfirmed",
+      "true"
+    );
+  }
+
+
+  username = nameInput.value.trim();
+  localStorage.setItem(`chatName_${room}`, username);
+
+  localStorage.setItem("chatRoom", room);
+
+  socket.emit("join", {
+  name: username,
+  color: myColor,
+  room,
+  key,
+  connectKey,
+  isAdmin: localStorage.getItem("isAdmin") === "true"
+});
+
+
+  joined = true;
+  login.style.display = "none";
+  chat.style.display = "flex";
+};
+
+/* ===== 操作 ===== */
+colorSelect.oninput = () => {
+  myColor = colorSelect.value;
+  localStorage.setItem("chatColor", myColor);
+  socket.emit("updateColor", { color: myColor });
+};
+
+const colorPreset = document.getElementById("colorPreset");
+
+colorPreset.onchange = () => {
+
+  if (!colorPreset.value) return;
+
+  myColor = colorPreset.value;
+
+  colorSelect.value = myColor;
+
+  localStorage.setItem("chatColor", myColor);
+
+  socket.emit("updateColor", { color: myColor });
+
+};
+
+
+
+privateTarget.onchange = () => {
+  privateTo = privateTarget.value || "";
+};
+
+sendBtn.onclick = () => {
+  if (!input.value.trim()) return;
+  socket.emit("message", {
+    text: input.value.trim(),
+    color: myColor,
+    to: privateTo || undefined
+  });
+  input.value = "";
+  privateTo = "";
+  privateTarget.value = "";
+};
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendBtn.click();
+  }
+});
+
+leaveBtn.onclick = () => {
+  socket.emit("leave");
+  localStorage.removeItem("chatName");
+  localStorage.removeItem("chatRoom");
+  localStorage.removeItem("chatKey");
+ joined = false;
+  chat.style.display = "none";
+  login.style.display = "flex";
+};
+
+const reloadBtn =
+  document.getElementById("reloadBtn");
+
+if (reloadBtn){
+  reloadBtn.onclick = () => {
+    location.reload();
+  };
+}
+
+function sendPunish(cmd){
+  socket.emit("message",{ text: cmd });
+}
+function sendDice(cmd){
+  socket.emit("message",{ text: cmd });
+}
+
+ // ===== メニューの開閉は下の共通切り替え処理で管理 =====
+
+  
+  
+  // ===== タイマーボタン（通常と電気分離） =====
+
+// 通常
+
+const normalTimer1Btn =
+  document.getElementById("timer1Btn");
+
+const normalTimer3Btn =
+  document.getElementById("timer3Btn");
+
+const normalTimer5Btn =
+  document.getElementById("timer5Btn");
+
+
+if (normalTimer1Btn){
+  normalTimer1Btn.onclick = function(){
+    socket.emit("timerStart", { seconds: 60 });
+  };
+}
+
+if (normalTimer3Btn){
+  normalTimer3Btn.onclick = () => {
+    socket.emit("timerStart", { seconds: 180 });
+  };
+}
+
+if (normalTimer5Btn){
+  normalTimer5Btn.onclick = () => {
+    socket.emit("timerStart", { seconds: 300 });
+  };
+}
+
+// ===== メニュー・タイマー・メトロノーム切り替え =====
+
+const normalToggle =
+  document.getElementById("punishToggleBtn");
+
+const normalWrap =
+  document.getElementById("punishWrap");
+
+const normalTimerToggle =
+  document.getElementById("timerToggleBtn");
+
+const normalTimerWrap =
+  document.getElementById("timerWrap");
+
+const metronomeToggleBtn =
+  document.getElementById("metronomeToggleBtn");
+
+const metronomeWrap =
+  document.getElementById("metronomeWrap");
+
+function closeToolMenus() {
+  if (normalWrap) {
+    normalWrap.style.display = "none";
+  }
+
+  if (normalTimerWrap) {
+    normalTimerWrap.style.display = "none";
+  }
+
+  if (metronomeWrap) {
+    metronomeWrap.style.display = "none";
+  }
+}
+
+// メニュー
+if (normalToggle && normalWrap) {
+  normalToggle.onclick = function () {
+
+    const isOpen =
+      normalWrap.style.display === "flex";
+
+    closeToolMenus();
+
+    if (!isOpen) {
+      normalWrap.style.display = "flex";
+    }
+
+  };
+}
+
+// タイマー
+if (normalTimerToggle && normalTimerWrap) {
+  normalTimerToggle.onclick = function () {
+
+    const isOpen =
+      normalTimerWrap.style.display === "flex";
+
+    closeToolMenus();
+
+    if (!isOpen) {
+      normalTimerWrap.style.display = "flex";
+    }
+
+  };
+}
+
+// メトロノーム
+if (metronomeToggleBtn && metronomeWrap) {
+  metronomeToggleBtn.onclick = function () {
+
+    const isOpen =
+      metronomeWrap.style.display === "flex";
+
+    closeToolMenus();
+
+    if (!isOpen) {
+      metronomeWrap.style.display = "flex";
+    }
+
+  };
+}
+
+// ===== メトロノームBPM =====
+
+const metro30Btn =
+  document.getElementById("metro30Btn");
+
+const metro60Btn =
+  document.getElementById("metro60Btn");
+
+const metro120Btn =
+  document.getElementById("metro120Btn");
+
+const metro180Btn =
+  document.getElementById("metro180Btn");
+
+const metroCustomInput =
+  document.getElementById("metroCustomInput");
+
+const metroCustomBtn =
+  document.getElementById("metroCustomBtn");
+
+const metroStopBtn =
+  document.getElementById("metroStopBtn");  
+
+function startMetronome(bpm) {
+
+  bpm = Number(bpm);
+
+  if (!Number.isFinite(bpm) || bpm <= 0) return;
+
+  startMetroBeat(bpm);
+
+}
+
+if (metro30Btn){
+  metro30Btn.onclick = () => {
+    startMetronome(30);
+  };
+}
+
+if (metro60Btn){
+  metro60Btn.onclick = () => {
+    startMetronome(60);
+  };
+}
+
+if (metro120Btn){
+  metro120Btn.onclick = () => {
+    startMetronome(120);
+  };
+}
+
+if (metro180Btn){
+  metro180Btn.onclick = () => {
+    startMetronome(180);
+  };
+}
+
+if (metroStopBtn){
+  metroStopBtn.onclick = () => {
+    stopMetroBeat();
+  };
+}
+
+if (metroCustomBtn){
+  metroCustomBtn.onclick = () => {
+
+    const bpm =
+      parseInt(metroCustomInput.value);
+
+    startMetronome(bpm);
+
+  };
+}
+// ===== メトロノーム拍表示 =====
+
+let metroBeatTimer = null;
+let metroBeat = 1;
+
+function stopMetroBeat() {
+  if (metroBeatTimer) {
+    clearInterval(metroBeatTimer);
+    metroBeatTimer = null;
+  }
+
+  const display =
+    document.getElementById("metroBeatDisplay");
+
+  if (display) {
+    display.style.display = "none";
+  }
+}
+
+function startMetroBeat(bpm) {
+
+  bpm = Number(bpm);
+
+  if (!Number.isFinite(bpm) || bpm <= 0) return;
+
+  if (metroBeatTimer) {
+    clearInterval(metroBeatTimer);
+  }
+
+  const display =
+    document.getElementById("metroBeatDisplay");
+
+  if (!display) return;
+
+  display.style.display = "block";
+  metroBeat = 1;
+
+  display.textContent = "① ② ③";
+
+  function updateBeat() {
+
+    const marks = ["①", "②", "③"];
+
+    display.innerHTML =
+  marks.map((mark, index) =>
+    index === metroBeat - 1
+      ? `<span style="font-size:32px; font-weight:bold;">${mark}</span>`
+      : `<span style="font-size:24px; opacity:0.4;">${mark}</span>`
+  ).join(" ");
+
+    metroBeat++;
+
+    if (metroBeat > 3) {
+      metroBeat = 1;
+    }
+
+  }
+
+  updateBeat();
+
+  metroBeatTimer =
+    setInterval(updateBeat, 60000 / bpm);
+}
+
+</script>
+
+</body>
+</html>
