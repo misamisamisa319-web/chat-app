@@ -6,10 +6,6 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.get(["/room2", "/room3"], (req, res) => {
-  res.sendFile("index.html", { root: "public" });
-});
-
 app.use(express.static("public"));
 
 const users = [];
@@ -366,10 +362,10 @@ io.on("connection", socket => {
 
     const endTime = Date.now() + (seconds * 1000);
 
-    io.to(socket.room).emit("timerSync", { endTime });
+    io.emit("timerSync", { endTime });
 
     setTimeout(() => {
-      io.to(socket.room).emit("timerEnd");
+      io.emit("timerEnd");
     }, seconds * 1000);
   });
 
@@ -395,8 +391,7 @@ socket.on("viewRoom", room => {
     socket.username = name;
     socket.color = data?.color || "#000000";
 
-    socket.room = String(data?.room || "room1");
-    socket.join(socket.room);
+    socket.room = data?.room || "room1";
 
     if (viewers[socket.room]) {
   viewers[socket.room].delete(socket.id);
@@ -413,19 +408,16 @@ socket.on("viewRoom", room => {
   room: data?.room || "room1"
 });
 
-    io.to(socket.room).emit(
-  "userList",
-  users.filter(u => u.room === socket.room)
-);
+    io.emit("userList", users);
 
-    socket.to(socket.room).emit("message", {
-  name: "system",
-  text: `${socket.username}さんが入室しました`,
-  time: getTimeString()
-  });
+    socket.emit("message", {
+      name: "system",
+      text: `${socket.username}さんが入室しました`,
+      time: getTimeString()
+    });
   });
 
-  socket.emit("pastMessages", roomChatLogs[socket.room] || []);
+  socket.emit("pastMessages", roomChatLogs[socket.room]);
 
   socket.on("updateColor", data => {
 
@@ -439,10 +431,7 @@ socket.on("viewRoom", room => {
       user.color = socket.color;
     }
 
-    io.to(socket.room).emit(
-  "userList",
-  users.filter(u => u.room === socket.room)
-);
+    io.emit("userList", users);
   });
 
     // ===== ミュート =====
@@ -522,7 +511,7 @@ socket.on("instructionDraw", data => {
         chatLogs.shift();
       }
 
-      io.to(socket.room).emit("message", specialMsg);
+      io.emit("message", specialMsg);
 
       // 解放されたらリセット
       instructionCount = 0;
@@ -542,7 +531,7 @@ socket.on("instructionDraw", data => {
   roomChatLogs[socket.room].shift();
 }
 
-  io.to(socket.room).emit("message", msg);
+  io.emit("message", msg);
 });
  
 
@@ -581,7 +570,7 @@ if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
   roomChatLogs[socket.room].shift();
 }
 
-io.to(socket.room).emit("message", diceMsg);
+io.emit("message", diceMsg);
 
       return;
     }
@@ -604,7 +593,7 @@ if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
   roomChatLogs[socket.room].shift();
 }
 
-io.to(socket.room).emit("message", commandMsg);
+io.emit("message", commandMsg);
 
   return;
 }    
@@ -625,7 +614,7 @@ if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
   roomChatLogs[socket.room].shift();
 }
 
-io.to(socket.room).emit("message", commandMsg);
+io.emit("message", commandMsg);
 
   return;
 }
@@ -667,7 +656,7 @@ if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
   roomChatLogs[socket.room].shift();
 }
 
-io.to(socket.room).emit("message", commandMsg);
+io.emit("message", commandMsg);
 
   return;
 }
@@ -709,7 +698,7 @@ if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
   roomChatLogs[socket.room].shift();
 }
 
-    io.to(socket.room).emit("message", msg);
+    io.emit("message", msg);
   });
 
   socket.on("leave", () => {
@@ -747,16 +736,13 @@ if (roomUsers.length === 0) {
   instructionCount = 0;
 }
 
-  io.to(socket.room).emit(
-  "userList",
-  users.filter(u => u.room === socket.room)
-);
+  io.emit("userList", users);
 
-  io.to(socket.room).emit("message", {
-  name: "system",
-  text: `${name}さんが退出しました`,
-  time: getTimeString()
-});
+  io.emit("message", {
+    name: "system",
+    text: `${name}さんが退出しました`,
+    time: getTimeString()
+  });
 }
 
 const PORT = process.env.PORT || 3000;

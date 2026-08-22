@@ -627,8 +627,8 @@ if (!connectKey){
 window.addEventListener("load", () => {
 
   const savedName  = localStorage.getItem("chatName");
-  const savedRoom = room;
-  socket.emit("viewRoom", room);
+  const savedRoom  = localStorage.getItem("chatRoom");
+  socket.emit("viewRoom", savedRoom);
   console.log("保存データ", savedName, savedRoom);
   const savedColor = localStorage.getItem("chatColor") || "#000000";
 
@@ -666,7 +666,7 @@ window.addEventListener("load", () => {
     socket.emit("join", {
   name: username,
   color: myColor,
-  room,
+  room: savedRoom,
   connectKey: localStorage.getItem("connectKey"),
   isAdmin: localStorage.getItem("isAdmin") === "true"
 });
@@ -695,13 +695,9 @@ window.addEventListener("load", () => {
   }
 });
 
-/* ===== URLから部屋を決定 ===== */
-const path = location.pathname;
+/* ===== ロビーからの情報 ===== */
+const room = localStorage.getItem("chatRoom") || "room1";
 
-const room =
-  path === "/room2" ? "room2" :
-  path === "/room3" ? "room3" :
-  "room1";
 
 // ===== ダイス表示制御 =====
 const diceRow =
