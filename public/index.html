@@ -534,6 +534,14 @@ const instructionDrawBtn =
 if (instructionDrawBtn){
   instructionDrawBtn.onclick = () => {
 
+    if (instructionDrawBtn.disabled) return;
+
+instructionDrawBtn.disabled = true;
+
+setTimeout(() => {
+  instructionDrawBtn.disabled = false;
+}, 3000);
+
     const selectedTypes =
       Array.from(instructionChecks)
         .filter(check => check.checked)
