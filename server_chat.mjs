@@ -10,9 +10,9 @@ app.use(express.static("public"));
 
 const users = [];
 
-// ===== チャットログ（最新100件） =====
+// ===== チャットログ（最新30件） =====
 const chatLogs = [];
-const MAX_CHAT_LOGS = 100;
+const MAX_CHAT_LOGS = 30;
 
 // ===== 女性用・男性用 命令リスト =====
 
@@ -374,11 +374,14 @@ io.on("connection", socket => {
     socket.username = name;
     socket.color = data?.color || "#000000";
 
-    users.push({
-      id: socket.id,
-      name: socket.username,
-      color: socket.color
-    });
+    socket.room = data?.room || "room1";
+
+   users.push({
+  id: socket.id,
+  name: socket.username,
+  color: socket.color,
+  room: data?.room || "room1"
+});
 
     io.emit("userList", users);
 
@@ -694,6 +697,15 @@ function removeUser(socket) {
   const name = users[index].name;
 
   users.splice(index, 1);
+
+  const roomUsers = users.filter(
+  u => u.room === socket.room
+);
+
+if (roomUsers.length === 0) {
+  chatLogs.length = 0;
+  instructionCount = 0;
+}
 
   io.emit("userList", users);
 
