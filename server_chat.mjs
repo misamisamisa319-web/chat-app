@@ -395,8 +395,13 @@ socket.on("viewRoom", room => {
     socket.username = name;
     socket.color = data?.color || "#000000";
 
-    socket.room = String(data?.room || "room1");
-    socket.join(socket.room);
+    if (socket.room) {
+  socket.leave(socket.room);
+}
+
+socket.room = String(data?.room || "room1");
+socket.join(socket.room);
+    console.log("入室確認:", socket.id, socket.room);
 
     if (viewers[socket.room]) {
   viewers[socket.room].delete(socket.id);
@@ -646,7 +651,7 @@ if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
   roomChatLogs[socket.room].shift();
 }
 
-io.emit("message", commandMsg);
+io.to(socket.room).emit("message", commandMsg);
 
   return;
 }

@@ -626,7 +626,7 @@ if (!connectKey){
 
 window.addEventListener("load", () => {
 
-  const savedName  = localStorage.getItem("chatName");
+  const savedName  = localStorage.getItem(`chatName_${room}`);
   const savedRoom = room;
   socket.emit("viewRoom", room);
   console.log("保存データ", savedName, savedRoom);
@@ -1198,7 +1198,7 @@ joinBtn.onclick = () => {
 
 
   username = nameInput.value.trim();
-  localStorage.setItem("chatName", username);
+  localStorage.setItem(`chatName_${room}`, username);
 
   localStorage.setItem("chatRoom", room);
 
