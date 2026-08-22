@@ -149,9 +149,110 @@ const partyCommands = [
   "パーティー30."
 ];
 
+// ===== 指示用6カテゴリ =====
+
+const stopCommands = [
+  "寸止め01",
+  "寸止め02", 
+  "寸止め03", 
+  "寸止め04", 
+  "寸止め05",
+  "寸止め06", 
+  "寸止め07", 
+  "寸止め08", 
+  "寸止め09", 
+  "寸止め10"
+];
+
+const onaCommands = [
+  "オナ01", 
+  "オナ02", 
+  "オナ03", 
+  "オナ04", 
+  "オナ05",
+  "オナ06", 
+  "オナ07", 
+  "オナ08", 
+  "オナ09", 
+  "オナ10"
+];
+
+const nippleCommands = [
+  "乳首01", 
+  "乳首02", 
+  "乳首03", 
+  "乳首04", 
+  "乳首05",
+  "乳首06", 
+  "乳首07", 
+  "乳首08", 
+  "乳首09", 
+  "乳首10"
+];
+
+const rotorCommands = [
+  "ローター01", 
+  "ローター02", 
+  "ローター03", 
+  "ローター04", 
+  "ローター05",
+  "ローター06", 
+  "ローター07", 
+  "ローター08", 
+  "ローター09", 
+  "ローター10"
+];
+
+const vibeCommands = [
+  "バイブ01", 
+  "バイブ02", 
+  "バイブ03", 
+  "バイブ04", 
+  "バイブ05",
+  "バイブ06", 
+  "バイブ07", 
+  "バイブ08", 
+  "バイブ09", 
+  "バイブ10"
+];
+
+const makikomiCommands = [
+  "巻き込み01", 
+  "巻き込み02", 
+  "巻き込み03", 
+  "巻き込み04", 
+  "巻き込み05",
+  "巻き込み06", 
+  "巻き込み07", 
+  "巻き込み08", 
+  "巻き込み09", 
+  "巻き込み10"
+];
 
 
 // ===== 命令抽選ストック =====
+
+function getInstructionCommand(type) {
+
+  const lists = {
+    寸止め: stopCommands,
+    オナ: onaCommands,
+    乳首: nippleCommands,
+    ローター: rotorCommands,
+    バイブ: vibeCommands,
+    巻き込み: makikomiCommands
+  };
+
+  const list = lists[type];
+
+  if (!list || list.length === 0) {
+    return null;
+  }
+
+  return list[
+    Math.floor(Math.random() * list.length)
+  ];
+}
 
 let girlCommandStock = [];
 
@@ -307,6 +408,39 @@ io.on("connection", socket => {
 
     socket.emit("muteSync", mutedNames);
   });
+
+// ===== 指示抽選 =====
+socket.on("instructionDraw", data => {
+
+  const types = Array.isArray(data?.types)
+    ? data.types
+    : [];
+
+  if (types.length === 0) return;
+
+  const type =
+    types[Math.floor(Math.random() * types.length)];
+
+  const command =
+    getInstructionCommand(type);
+
+  if (!command) return;
+
+  const msg = {
+    name: socket.username,
+    text: command,
+    color: socket.color,
+    time: getTimeString()
+  };
+
+  chatLogs.push(msg);
+
+  if (chatLogs.length > MAX_CHAT_LOGS) {
+    chatLogs.shift();
+  }
+
+  io.emit("message", msg);
+});
 
   socket.on("message", data => {
 

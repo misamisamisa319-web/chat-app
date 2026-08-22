@@ -157,10 +157,19 @@ button:hover {
 <div id="login">
   <h2>チャット</h2>
 
-  <div id="roomInfo"
-       style="margin-bottom:10px; color:#555;">
-  </div>
+<div id="roomInfo"
+     style="margin-bottom:10px; color:#555;">
+</div>
 
+<div id="roomMembers"
+     style="margin-bottom:10px; color:#555;">
+  閲覧：0人
+</div>
+
+<div id="roomParticipants"
+     style="margin-bottom:10px; color:#555;">
+  参加者：なし
+</div>
 
 
   <input id="nameInput"
@@ -619,6 +628,7 @@ window.addEventListener("load", () => {
 
   const savedName  = localStorage.getItem("chatName");
   const savedRoom  = localStorage.getItem("chatRoom");
+  socket.emit("viewRoom", savedRoom);
   console.log("保存データ", savedName, savedRoom);
   const savedColor = localStorage.getItem("chatColor") || "#000000";
 
@@ -1052,9 +1062,27 @@ socket.on("zecchoHide", () => {
 });
 
 
+socket.on("viewerCount", count => {
+  const roomMembers = document.getElementById("roomMembers");
 
+  if (roomMembers) {
+    roomMembers.textContent = `閲覧：${count}人`;
+  }
+});
 
 socket.on("userList", list => {
+
+const roomParticipants =
+  document.getElementById("roomParticipants");
+
+if (roomParticipants) {
+  const roomUsers = list.filter(u => u.room === room);
+  roomParticipants.textContent =
+    "参加者：" +
+    (roomUsers.length
+      ? roomUsers.map(u => u.name).join("、")
+      : "なし");
+}  
 
   userList.innerHTML = "";
   privateTarget.innerHTML =
