@@ -13,6 +13,7 @@ const users = [];
 // ===== チャットログ（最新30件） =====
 const chatLogs = [];
 const MAX_CHAT_LOGS = 30;
+const roomChatLogs = {};
 
 // ===== 女性用・男性用 命令リスト =====
 
@@ -351,7 +352,7 @@ io.on("connection", socket => {
     // ===== タイマー =====
   socket.on("timerStart", data => {
 
-    
+
     console.log("timerStart受信", data);
     
     const seconds = Number(data?.seconds);
@@ -378,6 +379,10 @@ io.on("connection", socket => {
 
     socket.room = data?.room || "room1";
 
+    if (!roomChatLogs[socket.room]) {
+  roomChatLogs[socket.room] = [];
+}
+
    users.push({
   id: socket.id,
   name: socket.username,
@@ -394,7 +399,7 @@ io.on("connection", socket => {
     });
   });
 
-  socket.emit("pastMessages", chatLogs);
+  socket.emit("pastMessages", roomChatLogs[socket.room]);
 
   socket.on("updateColor", data => {
 
@@ -502,11 +507,11 @@ socket.on("instructionDraw", data => {
     time: getTimeString()
   };
 
-  chatLogs.push(msg);
+  roomChatLogs[socket.room].push(msg);
 
-  if (chatLogs.length > MAX_CHAT_LOGS) {
-    chatLogs.shift();
-  }
+  if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
+  roomChatLogs[socket.room].shift();
+}
 
   io.emit("message", msg);
 });
@@ -541,10 +546,10 @@ socket.on("instructionDraw", data => {
   time: getTimeString()
 };
 
-chatLogs.push(diceMsg);
+roomChatLogs[socket.room].push(diceMsg);
 
-if (chatLogs.length > MAX_CHAT_LOGS) {
-  chatLogs.shift();
+if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
+  roomChatLogs[socket.room].shift();
 }
 
 io.emit("message", diceMsg);
@@ -564,10 +569,10 @@ if (text === "玩具用") {
   time: getTimeString()
 };
 
-chatLogs.push(commandMsg);
+roomChatLogs[socket.room].push(commandMsg);
 
-if (chatLogs.length > MAX_CHAT_LOGS) {
-  chatLogs.shift();
+if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
+  roomChatLogs[socket.room].shift();
 }
 
 io.emit("message", commandMsg);
@@ -585,10 +590,10 @@ if (text === "命令女") {
   time: getTimeString()
 };
 
-chatLogs.push(commandMsg);
+roomChatLogs[socket.room].push(commandMsg);
 
-if (chatLogs.length > MAX_CHAT_LOGS) {
-  chatLogs.shift();
+if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
+  roomChatLogs[socket.room].shift();
 }
 
 io.emit("message", commandMsg);
@@ -606,10 +611,10 @@ if (text === "命令男") {
   time: getTimeString()
 };
 
-chatLogs.push(commandMsg);
+roomChatLogs[socket.room].push(commandMsg);
 
-if (chatLogs.length > MAX_CHAT_LOGS) {
-  chatLogs.shift();
+if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
+  roomChatLogs[socket.room].shift();
 }
 
 io.emit("message", commandMsg);
@@ -627,10 +632,10 @@ if (text === "パーティー") {
   time: getTimeString()
 };
 
-chatLogs.push(commandMsg);
+roomChatLogs[socket.room].push(commandMsg);
 
-if (chatLogs.length > MAX_CHAT_LOGS) {
-  chatLogs.shift();
+if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
+  roomChatLogs[socket.room].shift();
 }
 
 io.emit("message", commandMsg);
@@ -669,10 +674,10 @@ io.emit("message", commandMsg);
       time: getTimeString()
     };
 
-    chatLogs.push(msg);
+roomChatLogs[socket.room].push(msg);
 
-if (chatLogs.length > MAX_CHAT_LOGS) {
-  chatLogs.shift();
+if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
+  roomChatLogs[socket.room].shift();
 }
 
     io.emit("message", msg);
@@ -704,7 +709,7 @@ function removeUser(socket) {
 );
 
 if (roomUsers.length === 0) {
-  chatLogs.length = 0;
+  roomChatLogs[socket.room] = [];
   instructionCount = 0;
 }
 
