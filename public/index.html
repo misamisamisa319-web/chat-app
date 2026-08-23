@@ -787,6 +787,47 @@ if (painPunishBtn){
 
 }
 
+// ===== room2・room3 メニュー制御 =====
+if (room === "room2" || room === "room3") {
+
+  const instructionBtn =
+    document.getElementById("instructionDrawBtn");
+
+  const toyBtn =
+    document.querySelector("button[onclick=\"sendPunish('玩具用')\"]");
+
+  const girlBtn =
+    document.querySelector("button[onclick=\"sendPunish('命令女')\"]");
+
+  const boyBtn =
+    document.querySelector("button[onclick=\"sendPunish('命令男')\"]");
+
+  const partyBtn =
+    document.querySelector("button[onclick=\"sendPunish('パーティー')\"]");
+
+  const painBtn =
+    document.getElementById("painPunishBtn");
+
+  const zecchoBtn =
+    document.getElementById("zecchoBtn");
+
+  if (instructionBtn) instructionBtn.style.display = "none";
+  if (toyBtn)         toyBtn.style.display = "none";
+  if (girlBtn)        girlBtn.style.display = "none";
+  if (boyBtn)         boyBtn.style.display = "none";
+  if (partyBtn)       partyBtn.style.display = "none";
+  if (painBtn)        painBtn.style.display = "none";
+  if (zecchoBtn)      zecchoBtn.style.display = "none";
+
+  if (room === "room2" && instructionBtn) {
+    instructionBtn.style.display = "inline-block";
+  }
+
+  if (room === "room3" && toyBtn) {
+    toyBtn.style.display = "inline-block";
+  }
+
+}
 
 // ===== ルーム6制御（イベントボタン表示） =====
 if (room === "room6") {
