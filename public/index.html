@@ -503,7 +503,11 @@ button:hover {
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
-const socket = io();
+const socket = io({
+  transports: ["websocket"],
+  upgrade: false
+});
+
 
 const login = document.getElementById("login");
 const chat = document.getElementById("chat");
