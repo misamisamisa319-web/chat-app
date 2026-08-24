@@ -232,6 +232,11 @@ button:hover {
   <ul id="userList"></ul>
 </div>
 
+<div id="chatViewerCount"
+     style="margin:4px 0; color:#555;">
+  閲覧：0人
+</div>
+
 <div id="timerStatusRow" 
   style=" 
     display:flex; 
@@ -1113,9 +1118,15 @@ socket.on("zecchoHide", () => {
 
 socket.on("viewerCount", count => {
   const roomMembers = document.getElementById("roomMembers");
+  const chatViewerCount =
+    document.getElementById("chatViewerCount");
 
   if (roomMembers) {
     roomMembers.textContent = `閲覧：${count}人`;
+  }
+
+  if (chatViewerCount) {
+    chatViewerCount.textContent = `閲覧：${count}人`;
   }
 });
 
