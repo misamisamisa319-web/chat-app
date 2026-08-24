@@ -1313,6 +1313,7 @@ input.addEventListener("keydown", e => {
 leaveBtn.onclick = () => {
   socket.emit("leave");
   localStorage.removeItem("chatName");
+  localStorage.removeItem(`chatName_${room}`);
   localStorage.removeItem("chatRoom");
   localStorage.removeItem("chatKey");
  joined = false;
