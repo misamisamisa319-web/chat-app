@@ -618,6 +618,10 @@ if (text === "玩具用") {
   time: getTimeString()
 };
 
+if (!roomChatLogs[socket.room]) {
+  roomChatLogs[socket.room] = [];
+}
+
 roomChatLogs[socket.room].push(commandMsg);
 
 if (roomChatLogs[socket.room].length > MAX_CHAT_LOGS) {
