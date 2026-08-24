@@ -224,9 +224,9 @@ const vibeCommands = [
 
 const makikomiCommands = [
   "巻き込み01.同性1名、次の指示を1回一緒に行う。", 
-  "巻き込み02.同性全員、次の指示を１回一緒に行う。", 
-  "巻き込み03.異性1名、次の指示を１回一緒に行う。", 
-  "巻き込み04.異性全員、次の指示を１回一緒に行う。", 
+  "巻き込み02.同性全員、次の指示を1回一緒に行う。", 
+  "巻き込み03.異性1名、次の指示を1回一緒に行う。", 
+  "巻き込み04.異性全員、次の指示を1回一緒に行う。", 
   "巻き込み05.1人指名して1d5を振って指名された人が負けたら負けた人のダイスの数一緒に行う。指名された人が勝った場合負けた人のダイスの数寸止めする。",
   "巻き込み06.1人指名して1d5を振って指名された人が負けたら負けた人のダイスの数一緒に行う。指名された人が勝った場合負けた人のダイスの数寸止めする。", 
   "巻き込み07.同性1名指名してその後一緒に解放まで行う。", 
@@ -411,11 +411,22 @@ socket.join(socket.room);
   roomChatLogs[socket.room] = [];
 }
 
+const oldUserIndex = users.findIndex(
+  u =>
+    u.connectKey === data?.connectKey &&
+    u.room === socket.room
+);
+
+if (oldUserIndex !== -1) {
+  users.splice(oldUserIndex, 1);
+}
+
    users.push({
   id: socket.id,
   name: socket.username,
   color: socket.color,
-  room: data?.room || "room1"
+  room: data?.room || "room1",
+  connectKey: data?.connectKey
 });
 
     io.to(socket.room).emit(
@@ -734,7 +745,8 @@ socket.on("disconnect", () => {
     viewers[roomName].delete(socket.id);
   }
 
-  removeUser(socket);
+
+
 });
 
 });
