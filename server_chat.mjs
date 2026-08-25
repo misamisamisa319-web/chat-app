@@ -772,7 +772,6 @@ function removeUser(socket) {
 );
 
 if (roomUsers.length === 0) {
-  roomChatLogs[socket.room] = [];
   instructionCount = 0;
 }
 
