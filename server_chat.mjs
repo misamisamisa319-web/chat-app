@@ -245,6 +245,15 @@ const specialCommands = [
 
 // ===== 命令抽選ストック =====
 
+const instructionCommandStocks = {
+  寸止め: [],
+  オナ: [],
+  乳首: [],
+  ローター: [],
+  バイブ: [],
+  巻き込み: []
+};
+
 function getInstructionCommand(type) {
 
   const lists = {
@@ -262,9 +271,11 @@ function getInstructionCommand(type) {
     return null;
   }
 
-  return list[
-    Math.floor(Math.random() * list.length)
-  ];
+  if (instructionCommandStocks[type].length === 0) {
+    instructionCommandStocks[type] = shuffle([...list]);
+  }
+
+  return instructionCommandStocks[type].shift();
 }
 
 function getSpecialCommand() {
@@ -439,9 +450,9 @@ if (oldUserIndex !== -1) {
   text: `${socket.username}さんが入室しました`,
   time: getTimeString()
   });
-  });
 
   socket.emit("pastMessages", roomChatLogs[socket.room] || []);
+  });
 
   socket.on("updateColor", data => {
 
